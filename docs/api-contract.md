@@ -64,6 +64,9 @@
 | `admin/orders/<id>/payments/` | POST `{amount, currency, method, reference, note}` | مدير، مشغّل |
 | `admin/storage/` | GET `{used, quota, percent, disk_free, warning}` | مدير، مشغّل |
 | `files/download/?t=<token>` | GET تنزيل بالرابط الموقّع. يعيد التحقق من صلاحية المستخدم الحالية. `Content-Disposition: attachment` و`Cache-Control: private, no-store` و`CSP: sandbox` | بلا Bearer |
+| `admin/notifications/` | GET قائمة. تصفية `status`، `kind` | مدير، مشغّل |
+| `admin/notifications/summary/` | GET `{by_status, failed, skipped}` | مدير، مشغّل |
+| `admin/notifications/<id>/resend/` | POST إعادة إرسال فورية للمستلمين الحاليين → التنبيه + `sent_now` | مدير، مشغّل |
 | `admin/statuses/` | GET للجميع؛ POST/PATCH/DELETE للمدير. الحذف 409 إن استُخدمت | — |
 | `admin/services/` | CRUD. `fields` قائمة تستبدل الحقول مع الحفاظ على `key` | مدير، مشغّل |
 | `admin/categories/` | CRUD. الحذف 409 إن احتوى خدمات | مدير، مشغّل |

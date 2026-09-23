@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models import Q
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, viewsets
@@ -8,6 +9,7 @@ from rest_framework.views import APIView
 from apps.accounts.permissions import IsOperatorOrAdmin
 from apps.core.idempotency import get_idempotency_key
 from apps.core.throttles import ScopedIPThrottle
+from apps.notifications.services import queue_new_inquiry
 
 from .models import Inquiry
 from .serializers import InquiryAdminSerializer, InquiryCreateSerializer
@@ -27,7 +29,9 @@ class PublicInquiryCreateView(APIView):
             return Response({"id": existing.pk}, status=200)
         s = InquiryCreateSerializer(data=request.data)
         s.is_valid(raise_exception=True)
-        inquiry = s.save(idempotency_key=key)
+        with transaction.atomic():
+            inquiry = s.save(idempotency_key=key)
+            queue_new_inquiry(inquiry)
         return Response({"id": inquiry.pk}, status=201)
 
 

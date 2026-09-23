@@ -1,10 +1,10 @@
 'use client';
-import { Clock3, ExternalLink, Inbox, LayoutDashboard, Layers3, LoaderCircle, LogOut, MessageCircle, Settings, ShieldCheck, Users } from 'lucide-react';
+import { Bell, Clock3, ExternalLink, Inbox, LayoutDashboard, Layers3, LoaderCircle, LogOut, MessageCircle, Settings, ShieldCheck, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, type ReactNode } from 'react';
+import { Suspense, useEffect, type ReactNode } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useStorage } from '@/hooks/admin';
+import { useNotificationSummary, useStorage } from '@/hooks/admin';
 import { formatSize } from '@/lib/files';
 import type { Role } from '@/lib/api/types';
 import { LoginForm } from './LoginForm';
@@ -15,6 +15,7 @@ const NAV: { href: string; name: string; icon: typeof Inbox; roles: Role[] }[] =
   { href: '/admin/orders', name: 'الطلبات', icon: Inbox, roles: ['admin', 'operator', 'executor'] },
   { href: '/admin/services', name: 'الخدمات والمجالات', icon: Layers3, roles: ['admin', 'operator'] },
   { href: '/admin/messages', name: 'الرسائل', icon: MessageCircle, roles: ['admin', 'operator'] },
+  { href: '/admin/notifications', name: 'تنبيهات البريد', icon: Bell, roles: ['admin', 'operator'] },
   { href: '/admin/settings', name: 'المحتوى والإعدادات', icon: Settings, roles: ['admin', 'operator'] },
   { href: '/admin/team', name: 'الفريق والصلاحيات', icon: Users, roles: ['admin'] },
 ];
@@ -30,6 +31,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   useDialogFocus(status === 'expired', () => {}, '.relogin-dialog');
   const canSeeStorage = status === 'authenticated' && (user?.role === 'admin' || user?.role === 'operator');
   const storage = useStorage(canSeeStorage);
+  const alerts = useNotificationSummary(canSeeStorage);
 
   if (!user || status === 'unknown' || status === 'loading' || status === 'anonymous') {
     return <div className="admin-boot" role="status"><LoaderCircle className="spin" size={30} /><span>جارٍ التحقق من الجلسة...</span></div>;
@@ -47,7 +49,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <span className="sidebar-label">مساحة العمل</span>
         {nav.map((n) => (
           <Link key={n.href} href={n.href} className={current === n ? 'active' : ''} aria-current={current === n ? 'page' : undefined}>
-            <n.icon size={19} />{n.name}
+            <n.icon size={19} />{n.name}{n.href === '/admin/notifications' && !!alerts.data?.failed && <b>{alerts.data.failed}</b>}
           </Link>
         ))}
         <div className="sidebar-bottom">
@@ -70,10 +72,17 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <main className="admin-main">
         <header className="admin-top">
           <span>مساحة العمل <span>/</span> {current?.name}</span>
-          <span className="admin-top-user"><Clock3 size={15} />{roleLabel[user.role]} · {user.full_name}</span>
+          <span className="admin-top-user">
+            {canSeeStorage && (
+              <Link className="icon-button bell" href="/admin/notifications" aria-label={alerts.data?.failed ? `${alerts.data.failed} تنبيهات فاشلة` : 'تنبيهات البريد'}>
+                <Bell size={18} />{!!alerts.data?.failed && <i className="dot" />}
+              </Link>
+            )}
+            <Clock3 size={15} />{roleLabel[user.role]} · {user.full_name}
+          </span>
         </header>
         <div className="admin-content">
-          {allowed ? children : <div className="compact-empty" role="alert"><h3>ليست لديك صلاحية لهذا القسم.</h3></div>}
+          {allowed ? <Suspense fallback={<div className="compact-empty" role="status"><LoaderCircle className="spin" size={28} /></div>}>{children}</Suspense> : <div className="compact-empty" role="alert"><h3>ليست لديك صلاحية لهذا القسم.</h3></div>}
         </div>
       </main>
       {status === 'expired' && (

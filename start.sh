@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Render start: Gunicorn (Django) on an internal port + Next.js on $PORT.
-# If either process exits, the other is stopped and the service restarts.
+# Render start: Gunicorn (Django) on an internal port, Next.js on $PORT, and
+# the e-mail alert worker. If any process exits, the others are stopped and
+# Render restarts the service.
 set -euo pipefail
 cd "$(dirname "$0")"
 DJANGO_PORT="${DJANGO_PORT:-8000}"
@@ -18,7 +19,10 @@ HOSTNAME=0.0.0.0 PORT="${PORT:-3000}" NEXT_INTERNAL_URL="http://127.0.0.1:${PORT
   node frontend/.next/standalone/server.js &
 NEXT_PID=$!
 
-trap 'kill $DJANGO_PID $NEXT_PID 2>/dev/null || true' TERM INT
-wait -n $DJANGO_PID $NEXT_PID
-kill $DJANGO_PID $NEXT_PID 2>/dev/null || true
+python manage.py send_notifications --loop &
+WORKER_PID=$!
+
+trap 'kill $DJANGO_PID $NEXT_PID $WORKER_PID 2>/dev/null || true' TERM INT
+wait -n $DJANGO_PID $NEXT_PID $WORKER_PID
+kill $DJANGO_PID $NEXT_PID $WORKER_PID 2>/dev/null || true
 exit 1

@@ -1,5 +1,6 @@
 'use client';
 import { ArrowUpLeft, Inbox, MessageCircle, Save, Search } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useUi } from '@/contexts/UiContext';
 import { useInquiries, useStaff, useUpdateInquiry } from '@/hooks/admin';
@@ -15,7 +16,8 @@ export function MessagesManager() {
   const [query, setQuery] = useState('');
   useEffect(() => { const t = setTimeout(() => setQuery(q), 350); return () => clearTimeout(t); }, [q]);
   const list = useInquiries({ status: status || undefined, q: query || undefined });
-  const [activeId, setActiveId] = useState<number | null>(null);
+  const openParam = Number(useSearchParams().get('open')) || null;
+  const [activeId, setActiveId] = useState<number | null>(openParam);
   const items = list.data?.results || [];
   const active = items.find((m) => m.id === activeId) || null;
 

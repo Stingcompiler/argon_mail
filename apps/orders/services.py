@@ -12,6 +12,7 @@ from apps.content.models import upload_limits
 from apps.media_library.models import PrivateFile
 from apps.media_library.storage import ensure_capacity, remove, store
 from apps.media_library.validation import clean_name, validate_upload
+from apps.notifications.services import queue_new_order
 
 from .models import Order, OrderEvent, OrderNote, OrderStatus, PaymentEntry, PaymentStatus, Quote, generate_tracking_code
 
@@ -152,6 +153,7 @@ def create_order(*, service: Service, customer_name, customer_phone, answers, de
                 OrderEvent.objects.create(
                     order=order, kind=OrderEvent.Kind.CREATED, is_public=True, data={"status": status.label}
                 )
+                queue_new_order(order)  # outbox row, committed with the order
                 for field, upload, kind in checked:
                     rel, digest = store(upload, kind.ext)
                     written.append(rel)

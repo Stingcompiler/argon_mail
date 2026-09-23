@@ -20,6 +20,10 @@ class SiteSettings(models.Model):
     about = models.TextField(
         max_length=2000, default="منصة تجمع خدمات متنوعة في تجربة بسيطة، وتضع وضوح الخطوات في المقدمة."
     )
+    notify_emails = models.CharField("بريد التنبيهات", max_length=500, blank=True,
+                                     help_text="عناوين مفصولة بفاصلة")
+    notify_orders = models.BooleanField("تنبيه عند طلب جديد", default=True)
+    notify_messages = models.BooleanField("تنبيه عند رسالة جديدة", default=True)
     max_file_mb = models.PositiveSmallIntegerField("حجم الملف الأقصى MB", default=5)
     max_files_per_order = models.PositiveSmallIntegerField("عدد الملفات لكل طلب", default=5)
     seo_title = models.CharField(max_length=70, default="بريد عرجون | خدمات تقرّب المسافات")

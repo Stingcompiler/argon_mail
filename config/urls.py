@@ -16,6 +16,7 @@ from apps.content.views import AdminFAQViewSet, AdminSiteSettingsView, PublicSit
 from apps.core.views import health
 from apps.media_library.views import download as file_download
 from apps.media_library.views import storage as storage_status
+from apps.notifications.views import NotificationViewSet
 from apps.inquiries.views import AdminInquiryViewSet, PublicInquiryCreateView
 from apps.orders.views import AdminOrderViewSet, PublicOrderCreateView, PublicTrackingView, StatusViewSet
 
@@ -34,6 +35,7 @@ staff.register("inquiries", AdminInquiryViewSet, basename="admin-inquiry")
 staff.register("faq", AdminFAQViewSet, basename="admin-faq")
 staff.register("staff", StaffDirectoryViewSet, basename="admin-staff")
 staff.register("team", TeamViewSet, basename="admin-team")
+staff.register("notifications", NotificationViewSet, basename="admin-notification")
 
 api_v1 = [
     path("health/", health, name="health"),
