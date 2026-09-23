@@ -1,0 +1,61 @@
+from django.conf import settings
+from django.contrib import admin
+from django.urls import include, path
+from drf_spectacular.views import SpectacularAPIView
+from rest_framework.routers import DefaultRouter
+
+from apps.accounts.views import LoginView, LogoutView, MeView, RefreshView, StaffDirectoryViewSet, TeamViewSet
+from apps.catalog.views import (
+    AdminCategoryViewSet,
+    AdminServiceViewSet,
+    PublicCategoryViewSet,
+    PublicServiceViewSet,
+    service_redirect,
+)
+from apps.content.views import AdminFAQViewSet, AdminSiteSettingsView, PublicSiteView
+from apps.core.views import health
+from apps.inquiries.views import AdminInquiryViewSet, PublicInquiryCreateView
+from apps.orders.views import AdminOrderViewSet, PublicOrderCreateView, PublicTrackingView, StatusViewSet
+
+public = DefaultRouter(trailing_slash=True)
+public.include_root_view = False
+public.register("categories", PublicCategoryViewSet, basename="public-category")
+public.register("services", PublicServiceViewSet, basename="public-service")
+
+staff = DefaultRouter(trailing_slash=True)
+staff.include_root_view = False
+staff.register("categories", AdminCategoryViewSet, basename="admin-category")
+staff.register("services", AdminServiceViewSet, basename="admin-service")
+staff.register("orders", AdminOrderViewSet, basename="admin-order")
+staff.register("statuses", StatusViewSet, basename="admin-status")
+staff.register("inquiries", AdminInquiryViewSet, basename="admin-inquiry")
+staff.register("faq", AdminFAQViewSet, basename="admin-faq")
+staff.register("staff", StaffDirectoryViewSet, basename="admin-staff")
+staff.register("team", TeamViewSet, basename="admin-team")
+
+api_v1 = [
+    path("health/", health, name="health"),
+    path("auth/login/", LoginView.as_view(), name="auth-login"),
+    path("auth/refresh/", RefreshView.as_view(), name="auth-refresh"),
+    path("auth/logout/", LogoutView.as_view(), name="auth-logout"),
+    path("auth/me/", MeView.as_view(), name="auth-me"),
+    path("public/site/", PublicSiteView.as_view(), name="public-site"),
+    path("public/service-redirects/<str:slug>/", service_redirect, name="public-service-redirect"),
+    path("public/orders/", PublicOrderCreateView.as_view(), name="public-order-create"),
+    path("public/track/<str:code>/", PublicTrackingView.as_view(), name="public-track"),
+    path("public/inquiries/", PublicInquiryCreateView.as_view(), name="public-inquiry-create"),
+    path("public/", include(public.urls)),
+    path("admin/settings/", AdminSiteSettingsView.as_view(), name="admin-settings"),
+    path("admin/", include(staff.urls)),
+]
+
+urlpatterns = [
+    path("api/v1/", include(api_v1)),
+    path("django-admin/", admin.site.urls),
+]
+
+if settings.DEBUG:
+    from django.conf.urls.static import static
+
+    urlpatterns += [path("api/v1/schema/", SpectacularAPIView.as_view(), name="schema")]
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
