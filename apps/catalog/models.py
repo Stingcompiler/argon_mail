@@ -118,6 +118,8 @@ class ServiceField(models.Model):
         SELECT = "select", "اختيار واحد"
         MULTISELECT = "multiselect", "اختيارات متعددة"
         ADDRESS = "address", "عنوان"
+        FILE = "file", "ملف"
+        IMAGE = "image", "صورة"
 
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="fields")
     key = models.CharField(max_length=40)
@@ -127,6 +129,7 @@ class ServiceField(models.Model):
     required = models.BooleanField(default=False)
     options = models.JSONField(default=list, blank=True)
     max_length = models.PositiveIntegerField(default=1000)
+    max_files = models.PositiveSmallIntegerField(default=1)
     sort_order = models.PositiveIntegerField(default=0)
 
     class Meta:
@@ -144,6 +147,7 @@ class ServiceField(models.Model):
             "required": self.required,
             "options": list(self.options or []),
             "max_length": self.max_length,
+            "max_files": self.max_files,
         }
 
 

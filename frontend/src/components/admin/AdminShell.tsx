@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useStorage } from '@/hooks/admin';
+import { formatSize } from '@/lib/files';
 import type { Role } from '@/lib/api/types';
 import { LoginForm } from './LoginForm';
 import { roleLabel, useDialogFocus } from './ui';
@@ -26,6 +28,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
     if (status === 'anonymous') router.replace(`/admin/login?next=${encodeURIComponent(pathname)}`);
   }, [status, router, pathname]);
   useDialogFocus(status === 'expired', () => {}, '.relogin-dialog');
+  const canSeeStorage = status === 'authenticated' && (user?.role === 'admin' || user?.role === 'operator');
+  const storage = useStorage(canSeeStorage);
 
   if (!user || status === 'unknown' || status === 'loading' || status === 'anonymous') {
     return <div className="admin-boot" role="status"><LoaderCircle className="spin" size={30} /><span>جارٍ التحقق من الجلسة...</span></div>;
@@ -47,6 +51,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </Link>
         ))}
         <div className="sidebar-bottom">
+          {storage.data && (
+            <div className="storage">
+              <span>مساحة التخزين <b>{formatSize(storage.data.used)} / {formatSize(storage.data.quota)}</b></span>
+              <div style={{ ['--used' as string]: `${Math.min(100, storage.data.percent)}%` }} role="progressbar" aria-valuenow={storage.data.percent} aria-valuemin={0} aria-valuemax={100} aria-label="استهلاك التخزين" />
+              <small className={storage.data.warning ? 'storage-warn' : undefined}>{storage.data.warning ? 'اقتربت المساحة من الامتلاء. راجع سياسة الاحتفاظ.' : 'مرفقات الطلبات الخاصة'}</small>
+            </div>
+          )}
           <Link href="/" target="_blank"><ExternalLink size={17} />عرض الموقع</Link>
           <button onClick={logout}><LogOut size={17} />تسجيل الخروج</button>
           <div className="admin-user">

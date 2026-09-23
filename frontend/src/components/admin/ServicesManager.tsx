@@ -11,6 +11,7 @@ import { LoadError, Loading, SectionTitle, Toggle, useDialogFocus } from './ui';
 const FIELD_TYPES: { v: FieldType; l: string }[] = [
   { v: 'text', l: 'نص قصير' }, { v: 'textarea', l: 'نص طويل' }, { v: 'number', l: 'رقم' }, { v: 'date', l: 'تاريخ' },
   { v: 'select', l: 'اختيار واحد' }, { v: 'multiselect', l: 'اختيارات متعددة' }, { v: 'address', l: 'عنوان' },
+  { v: 'file', l: 'ملف (PDF أو صورة)' }, { v: 'image', l: 'صورة' },
 ];
 const STATUS_LABEL = { draft: 'مسودة', published: 'منشورة', hidden: 'مخفية' } as const;
 
@@ -242,11 +243,17 @@ function ServiceEditor({ draft, setDraft, onClose }: { draft: Draft; setDraft: (
                   <label>الخيارات، مفصولة بفاصلة<input value={draft.optionsText[i] || ''} placeholder="الخيار الأول، الخيار الثاني"
                     onChange={(e) => change({ optionsText: { ...draft.optionsText, [i]: e.target.value } })} />{err(`fields.${i}.options`)}</label>
                 )}
+                {(f.type === 'file' || f.type === 'image') && (
+                  <label>عدد الملفات المسموح في هذا الحقل
+                    <input type="number" min={1} max={10} value={f.max_files} onChange={(e) => setField(i, { max_files: Math.max(1, Math.min(10, Number(e.target.value) || 1)) })} />
+                    <small>الحجم والعدد الكلي لكل طلب يُضبطان من الإعدادات.</small>{err(`fields.${i}.max_files`)}
+                  </label>
+                )}
                 <label>نص المساعدة<input value={f.help_text} maxLength={240} onChange={(e) => setField(i, { help_text: e.target.value })} /></label>
                 <div className="switch-row compact"><span>حقل مطلوب</span><Toggle checked={f.required} label={'إلزامية ' + f.label} onChange={(v) => setField(i, { required: v })} /></div>
               </div>
             ))}
-            <button className="dashed-button" onClick={() => change({ fields: [...draft.fields, { key: '', label: '', help_text: '', type: 'text', required: false, options: [], max_length: 1000 }] })}>
+            <button className="dashed-button" onClick={() => change({ fields: [...draft.fields, { key: '', label: '', help_text: '', type: 'text', required: false, options: [], max_length: 1000, max_files: 1 }] })}>
               <Plus size={18} />إضافة حقل إلى النموذج
             </button>
           </>}
@@ -277,7 +284,7 @@ function ServiceEditor({ draft, setDraft, onClose }: { draft: Draft; setDraft: (
               <div className={draft.color}>{(() => { const I = iconFor(draft.icon_key); return <I size={35} />; })()}</div>
               <section><small>{categories.data?.find((c) => c.id === draft.category)?.name}</small><h3>{draft.name || 'اسم خدمتك هنا'}</h3><p>{draft.tagline}</p></section>
             </div>
-            <div className="design-tip"><CircleHelp size={17} /><span>الصور المخصصة للخدمات تُضاف مع مكتبة الوسائط في مرحلة الملفات.</span></div>
+            <div className="design-tip"><CircleHelp size={17} /><span>الصور المخصصة لبطاقات الخدمات تُضاف مع مكتبة الوسائط العامة.</span></div>
           </>}
         </div>
         <footer className="drawer-footer">

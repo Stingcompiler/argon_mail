@@ -32,14 +32,15 @@ type Options = { method?: string; body?: unknown; auth?: boolean; idempotencyKey
 
 async function send(path: string, o: Options, token: string | null) {
   const headers: Record<string, string> = { Accept: 'application/json' };
-  if (o.body !== undefined) headers['Content-Type'] = 'application/json';
+  const isForm = typeof FormData !== 'undefined' && o.body instanceof FormData;
+  if (o.body !== undefined && !isForm) headers['Content-Type'] = 'application/json';
   if (o.auth && token) headers.Authorization = `Bearer ${token}`;
   if (o.idempotencyKey) headers['Idempotency-Key'] = o.idempotencyKey;
   try {
     return await fetch(`/api/v1${path}`, {
       method: o.method || 'GET',
       headers,
-      body: o.body === undefined ? undefined : JSON.stringify(o.body),
+      body: o.body === undefined ? undefined : isForm ? (o.body as FormData) : JSON.stringify(o.body),
       credentials: 'same-origin',
       signal: o.signal,
     });
@@ -52,7 +53,7 @@ async function send(path: string, o: Options, token: string | null) {
 async function toError(res: Response) {
   let data: { detail?: string; code?: string; errors?: Record<string, unknown> } = {};
   try { data = await res.json(); } catch {}
-  const fallback = res.status === 429 ? 'محاولات كثيرة. انتظر قليلًا ثم أعد المحاولة.'
+  const fallback = res.status === 413 ? 'حجم الملفات المرفقة أكبر من المسموح.' : res.status === 429 ? 'محاولات كثيرة. انتظر قليلًا ثم أعد المحاولة.'
     : res.status >= 500 ? 'حدث خطأ في الخادم. أعد المحاولة بعد قليل.' : 'تعذّر إتمام الطلب.';
   return new ApiError(res.status, data.code || String(res.status), data.detail || fallback, data.errors || {});
 }

@@ -36,13 +36,15 @@
 | GET `public/track/<code>/` | `{code, service_name, status, created_at, updated_at, timeline}` فقط | tracking |
 | POST `public/inquiries/` | إنشاء رسالة → `{id}` | inquiry_create |
 
-جسم إنشاء الطلب:
+جسم إنشاء الطلب (JSON). عند وجود ملفات يُرسل الطلب `multipart/form-data`: الجسم نفسه كنص JSON في الحقل `payload`، وكل ملف في `file.<field_key>` (يتكرر للملفات المتعددة). طلب multipart أكبر من (عدد الملفات المسموح × حجم الملف + 1 MB) يُرفض بـ 413 قبل قراءته. تكرار `Idempotency-Key` لطلب مكتمل يعيد الطلب الأصلي دون قراءة الملفات.
 
 ```json
 {"service": "slug", "customer_name": "...", "customer_phone": "+249...", "answers": {"field_key": "قيمة أو [قيم]"}, "details": "", "consent": true}
 ```
 
-أخطاء الحقول تعود في جولة واحدة: `errors.customer_phone` و`errors.answers.<key>`.
+أخطاء الحقول تعود في جولة واحدة: `errors.customer_phone` و`errors.answers.<key>`، و`errors.answers.files` لتجاوز عدد الملفات، و`errors.files` لامتلاء التخزين.
+
+الملفات: PDF وPNG وJPG وWebP فقط، ويُتحقق من التوقيع الثنائي وتطابق الامتداد. حقل «صورة» يقبل الصور فقط.
 
 ## الإدارة (Bearer)
 
@@ -54,6 +56,14 @@
 | `admin/orders/<id>/status/` | POST `{status: key, public_note?}` | الكل ضمن النطاق |
 | `admin/orders/<id>/assign/` | POST `{assignee: id\|null}` | مدير، مشغّل |
 | `admin/orders/<id>/notes/` | POST `{body, visibility}` | الكل ضمن النطاق |
+| `admin/orders/<id>/attachments/` | POST multipart `file`، `kind` (order_document أو payment_proof)، `payment` اختياري. إثبات الدفع لا يغيّر حالة الدفع | الكل ضمن النطاق للمستندات؛ الإثبات للمدير والمشغّل |
+| `admin/orders/<id>/attachments/<uuid>/link/` | POST → `{url, expires_in}` رابط موقّع لخمس دقائق | الكل ضمن النطاق |
+| `admin/orders/<id>/quotes/` | POST `{amount, currency, note}` يستبدل العرض المعلّق | مدير، مشغّل |
+| `admin/orders/<id>/quotes/<qid>/decision/` | POST `{decision: accepted\|rejected, note}` مرة واحدة | مدير، مشغّل |
+| `admin/orders/<id>/payment-status/` | POST `{payment_status, note}` | مدير، مشغّل |
+| `admin/orders/<id>/payments/` | POST `{amount, currency, method, reference, note}` | مدير، مشغّل |
+| `admin/storage/` | GET `{used, quota, percent, disk_free, warning}` | مدير، مشغّل |
+| `files/download/?t=<token>` | GET تنزيل بالرابط الموقّع. يعيد التحقق من صلاحية المستخدم الحالية. `Content-Disposition: attachment` و`Cache-Control: private, no-store` و`CSP: sandbox` | بلا Bearer |
 | `admin/statuses/` | GET للجميع؛ POST/PATCH/DELETE للمدير. الحذف 409 إن استُخدمت | — |
 | `admin/services/` | CRUD. `fields` قائمة تستبدل الحقول مع الحفاظ على `key` | مدير، مشغّل |
 | `admin/categories/` | CRUD. الحذف 409 إن احتوى خدمات | مدير، مشغّل |

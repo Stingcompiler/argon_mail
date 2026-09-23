@@ -19,10 +19,20 @@ export type OrderInput = {
   answers: Record<string, string | string[]>; details: string; consent: boolean;
 };
 
+/** Files go as multipart: JSON in `payload`, uploads as `file.<field_key>`. */
 export function useCreateOrder() {
   return useMutation({
-    mutationFn: ({ key, ...body }: OrderInput & { key: string }) =>
-      api<{ code: string; service_name: string; created_at: string }>('/public/orders/', { method: 'POST', body, auth: false, idempotencyKey: key }),
+    mutationFn: ({ key, files, ...body }: OrderInput & { key: string; files: Record<string, File[]> }) => {
+      const hasFiles = Object.values(files).some((l) => l.length);
+      let payload: FormData | OrderInput = body;
+      if (hasFiles) {
+        const form = new FormData();
+        form.append('payload', JSON.stringify(body));
+        Object.entries(files).forEach(([k, list]) => list.forEach((f) => form.append(`file.${k}`, f, f.name)));
+        payload = form;
+      }
+      return api<{ code: string; service_name: string; created_at: string }>('/public/orders/', { method: 'POST', body: payload, auth: false, idempotencyKey: key });
+    },
   });
 }
 

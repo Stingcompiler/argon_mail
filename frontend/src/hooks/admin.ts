@@ -2,6 +2,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 import type {
+  Currency, Payment, PaymentStatus, StorageStatus,
   AdminService, AdminServiceInput, Category, FAQItem, Inquiry, InquiryStatus, OrderDetail, OrderFilters,
   OrderListItem, OrderStatus, Paginated, SiteSettings, User, UserBrief,
 } from '@/lib/api/types';
@@ -61,7 +62,56 @@ export function useOrderActions(id: number) {
         api<OrderDetail>(`/admin/orders/${id}/notes/`, { method: 'POST', body: v }),
       onSuccess,
     }),
+    upload: useMutation({
+      mutationFn: (v: { file: File; kind: 'order_document' | 'payment_proof'; payment?: number }) => {
+        const form = new FormData();
+        form.append('file', v.file, v.file.name);
+        form.append('kind', v.kind);
+        if (v.payment) form.append('payment', String(v.payment));
+        return api<OrderDetail>(`/admin/orders/${id}/attachments/`, { method: 'POST', body: form });
+      },
+      onSuccess,
+    }),
+    createQuote: useMutation({
+      mutationFn: (v: { amount: string; currency: Currency; note: string }) =>
+        api<OrderDetail>(`/admin/orders/${id}/quotes/`, { method: 'POST', body: v }),
+      onSuccess,
+    }),
+    decideQuote: useMutation({
+      mutationFn: ({ quoteId, ...v }: { quoteId: number; decision: 'accepted' | 'rejected'; note: string }) =>
+        api<OrderDetail>(`/admin/orders/${id}/quotes/${quoteId}/decision/`, { method: 'POST', body: v }),
+      onSuccess,
+    }),
+    setPaymentStatus: useMutation({
+      mutationFn: (v: { payment_status: PaymentStatus; note?: string }) =>
+        api<OrderDetail>(`/admin/orders/${id}/payment-status/`, { method: 'POST', body: v }),
+      onSuccess,
+    }),
+    recordPayment: useMutation({
+      mutationFn: (v: { amount: string; currency: Currency; method: Payment['method']; reference: string; note: string }) =>
+        api<OrderDetail>(`/admin/orders/${id}/payments/`, { method: 'POST', body: v }),
+      onSuccess,
+    }),
   };
+}
+
+/** Asks for a 5-minute signed link, then lets the browser download it. */
+export function useDownloadAttachment(orderId: number) {
+  return useMutation({
+    mutationFn: async (fileId: string) => {
+      const { url } = await api<{ url: string; expires_in: number }>(`/admin/orders/${orderId}/attachments/${fileId}/link/`, { method: 'POST' });
+      const a = document.createElement('a');
+      a.href = url;
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    },
+  });
+}
+
+export function useStorage(enabled: boolean) {
+  return useQuery({ queryKey: qk.admin.storage, queryFn: ({ signal }) => api<StorageStatus>('/admin/storage/', { signal }), enabled, staleTime: 5 * 60_000 });
 }
 
 export function useStatuses() {

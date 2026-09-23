@@ -1,16 +1,24 @@
 'use client';
-import { Check, Eye, FileText, History, Inbox, LockKeyhole, MessageCircle, Save, StickyNote, X } from 'lucide-react';
+import { Banknote, Check, Eye, FileText, History, Inbox, LockKeyhole, MessageCircle, Save, StickyNote, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUi } from '@/contexts/UiContext';
 import { useOrder, useOrderActions, useStaff, useStatuses } from '@/hooks/admin';
 import { formatDate, formatDateTime } from '@/lib/format';
+import { AttachmentList, OrderMoney } from './OrderMoney';
 import { LoadError, Loading, StatusBadge, useDialogFocus } from './ui';
+
+const MAX_MB = 20; // the server enforces the owner's lower limit
 
 const eventText = (kind: string, data: Record<string, unknown>) =>
   kind === 'created' ? 'تم إنشاء الطلب'
   : kind === 'status_changed' ? `تغيير الحالة من «${data.from}» إلى «${data.to}»`
   : kind === 'assigned' ? (data.assignee ? `إسناد إلى ${data.assignee}` : 'إلغاء الإسناد')
+  : kind === 'attachment_added' ? `إضافة مرفق: ${data.file}`
+  : kind === 'quote_created' ? `عرض سعر (الإصدار ${data.version}): ${data.amount} ${data.currency}`
+  : kind === 'quote_decided' ? `${data.decision === 'accepted' ? 'موافقة العميل على' : 'رفض العميل'} العرض ${data.version}${data.note ? ` · ${data.note}` : ''}`
+  : kind === 'payment_status' ? `حالة الدفع من «${data.from}» إلى «${data.to}»`
+  : kind === 'payment_recorded' ? `تسجيل دفعة ${data.amount} ${data.currency} (${data.method})`
   : data.visibility === 'public' ? 'إضافة ملاحظة للعميل' : 'إضافة ملاحظة داخلية';
 
 export function OrderDrawer({ id, onClose }: { id: number; onClose: () => void }) {
@@ -56,7 +64,7 @@ export function OrderDrawer({ id, onClose }: { id: number; onClose: () => void }
             <StatusBadge meaning={o.status.meaning} label={o.status.label} />
           </div>
           <div className="editor-tabs" role="tablist">
-            {[{ id: 'details', name: 'التفاصيل', icon: FileText }, { id: 'notes', name: 'الملاحظات', icon: StickyNote }, { id: 'history', name: 'السجل', icon: History }].map((t) => (
+            {[{ id: 'details', name: 'التفاصيل', icon: FileText }, { id: 'notes', name: 'الملاحظات', icon: StickyNote }, { id: 'money', name: 'السعر والدفع', icon: Banknote }, { id: 'history', name: 'السجل', icon: History }].map((t) => (
               <button key={t.id} role="tab" aria-selected={tab === t.id} className={tab === t.id ? 'selected' : ''} onClick={() => setTab(t.id)}><t.icon size={15} />{t.name}</button>
             ))}
           </div>
@@ -75,6 +83,7 @@ export function OrderDrawer({ id, onClose }: { id: number; onClose: () => void }
                 {o.details && <div className="answer-row"><span>تفاصيل إضافية</span><b className="preserve-lines">{o.details}</b></div>}
                 <div className="answer-row"><span>نسخة النموذج</span><b>{o.form_version} · {o.service_snapshot.price_label}</b></div>
               </div>
+              <AttachmentList order={o} items={o.attachments.filter((f) => f.kind !== 'payment_proof')} canUpload maxMb={MAX_MB} />
               <div className="form-row">
                 <label>
                   حالة التنفيذ
@@ -120,6 +129,7 @@ export function OrderDrawer({ id, onClose }: { id: number; onClose: () => void }
                 {!o.notes.length && <p className="subtle-copy">لا توجد ملاحظات بعد.</p>}
               </div>
             </>}
+            {tab === 'money' && <OrderMoney order={o} canEdit={canAssign} maxMb={MAX_MB} />}
             {tab === 'history' && (
               <div className="activity-list">
                 {[...o.events].reverse().map((ev) => (
