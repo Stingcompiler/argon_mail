@@ -7,7 +7,9 @@ restart never send the same alert twice at the same time."""
 import logging
 
 from django.conf import settings
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils import translation
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -24,7 +26,19 @@ def _recipients(s: SiteSettings) -> list[str]:
     return configured or [e.strip().lower() for e in settings.DEFAULT_ALERT_EMAILS if e.strip()]
 
 
-def _queue(kind, dedupe_key, subject, body, enabled, **refs):
+def _one_line(text: str, limit: int = 150) -> str:
+    """Subjects must be a single line (header injection) and short."""
+    text = " ".join((text or "").split())
+    return text if len(text) <= limit else text[: limit - 1] + "…"
+
+
+def _render(template: str, context: dict) -> str:
+    s = SiteSettings.load()
+    with translation.override("ar"):
+        return render_to_string(template, {"site_name": s.name, "tagline": s.tagline, **context})
+
+
+def _queue(kind, dedupe_key, subject, body, enabled, html_body="", **refs):
     s = SiteSettings.load()
     if not enabled(s):
         return None
@@ -32,36 +46,53 @@ def _queue(kind, dedupe_key, subject, body, enabled, **refs):
     status = Notification.Status.PENDING if recipients else Notification.Status.SKIPPED
     obj, _ = Notification.objects.get_or_create(
         dedupe_key=dedupe_key,
-        defaults=dict(kind=kind, recipients=recipients, subject=subject, body=body, status=status,
+        defaults=dict(kind=kind, recipients=recipients, subject=_one_line(subject), body=body, html_body=html_body, status=status,
                       last_error="" if recipients else "لم يُضبط بريد مستلم للتنبيهات في الإعدادات.", **refs),
     )
     return obj
 
 
-def queue_new_order(order):
-    # Deliberately minimal: no phone, answers or attachments in the mail.
+def queue_new_order(order, attachments: int = 0):
+    # Order alerts stay minimal: no phone, answers or files in the mail.
     link = f"{settings.SITE_URL}/admin/orders?open={order.pk}"
     subject = f"طلب جديد {order.code} — {order.service_name}"
     body = (
-        f"وصل طلب جديد إلى بريد عرجون.\n\n"
-        f"رقم الطلب: {order.code}\nالخدمة: {order.service_name}\n\n"
+        f"وصل طلب جديد.\n\n"
+        f"رقم الطلب: {order.code}\nالخدمة: {order.service_name}\nالمرفقات: {attachments}\n\n"
         f"افتح الطلب في لوحة التحكم:\n{link}\n\n"
-        f"هذا تنبيه آلي. التفاصيل الكاملة داخل لوحة التحكم فقط."
+        f"تنبيه آلي. بيانات العميل وإجاباته ومرفقاته في لوحة التحكم."
     )
+    html = _render("notifications/order.html", {
+        "subject": subject, "preheader": f"{order.service_name} — {order.code}", "badge": "طلب جديد",
+        "heading": f"طلب جديد: {order.service_name}", "received_at": order.created_at, "order": order,
+        "attachments": attachments, "link": link, "cta": "فتح الطلب في لوحة التحكم",
+    })
     return _queue(Notification.Kind.NEW_ORDER, f"order:{order.pk}:new", subject, body,
-                  lambda s: s.notify_orders, order=order)
+                  lambda s: s.notify_orders, html_body=html, order=order)
 
 
 def queue_new_inquiry(inquiry):
+    """The owner chose to receive the full message (name, phone, subject,
+    text) by e-mail so it can be answered without opening the dashboard."""
+    from apps.core.phone import whatsapp_link
+
     link = f"{settings.SITE_URL}/admin/messages?open={inquiry.pk}"
-    subject = "رسالة جديدة من نموذج التواصل"
+    subject = f"رسالة جديدة: {inquiry.subject}"
     body = (
-        f"وصلت رسالة جديدة إلى بريد عرجون.\n\n"
-        f"افتح الرسالة في لوحة التحكم:\n{link}\n\n"
-        f"هذا تنبيه آلي. نص الرسالة داخل لوحة التحكم فقط."
+        f"وصلت رسالة جديدة من نموذج التواصل.\n\n"
+        f"الاسم: {inquiry.name}\nWhatsApp: {inquiry.phone}\nالموضوع: {inquiry.subject}\n\n"
+        f"الرسالة:\n{inquiry.body}\n\n"
+        f"الرد عبر WhatsApp: {whatsapp_link(inquiry.phone, f'مرحبًا {inquiry.name}، بخصوص رسالتك: {inquiry.subject}')}\n"
+        f"فتح الرسالة في لوحة التحكم: {link}\n"
     )
+    html = _render("notifications/inquiry.html", {
+        "subject": subject, "preheader": _one_line(f"{inquiry.name}: {inquiry.body}", 120), "badge": "رسالة جديدة",
+        "heading": inquiry.subject, "received_at": inquiry.created_at, "inquiry": inquiry, "link": link,
+        "cta": "فتح الرسالة في لوحة التحكم",
+        "whatsapp_url": whatsapp_link(inquiry.phone, f"مرحبًا {inquiry.name}، بخصوص رسالتك إلى بريد عرجون: {inquiry.subject}"),
+    })
     return _queue(Notification.Kind.NEW_INQUIRY, f"inquiry:{inquiry.pk}:new", subject, body,
-                  lambda s: s.notify_messages, inquiry=inquiry)
+                  lambda s: s.notify_messages, html_body=html, inquiry=inquiry)
 
 
 def _claim(limit):
@@ -86,7 +117,10 @@ def send_one(n: Notification, user=None) -> bool:
     try:
         if not n.recipients:
             raise ValueError("لا يوجد بريد مستلم.")
-        EmailMessage(n.subject, n.body, settings.DEFAULT_FROM_EMAIL, n.recipients).send(fail_silently=False)
+        msg = EmailMultiAlternatives(n.subject, n.body, settings.DEFAULT_FROM_EMAIL, n.recipients)
+        if n.html_body:
+            msg.attach_alternative(n.html_body, "text/html")
+        msg.send(fail_silently=False)
         ok = True
     except Exception as exc:  # any SMTP/network error is recorded, never raised
         ok = False

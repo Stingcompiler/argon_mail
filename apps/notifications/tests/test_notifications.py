@@ -57,7 +57,7 @@ class NotificationTests(APITestCase):
 
     def test_mail_failure_keeps_order_and_retries_with_backoff(self):
         order = self.create_order()
-        with patch("apps.notifications.services.EmailMessage.send", side_effect=OSError("smtp down")):
+        with patch("apps.notifications.services.EmailMultiAlternatives.send", side_effect=OSError("smtp down")):
             deliver_due()
         n = Notification.objects.get(order=order)
         self.assertEqual(n.status, "pending")
@@ -73,7 +73,7 @@ class NotificationTests(APITestCase):
 
     def test_gives_up_after_max_attempts_then_manual_resend(self):
         order = self.create_order()
-        with patch("apps.notifications.services.EmailMessage.send", side_effect=OSError("down")):
+        with patch("apps.notifications.services.EmailMultiAlternatives.send", side_effect=OSError("down")):
             for _ in range(MAX_ATTEMPTS):
                 Notification.objects.update(next_attempt_at=timezone.now())
                 deliver_due()
@@ -118,12 +118,32 @@ class NotificationTests(APITestCase):
             self.client.post("/api/v1/public/orders/", order_payload(self.service), format="json", HTTP_IDEMPOTENCY_KEY=key)
         self.assertEqual(Notification.objects.count(), 1)
 
-    def test_inquiry_alert_has_no_message_text(self):
-        r = self.client.post("/api/v1/public/inquiries/", {"name": "زائر", "phone": "+249911111111", "subject": "موضوع سري",
-                             "body": "نص خاص"}, format="json", HTTP_IDEMPOTENCY_KEY=str(uuid.uuid4()))
+    def test_inquiry_alert_contains_the_message(self):
+        """Owner decision: the alert carries the full message for quick replies."""
+        r = self.client.post("/api/v1/public/inquiries/", {
+            "name": "زائر <b>مهم</b>", "phone": "+249911111111", "subject": "سؤال\r\nBcc: evil@example.com",
+            "body": "السطر الأول\nالسطر الثاني <script>alert(1)</script>"}, format="json", HTTP_IDEMPOTENCY_KEY=str(uuid.uuid4()))
         n = Notification.objects.get(inquiry_id=r.json()["id"])
-        self.assertNotIn("سري", n.subject + n.body)
-        self.assertNotIn("نص خاص", n.body)
+        self.assertNotIn("\n", n.subject)                     # single-line subject, no header injection
+        self.assertTrue(n.subject.startswith("رسالة جديدة: سؤال"))
+        for part in ("زائر", "+249911111111", "السطر الأول", "السطر الثاني", "wa.me/249911111111"):
+            self.assertIn(part, n.body)
+        self.assertIn("السطر الأول<br>السطر الثاني", n.html_body)
+        self.assertIn("&lt;script&gt;", n.html_body)            # escaped, never raw HTML
+        self.assertNotIn("<script>", n.html_body)
+        self.assertNotIn("<b>مهم</b>", n.html_body)
+        self.assertIn(f"/admin/messages?open={r.json()['id']}", n.html_body)
+        deliver_due()
+        sent = mail.outbox[-1]
+        self.assertEqual(sent.alternatives[0][1], "text/html")
+        self.assertIn('dir="rtl"', sent.alternatives[0][0])
+
+    def test_order_alert_is_html_and_still_minimal(self):
+        order = self.create_order(customer_name="فاطمة الزبونة")
+        n = Notification.objects.get(order=order)
+        self.assertIn(order.code, n.html_body)
+        self.assertNotIn("فاطمة", n.html_body)
+        self.assertNotIn("912345678", n.html_body)
 
     def test_failed_order_validation_creates_no_alert(self):
         r = self.client.post("/api/v1/public/orders/", order_payload(self.service, answers={}), format="json",

@@ -1,0 +1,29 @@
+{% load static %}<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ subject }}</title></head>
+<body style="margin:0;padding:0;background:#FAF8F2;font-family:Tahoma,'Noto Sans Arabic',Arial,sans-serif;color:#202923;">
+<span style="display:none!important;visibility:hidden;opacity:0;height:0;width:0;overflow:hidden;">{{ preheader }}</span>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FAF8F2;padding:24px 12px;">
+  <tr><td align="center">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #E5E7E2;border-radius:12px;overflow:hidden;" dir="rtl">
+      <tr><td style="background:#145A46;padding:20px 24px;text-align:right;">
+        <div style="font-size:20px;font-weight:bold;color:#FFFFFF;">{{ site_name }}</div>
+        <div style="font-size:12px;color:#DDEBE3;margin-top:4px;">{{ tagline }}</div>
+      </td></tr>
+      <tr><td style="padding:24px;text-align:right;">
+        <div style="display:inline-block;background:#DDEBE3;color:#145A46;font-size:12px;font-weight:bold;padding:4px 10px;border-radius:999px;">{{ badge }}</div>
+        <h1 style="font-size:20px;line-height:1.6;margin:12px 0 4px;color:#202923;">{{ heading }}</h1>
+        <div style="font-size:12px;color:#778078;margin-bottom:18px;">{{ received_at|date:"j F Y، H:i" }}</div>
+        {% block content %}{% endblock %}
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0 8px;"><tr><td style="background:#145A46;border-radius:6px;">
+          <a href="{{ link }}" style="display:inline-block;padding:12px 22px;color:#FFFFFF;font-size:14px;font-weight:bold;text-decoration:none;">{{ cta }}</a>
+        </td></tr></table>
+      </td></tr>
+      <tr><td style="background:#F3F5EF;padding:14px 24px;font-size:11px;color:#778078;text-align:right;line-height:1.8;">
+        تنبيه آلي من {{ site_name }} إلى فريق الإدارة. لا ترد على هذه الرسالة؛ تواصل مع العميل عبر WhatsApp أو من لوحة التحكم.
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

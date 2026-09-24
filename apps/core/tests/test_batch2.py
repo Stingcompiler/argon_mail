@@ -110,7 +110,7 @@ class OpsCommandTests(APITestCase):
         s.save()
         self.client.post("/api/v1/public/orders/", order_payload(make_service(name="خدمة ب")), format="json",
                          HTTP_IDEMPOTENCY_KEY=str(uuid.uuid4()))
-        with patch("apps.notifications.services.EmailMessage.send", side_effect=OSError("down")), \
+        with patch("apps.notifications.services.EmailMultiAlternatives.send", side_effect=OSError("down")), \
                 self.assertLogs("apps.notifications.services", level="ERROR") as logs:
             for _ in range(MAX_ATTEMPTS):
                 Notification.objects.update(next_attempt_at=timezone.now())
