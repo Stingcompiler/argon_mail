@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "apps.content",
     "apps.revalidation",
     "apps.media_library",
+    "apps.notifications",
 ]
 
 MIDDLEWARE = [
@@ -120,6 +121,16 @@ FILE_UPLOAD_PERMISSIONS = 0o600
 FILE_UPLOAD_MAX_MEMORY_SIZE = 2 * 1024 * 1024
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# SMTP from EMAIL_URL, e.g. smtp+tls://user:pass@smtp.example.com:587
+# Defaults to the console backend so nothing is sent by accident.
+_email = env.email_url("EMAIL_URL", default="consolemail://")
+EMAIL_BACKEND = _email["EMAIL_BACKEND"]
+for _k in ("EMAIL_HOST", "EMAIL_PORT", "EMAIL_HOST_USER", "EMAIL_HOST_PASSWORD", "EMAIL_USE_TLS", "EMAIL_USE_SSL"):
+    if _k in _email:
+        globals()[_k] = _email[_k]
+EMAIL_TIMEOUT = 15
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="بريد عرجون <no-reply@localhost>")
 
 CACHES = {
     "default": {

@@ -11,5 +11,7 @@ export DJANGO_INTERNAL_URL="http://127.0.0.1:${DJANGO_PORT}"
 .venv/bin/python manage.py migrate --noinput
 .venv/bin/python manage.py runserver "127.0.0.1:${DJANGO_PORT}" &
 DJANGO_PID=$!
-trap 'kill $DJANGO_PID 2>/dev/null || true' EXIT
+.venv/bin/python manage.py send_notifications --loop &
+WORKER_PID=$!
+trap 'kill $DJANGO_PID $WORKER_PID 2>/dev/null || true' EXIT
 cd frontend && npx next dev --port "$NEXT_PORT" --hostname 127.0.0.1

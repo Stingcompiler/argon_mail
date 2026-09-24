@@ -1,5 +1,6 @@
 'use client';
 import { ArrowUpLeft, Search } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrders, useStaff, useStatuses } from '@/hooks/admin';
@@ -23,7 +24,9 @@ export function OrdersPanel({ compact = false }: { compact?: boolean }) {
   const orders = useOrders(effective);
   const statuses = useStatuses();
   const staff = useStaff();
-  const [selected, setSelected] = useState<number | null>(null);
+  const openParam = Number(useSearchParams().get('open')) || null;
+  const [selected, setSelected] = useState<number | null>(openParam);
+  useEffect(() => { if (openParam) setSelected(openParam); }, [openParam]);
   const set = (p: Partial<OrderFilters>) => setFilters({ ...filters, ...p, page: p.page ?? 1 });
   useEffect(() => { setFilters((f) => ({ ...f, page: 1 })); }, [query]);
   const data = orders.data;

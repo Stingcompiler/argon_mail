@@ -9,5 +9,7 @@ export DJANGO_INTERNAL_URL="http://127.0.0.1:${DJANGO_PORT}"
 .venv/bin/gunicorn config.wsgi:application --env DJANGO_SETTINGS_MODULE=config.settings.dev \
   --bind "127.0.0.1:${DJANGO_PORT}" --workers 2 --access-logfile - &
 G=$!
-trap 'kill $G 2>/dev/null || true' EXIT
+.venv/bin/python manage.py send_notifications --loop &
+W=$!
+trap 'kill $G $W 2>/dev/null || true' EXIT
 HOSTNAME=127.0.0.1 PORT="$NEXT_PORT" exec node frontend/.next/standalone/server.js

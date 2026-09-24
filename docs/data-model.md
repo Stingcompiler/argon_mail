@@ -43,7 +43,7 @@
 
 | الكيان | الحقول المهمة |
 | --- | --- |
-| SiteSettings (pk=1) | الاسم، العبارة، رقم WhatsApp ونصه وإظهاره، البريد، العنوان، نصوص المقدمة، نص «عن المنصة»، SEO الرئيسية، max_file_mb، max_files_per_order |
+| SiteSettings (pk=1) | الاسم، العبارة، رقم WhatsApp ونصه وإظهاره، البريد، العنوان، نصوص المقدمة، نص «عن المنصة»، SEO الرئيسية، max_file_mb، max_files_per_order، notify_emails، notify_orders، notify_messages (الثلاثة الأخيرة لا تظهر في API العام) |
 | FAQItem | question، answer، sort_order، is_published |
 
 ## media_library
@@ -52,6 +52,13 @@
 | --- | --- | --- |
 | PrivateFile | id (UUID)، order (PROTECT)، kind (order_field/order_document/payment_proof)، field_key، field_label، payment، original_name، content_type، size، sha256، path فريد، uploaded_by | يُخزَّن تحت PRIVATE_ROOT باسم عشوائي وصلاحية 0600، ولا يُقدَّم برابط عام |
 
+## notifications
+
+| الكيان | الحقول المهمة | القواعد |
+| --- | --- | --- |
+| Notification | kind (new_order/new_inquiry)، dedupe_key فريد، order أو inquiry، recipients، subject، body، status (pending/sending/sent/failed/skipped)، attempts، next_attempt_at، locked_until، last_error، sent_at | يُنشأ في معاملة حفظ الطلب أو الرسالة. لا يحمل هاتف العميل أو إجاباته أو نص رسالته |
+| DeliveryAttempt | notification، started_at، finished_at، success، error، triggered_by | سجل دائم لكل محاولة، آلية أو يدوية |
+
 ## لم يُنفّذ بعد
 
-الوسائط العامة، الصفحات والأقسام والتنقل، إشعارات البريد ومحاولاتها، سياسة الاحتفاظ وحذف المرفقات، سجل تدقيق عام للإدارة.
+الوسائط العامة، الصفحات والأقسام والتنقل، سياسة الاحتفاظ وحذف المرفقات، سجل تدقيق عام للإدارة.

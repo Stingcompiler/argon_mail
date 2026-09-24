@@ -2,7 +2,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 import type {
-  Currency, Payment, PaymentStatus, StorageStatus,
+  AdminNotification, Currency, Payment, PaymentStatus, StorageStatus,
   AdminService, AdminServiceInput, Category, FAQItem, Inquiry, InquiryStatus, OrderDetail, OrderFilters,
   OrderListItem, OrderStatus, Paginated, SiteSettings, User, UserBrief,
 } from '@/lib/api/types';
@@ -238,5 +238,31 @@ export function useSaveTeamMember() {
       client.invalidateQueries({ queryKey: qk.admin.team });
       client.invalidateQueries({ queryKey: qk.admin.staff });
     },
+  });
+}
+
+// ---------- e-mail alerts ----------
+export function useNotifications(f: { status?: string; page?: number }) {
+  return useQuery({
+    queryKey: qk.admin.notifications.list(f),
+    queryFn: ({ signal }) => api<Paginated<AdminNotification>>(`/admin/notifications/${qs(f)}`, { signal }),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useNotificationSummary(enabled: boolean) {
+  return useQuery({
+    queryKey: qk.admin.notifications.summary,
+    queryFn: ({ signal }) => api<{ by_status: Record<string, number>; failed: number; skipped: number }>('/admin/notifications/summary/', { signal }),
+    enabled,
+    refetchInterval: 60_000,
+  });
+}
+
+export function useResendNotification() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => api<AdminNotification & { sent_now: boolean | null }>(`/admin/notifications/${id}/resend/`, { method: 'POST' }),
+    onSettled: () => client.invalidateQueries({ queryKey: qk.admin.notifications.all }),
   });
 }

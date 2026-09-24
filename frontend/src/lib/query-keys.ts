@@ -24,6 +24,11 @@ export const qk = {
     },
     settings: ['admin', 'settings'] as const,
     storage: ['admin', 'storage'] as const,
+    notifications: {
+      all: ['admin', 'notifications'] as const,
+      list: (f: { status?: string; page?: number }) => ['admin', 'notifications', 'list', f] as const,
+      summary: ['admin', 'notifications', 'summary'] as const,
+    },
     faq: ['admin', 'faq'] as const,
   },
   public: {

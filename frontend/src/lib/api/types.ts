@@ -75,9 +75,17 @@ export type Inquiry = {
 export type SiteSettings = {
   name: string; tagline: string; whatsapp_phone: string; whatsapp_text: string; show_whatsapp: boolean; whatsapp_url: string;
   email: string; address: string; hero_eyebrow: string; hero_title: string; hero_text: string; about: string;
-  seo_title: string; seo_description: string; max_file_mb: number; max_files_per_order: number; updated_at: string;
+  seo_title: string; seo_description: string; notify_emails?: string; notify_orders?: boolean; notify_messages?: boolean; max_file_mb: number; max_files_per_order: number; updated_at: string;
 };
 export type FAQItem = { id: number; question: string; answer: string; sort_order: number; is_published: boolean };
 export type PublicSite = { settings: SiteSettings; faq: FAQItem[] };
 
 export type Paginated<T> = { count: number; next: string | null; previous: string | null; results: T[] };
+
+export type NotificationStatus = 'pending' | 'sending' | 'sent' | 'failed' | 'skipped';
+export type AdminNotification = {
+  id: number; kind: 'new_order' | 'new_inquiry'; kind_label: string; status: NotificationStatus; status_label: string;
+  subject: string; recipients: string[]; attempts: number; next_attempt_at: string; last_error: string; sent_at: string | null;
+  created_at: string; order: number | null; order_code: string | null; inquiry: number | null;
+  delivery_attempts: { started_at: string; finished_at: string; success: boolean; error: string; triggered_by: UserBrief | null }[];
+};

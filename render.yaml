@@ -1,5 +1,5 @@
-# One web service runs the whole monolith (Next.js on $PORT + Gunicorn on
-# 127.0.0.1:8000), plus PostgreSQL and a 10 GB persistent disk.
+# One web service runs the whole monolith (Next.js on $PORT, Gunicorn on
+# 127.0.0.1:8000 and the e-mail alert worker), plus PostgreSQL and a 10 GB disk.
 # Review plans and regions before applying; nothing here is deployed yet.
 services:
   - type: web
@@ -36,6 +36,10 @@ services:
         sync: false          # same as SITE_URL (comma separated if several)
       - key: DJANGO_ALLOWED_HOSTS
         value: 127.0.0.1,localhost
+      - key: EMAIL_URL
+        sync: false          # smtp+tls://user:pass@host:587 from the chosen mail provider
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
       - key: NUM_PROXIES
         value: "1"           # Render LB appends the client IP; Next.js forwards XFF unchanged. Verify after first deploy
 databases:

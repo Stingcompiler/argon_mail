@@ -8,7 +8,7 @@ from apps.accounts.permissions import IsAdmin, IsOperatorOrAdmin
 from apps.core.throttles import ScopedIPThrottle
 
 from .models import FAQItem, SiteSettings
-from .serializers import FAQSerializer, SiteSettingsSerializer
+from .serializers import FAQSerializer, PublicSiteSettingsSerializer, SiteSettingsSerializer
 
 
 class PublicSiteView(APIView):
@@ -19,7 +19,7 @@ class PublicSiteView(APIView):
 
     @extend_schema(responses={200: dict})
     def get(self, request):
-        s = SiteSettingsSerializer(SiteSettings.load()).data
+        s = PublicSiteSettingsSerializer(SiteSettings.load()).data
         faq = FAQSerializer(FAQItem.objects.filter(is_published=True), many=True).data
         return Response({"settings": s, "faq": faq})
 

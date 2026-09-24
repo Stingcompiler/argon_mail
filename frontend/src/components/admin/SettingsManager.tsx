@@ -44,6 +44,10 @@ export function SettingsManager() {
         {input('hero_title', 'عنوان المقدمة', { area: true, max: 160, hint: 'سطر جديد لكل سطر في العنوان.' })}
         {input('hero_text', 'نص المقدمة', { area: true, max: 600 })}
         {input('about', 'نص صفحة عن المنصة', { area: true, max: 2000 })}
+        <h3 id="alerts">تنبيهات البريد للإدارة</h3>
+        {input('notify_emails', 'البريد المستلم للتنبيهات', { ltr: true, max: 500, hint: 'عنوان أو أكثر مفصولة بفاصلة. يصل تنبيه مختصر برابط، دون بيانات العميل.' })}
+        <div className="switch-row"><div><b>تنبيه عند طلب جديد</b></div><Toggle checked={!!d.notify_orders} disabled={!canEdit} onChange={(v) => set({ notify_orders: v })} label="تنبيه الطلبات" /></div>
+        <div className="switch-row"><div><b>تنبيه عند رسالة جديدة</b></div><Toggle checked={!!d.notify_messages} disabled={!canEdit} onChange={(v) => set({ notify_messages: v })} label="تنبيه الرسائل" /></div>
         <h3>الملفات المرفقة</h3>
         <div className="form-row">
           <label>حجم الملف الأقصى (MB)<input type="number" min={1} max={20} value={d.max_file_mb} disabled={!canEdit} onChange={(e) => set({ max_file_mb: Number(e.target.value) })} />{errors.max_file_mb && <small className="field-error">{errors.max_file_mb}</small>}</label>
