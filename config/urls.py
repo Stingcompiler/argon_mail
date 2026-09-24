@@ -57,8 +57,9 @@ api_v1 = [
 
 urlpatterns = [
     path("api/v1/", include(api_v1)),
-    path("django-admin/", admin.site.urls),
 ]
+if settings.ENABLE_DJANGO_ADMIN:
+    urlpatterns.append(path("django-admin/", admin.site.urls))
 
 if settings.DEBUG:
     from django.conf.urls.static import static

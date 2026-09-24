@@ -20,7 +20,8 @@ log = logging.getLogger(__name__)
 
 
 def _recipients(s: SiteSettings) -> list[str]:
-    return [e.strip().lower() for e in (s.notify_emails or "").split(",") if e.strip()]
+    configured = [e.strip().lower() for e in (s.notify_emails or "").split(",") if e.strip()]
+    return configured or [e.strip().lower() for e in settings.DEFAULT_ALERT_EMAILS if e.strip()]
 
 
 def _queue(kind, dedupe_key, subject, body, enabled, **refs):

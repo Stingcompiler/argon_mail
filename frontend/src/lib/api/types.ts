@@ -75,7 +75,7 @@ export type Inquiry = {
 export type SiteSettings = {
   name: string; tagline: string; whatsapp_phone: string; whatsapp_text: string; show_whatsapp: boolean; whatsapp_url: string;
   email: string; address: string; hero_eyebrow: string; hero_title: string; hero_text: string; about: string;
-  seo_title: string; seo_description: string; notify_emails?: string; notify_orders?: boolean; notify_messages?: boolean; max_file_mb: number; max_files_per_order: number; updated_at: string;
+  seo_title: string; seo_description: string; notify_emails?: string; notify_orders?: boolean; notify_messages?: boolean; max_file_mb: number; max_files_per_order: number; max_order_upload_mb?: number; updated_at: string;
 };
 export type FAQItem = { id: number; question: string; answer: string; sort_order: number; is_published: boolean };
 export type PublicSite = { settings: SiteSettings; faq: FAQItem[] };
