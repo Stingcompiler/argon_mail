@@ -34,6 +34,7 @@ class Notification(models.Model):
     recipients = models.JSONField(default=list)
     subject = models.CharField(max_length=200)
     body = models.TextField()
+    html_body = models.TextField(blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING, db_index=True)
     attempts = models.PositiveSmallIntegerField(default=0)
     next_attempt_at = models.DateTimeField(default=timezone.now, db_index=True)

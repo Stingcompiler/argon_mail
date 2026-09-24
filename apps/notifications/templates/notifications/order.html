@@ -1,0 +1,9 @@
+{% extends "notifications/base.html" %}
+{% block content %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E5E7E2;border-radius:8px;font-size:14px;">
+  <tr><td style="padding:10px 14px;color:#778078;width:110px;border-bottom:1px solid #E5E7E2;">رقم الطلب</td><td style="padding:10px 14px;font-weight:bold;border-bottom:1px solid #E5E7E2;"><span dir="ltr" style="font-family:monospace;letter-spacing:1px;">{{ order.code }}</span></td></tr>
+  <tr><td style="padding:10px 14px;color:#778078;border-bottom:1px solid #E5E7E2;">الخدمة</td><td style="padding:10px 14px;font-weight:bold;border-bottom:1px solid #E5E7E2;">{{ order.service_name }}</td></tr>
+  <tr><td style="padding:10px 14px;color:#778078;">المرفقات</td><td style="padding:10px 14px;">{% if attachments %}{{ attachments }} ملف{% else %}لا توجد{% endif %}</td></tr>
+</table>
+<p style="font-size:13px;color:#778078;line-height:1.8;margin-top:14px;">بيانات العميل وإجاباته ومرفقاته في لوحة التحكم.</p>
+{% endblock %}

@@ -155,7 +155,7 @@ def create_order(*, service: Service, customer_name, customer_phone, answers, de
                 OrderEvent.objects.create(
                     order=order, kind=OrderEvent.Kind.CREATED, is_public=True, data={"status": status.label}
                 )
-                queue_new_order(order)  # outbox row, committed with the order
+                queue_new_order(order, attachments=len(checked))  # outbox row, committed with the order
                 for field, upload, kind in checked:
                     rel, digest = store(upload, kind.ext)
                     written.append(rel)

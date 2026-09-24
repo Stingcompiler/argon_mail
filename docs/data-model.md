@@ -56,7 +56,7 @@
 
 | الكيان | الحقول المهمة | القواعد |
 | --- | --- | --- |
-| Notification | kind (new_order/new_inquiry)، dedupe_key فريد، order أو inquiry، recipients، subject، body، status (pending/sending/sent/failed/skipped)، attempts، next_attempt_at، locked_until، last_error، sent_at | يُنشأ في معاملة حفظ الطلب أو الرسالة. لا يحمل هاتف العميل أو إجاباته أو نص رسالته |
+| Notification | kind (new_order/new_inquiry)، dedupe_key فريد، order أو inquiry، recipients، subject، body، status (pending/sending/sent/failed/skipped)، attempts، next_attempt_at، locked_until، last_error، sent_at | يُنشأ في معاملة حفظ الطلب أو الرسالة، مع `html_body`. تنبيه الطلب لا يحمل بيانات العميل؛ تنبيه الرسالة يحمل نصها كاملًا بقرار المالك |
 | DeliveryAttempt | notification، started_at، finished_at، success، error، triggered_by | سجل دائم لكل محاولة، آلية أو يدوية |
 
 ## لم يُنفّذ بعد
