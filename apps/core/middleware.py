@@ -39,6 +39,28 @@ class RequestSizeLimitMiddleware:
             multipart = request.content_type.startswith("multipart/")
             limit = (settings.UPLOAD_MAX_REQUEST_MB + 1) * 1024 * 1024 if multipart else settings.API_MAX_BODY_BYTES
             if length < 0 or length > limit:
+                self._drain(request, length)
                 msg = "حجم الملفات المرفقة أكبر من المسموح." if multipart else "حجم الطلب أكبر من المسموح."
                 return JsonResponse({"detail": msg, "code": "payload_too_large"}, status=413)
         return self.get_response(request)
+
+    DRAIN_MAX = 64 * 1024 * 1024
+    CHUNK = 64 * 1024
+
+    def _drain(self, request, length):
+        """Read and discard the body before answering. If the socket is closed
+        with unread data, the Next.js proxy is still writing and fails with
+        EPIPE, turning the 413 into a 500. Nothing is kept in memory; the
+        proxy already caps bodies (22 MB), and DRAIN_MAX bounds the work."""
+        stream = request.META.get("wsgi.input")
+        if stream is None or length <= 0 or length > self.DRAIN_MAX:
+            return
+        remaining = length
+        try:
+            while remaining > 0:
+                chunk = stream.read(min(self.CHUNK, remaining))
+                if not chunk:
+                    break
+                remaining -= len(chunk)
+        except Exception:  # best effort: a short or broken body must not break the 413
+            pass
