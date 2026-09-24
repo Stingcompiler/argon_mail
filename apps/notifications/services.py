@@ -101,6 +101,8 @@ def send_one(n: Notification, user=None) -> bool:
         n.status, n.sent_at, n.last_error = Notification.Status.SENT, finished, ""
     elif n.attempts >= MAX_ATTEMPTS:
         n.status, n.last_error = Notification.Status.FAILED, error
+        # ERROR level reaches Sentry (when configured) so someone is told.
+        log.error("notification %s gave up after %s attempts: %s", n.pk, n.attempts, error)
     else:
         n.status, n.last_error = Notification.Status.PENDING, error
         n.next_attempt_at = finished + BACKOFF[min(n.attempts - 1, len(BACKOFF) - 1)]

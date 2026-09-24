@@ -4,6 +4,7 @@ The platform is a monolith: Django serves only /api/, /media/ and /django-admin/
 on an internal port, and the Next.js server in frontend/ is the public entry
 point that proxies those paths here. See docs/architecture.md.
 """
+import logging
 from datetime import timedelta
 from pathlib import Path
 
@@ -119,6 +120,10 @@ PRIVATE_ROOT = DATA_ROOT / "private"
 # warning in the dashboard from 85 %.
 STORAGE_QUOTA_BYTES = env.int("STORAGE_QUOTA_BYTES", default=9 * 1024**3)
 STORAGE_WARN_RATIO = 0.85
+# Health check strictness. On Render both are true (see render.yaml): the
+# e-mail worker must be ticking and DATA_ROOT must be the mounted disk.
+HEALTH_REQUIRE_WORKER = env.bool("HEALTH_REQUIRE_WORKER", default=False)
+HEALTH_REQUIRE_DATA_MOUNT = env.bool("HEALTH_REQUIRE_DATA_MOUNT", default=False)
 # Hard ceilings; the owner's settings can only lower them.
 UPLOAD_HARD_MAX_MB = env.int("UPLOAD_HARD_MAX_MB", default=20)
 UPLOAD_HARD_MAX_FILES = env.int("UPLOAD_HARD_MAX_FILES", default=10)
@@ -210,3 +215,18 @@ LOGGING = {
     "root": {"handlers": ["console"], "level": env("LOG_LEVEL", default="INFO")},
     "loggers": {"django.db.backends": {"level": "WARNING"}},
 }
+
+# Optional error monitoring. Set SENTRY_DSN to enable; nothing is sent otherwise.
+SENTRY_DSN = env("SENTRY_DSN", default="")
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration(), LoggingIntegration(event_level=logging.ERROR)],
+        environment=env("SENTRY_ENVIRONMENT", default="production"),
+        traces_sample_rate=env.float("SENTRY_TRACES_SAMPLE_RATE", default=0.0),
+        send_default_pii=False,  # never send customer data, cookies or headers
+    )

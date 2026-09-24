@@ -1,0 +1,142 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.13"
+  NODE_VERSION: "22"
+
+jobs:
+  backend:
+    name: Backend (Django)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_USER: arjoon, POSTGRES_PASSWORD: arjoon, POSTGRES_DB: arjoon }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U arjoon" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://arjoon:arjoon@localhost:5432/arjoon
+      DJANGO_SECRET_KEY: ci-only-secret-key-not-used-anywhere-else-0123456789abcdef
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ env.PYTHON_VERSION }}", cache: pip }
+      - run: pip install -r requirements.txt coverage pip-audit
+      - name: Migrations are up to date
+        run: python manage.py makemigrations --check --dry-run
+      - name: Production settings pass deploy checks
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.prod
+          SITE_URL: https://arjoon.example
+          TRUSTED_ORIGINS: https://arjoon.example
+          INTERNAL_SECRET: ci-internal-secret-0123456789abcdef0123
+          JWT_SIGNING_KEY: ci-jwt-signing-key-0123456789abcdef0123456789abcdef-xyz
+        # W004/W008 are expected: HSTS and HTTPS redirects are handled by Next.js and Render.
+        run: python manage.py check --deploy --fail-level ERROR
+      - name: Tests
+        run: |
+          coverage run --source=apps,config --omit="*/migrations/*,*/tests/*" manage.py test --settings=config.settings.test
+          coverage report | tail -1
+      - name: Dependency audit
+        run: pip-audit -r requirements.txt
+
+  frontend:
+    name: Frontend (Next.js)
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: frontend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - run: npm ci --include=dev
+      - run: npx tsc --noEmit
+      - run: npm run build
+      - name: Dependency audit (critical fails; known Next 15 PostCSS advisory is a warning)
+        run: |
+          npm audit --omit=dev --audit-level=critical
+          npm audit --omit=dev --audit-level=high || echo "::warning::High-severity npm advisories remain (see docs/decisions.md: Next 16 upgrade deferred)"
+
+  scripts:
+    name: Shell scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: for f in start.sh build.sh scripts/*.sh; do bash -n "$f"; done
+      - name: start.sh supervision (graceful stop, crash, missing env)
+        run: scripts/test-start.sh
+
+  e2e:
+    name: End-to-end smoke + Lighthouse
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_USER: arjoon, POSTGRES_PASSWORD: arjoon, POSTGRES_DB: arjoon }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U arjoon" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://arjoon:arjoon@localhost:5432/arjoon
+      DJANGO_SECRET_KEY: ci-only-secret-key-not-used-anywhere-else-0123456789abcdef
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      DJANGO_DEBUG: "false"
+      SITE_URL: http://127.0.0.1:3108
+      TRUSTED_ORIGINS: http://127.0.0.1:3108
+      NEXT_INTERNAL_URL: http://127.0.0.1:3108
+      DJANGO_INTERNAL_URL: http://127.0.0.1:8108
+      INTERNAL_SECRET: ci-internal-secret-0123456789abcdef0123
+      DATA_ROOT: ${{ github.workspace }}/var
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ env.PYTHON_VERSION }}", cache: pip }
+      - uses: actions/setup-node@v4
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - run: pip install -r requirements.txt
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci --include=dev
+          npm run build
+          cp -r .next/static .next/standalone/.next/static
+          cp -r public .next/standalone/public
+      - name: Database and demo data
+        run: |
+          python manage.py migrate --noinput
+          python manage.py createcachetable
+          python manage.py shell < scripts/ci/prepare_e2e.py
+      - name: Start the stack
+        run: |
+          gunicorn config.wsgi:application --bind 127.0.0.1:8108 --workers 2 --worker-class gthread --threads 4 > gunicorn.log 2>&1 &
+          HOSTNAME=127.0.0.1 PORT=3108 node frontend/.next/standalone/server.js > next.log 2>&1 &
+          python manage.py send_notifications --loop > worker.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:3108/api/v1/health/ && break; sleep 1; done
+      - name: Smoke test
+        run: BASE=http://127.0.0.1:3108 scripts/smoke.sh
+      - name: Lighthouse (mobile)
+        run: |
+          SVC=$(python3 -c "import urllib.parse;print(urllib.parse.quote('إرسال-الطرود-والمستندات'))")
+          npx --yes @lhci/cli@0.15.x collect --numberOfRuns=1 \
+            --url=http://127.0.0.1:3108/ --url=http://127.0.0.1:3108/services --url="http://127.0.0.1:3108/services/$SVC" \
+            --settings.chromeFlags="--no-sandbox --headless=new"
+          npx --yes @lhci/cli@0.15.x upload --target=filesystem --outputDir=lighthouse
+          python3 scripts/ci/lighthouse_summary.py lighthouse >> "$GITHUB_STEP_SUMMARY"
+          python3 scripts/ci/lighthouse_summary.py lighthouse
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-reports
+          path: |
+            lighthouse/
+            *.log

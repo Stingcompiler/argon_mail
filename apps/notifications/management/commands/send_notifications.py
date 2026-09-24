@@ -2,8 +2,10 @@ import signal
 import time
 
 from django.core.management.base import BaseCommand
+from django.core.cache import cache
 from django.db import close_old_connections
 
+from apps.core.views import WORKER_HEARTBEAT_KEY
 from apps.notifications.services import deliver_due
 
 
@@ -19,6 +21,7 @@ class Command(BaseCommand):
         signal.signal(signal.SIGTERM, lambda *a: stop.update(now=True))
         while True:
             try:
+                cache.set(WORKER_HEARTBEAT_KEY, time.time(), timeout=None)  # read by /api/v1/health/
                 n = deliver_due()
                 if n:
                     self.stdout.write(f"processed {n} notification(s)")
