@@ -36,6 +36,23 @@
 3. انشر. التسلسل: `build.sh` (يتحقق من Node 22، يبني Next وcollectstatic) ← `preDeployCommand` (migrate وcreatecachetable) ← `start.sh`.
 4. الإنتاج يرفض البدء إذا كانت القيم ناقصة أو ضعيفة، وتظهر الرسالة في السجل: `Production configuration error: ...` أو `start.sh: missing required env var ...`.
 
+## البريد عبر Gmail
+
+المالك اختار حساب Gmail `preedargon@gmail.com` بكلمة مرور تطبيق لإرسال تنبيهات الإدارة (طلبات جديدة ورسائل التواصل).
+
+- في Render اضبط `EMAIL_URL` كقيمة سرية بالصيغة التالية، مع ترميز `@` في اسم المستخدم إلى `%40` وحذف المسافات من كلمة مرور التطبيق:
+
+  ```
+  smtp+tls://preedargon%40gmail.com:APP_PASSWORD@smtp.gmail.com:587
+  ```
+
+- `DEFAULT_FROM_EMAIL` يجب أن يكون الحساب نفسه: `بريد عرجون <preedargon@gmail.com>`. Gmail يرفض الإرسال باسم عنوان آخر.
+- حد Gmail اليومي نحو 500 رسالة، وهو كافٍ للتنبيهات. إن زاد الحجم انتقل إلى مزود بريد معاملات.
+- كلمة مرور التطبيق تُلغى وتُجدد من إعدادات حساب Google ← الأمان ← كلمات مرور التطبيقات. بعد تجديدها حدّث `EMAIL_URL` في Render.
+- لا تُكتب كلمة المرور في المستودع أبدًا؛ محليًا مكانها `.env` المستبعد من git.
+
+تحقق محلي (24 سبتمبر 2026): رسالة تواصل تجريبية أنشأت تنبيهًا أرسله العامل عبر `smtp.gmail.com:587` إلى `preedargon@gmail.com` من المحاولة الأولى.
+
 ## بعد النشر الأول
 
 1. **الصحة:** `https://النطاق/api/v1/health/` يجب أن يعيد `{"status":"ok","database":"ok","worker":"ok","storage":"ok"}`. قيمة `worker` تكون `unknown` لأول 15 ثانية. `storage: not_mounted` يعني أن القرص غير مركّب.
