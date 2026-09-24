@@ -21,14 +21,18 @@ class Command(BaseCommand):
         parser.add_argument("email")
         parser.add_argument("full_name")
         parser.add_argument("--role", choices=Role.values, default=Role.ADMIN)
+        parser.add_argument("--username", default=None, help="Optional login alias (lower-case letters, digits, _ . -).")
 
-    def handle(self, email, full_name, role, **opts):
+    def handle(self, email, full_name, role, username=None, **opts):
         password = os.environ.get("STAFF_PASSWORD") or getpass.getpass("Password: ")
         if not password:
             raise CommandError("A password is required.")
         password_validation.validate_password(password)
         user, created = User.objects.get_or_create(email=email.lower(), defaults={"full_name": full_name})
         user.full_name = full_name
+        if username:
+            user.username = username.strip().lower()
+            user.full_clean(exclude=["password"])
         user.role = role
         user.is_active = True
         user.set_password(password)

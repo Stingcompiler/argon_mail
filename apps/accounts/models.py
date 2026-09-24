@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.core.validators import RegexValidator
 from django.db import models
 
 
@@ -31,8 +32,16 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra)
 
 
+USERNAME_RE = r"^[A-Za-z0-9][A-Za-z0-9_.-]{2,29}$"
+
+
 class User(AbstractUser):
-    username = None
+    # Optional login alias. Stored lower-case so it is unique regardless of
+    # case; e-mail stays the primary identifier (USERNAME_FIELD).
+    username = models.CharField(
+        "اسم المستخدم", max_length=30, unique=True, null=True, blank=True,
+        validators=[RegexValidator(USERNAME_RE, "من 3 إلى 30 حرفًا: أحرف إنجليزية صغيرة وأرقام و _ . -، ويبدأ بحرف أو رقم.")],
+    )
     email = models.EmailField("البريد الإلكتروني", unique=True)
     full_name = models.CharField("الاسم", max_length=120)
     role = models.CharField("الدور", max_length=16, choices=Role.choices, default=Role.EXECUTOR)
@@ -48,6 +57,7 @@ class User(AbstractUser):
         return self.full_name or self.email
 
     def save(self, *args, **kwargs):
+        self.username = (self.username or "").strip().lower() or None
         # Django-admin access always follows the dashboard role, so demoting
         # or deactivating someone also removes their superuser rights.
         self.is_staff = self.is_superuser = bool(self.is_active and self.role == Role.ADMIN)

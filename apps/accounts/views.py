@@ -80,9 +80,14 @@ class LoginView(AuthBaseView):
     def post(self, request):
         s = LoginSerializer(data=request.data)
         s.is_valid(raise_exception=True)
-        user = authenticate(request, email=s.validated_data["email"].lower(), password=s.validated_data["password"])
+        ident = s.validated_data["login"]
+        if "@" not in ident:
+            # Username alias → the account's e-mail. An unknown username still
+            # goes through authenticate() so timing and the error stay the same.
+            ident = User.objects.filter(username=ident).values_list("email", flat=True).first() or f"{ident}@invalid"
+        user = authenticate(request, email=ident, password=s.validated_data["password"])
         if user is None or not user.is_active:
-            raise AuthenticationFailed("البريد الإلكتروني أو كلمة المرور غير صحيحة.")
+            raise AuthenticationFailed("بيانات الدخول غير صحيحة.")
         refresh = RefreshToken.for_user(user)
         User.objects.filter(pk=user.pk).update(last_login=refresh.current_time)
         response = Response(session_payload(user, refresh))
