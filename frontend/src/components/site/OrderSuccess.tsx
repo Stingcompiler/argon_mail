@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useUi } from '@/contexts/UiContext';
+import { RememberCode } from './RememberCode';
 
 export function OrderSuccess() {
   const code = useSearchParams().get('code') || '';
@@ -24,6 +25,7 @@ export function OrderSuccess() {
           {copied ? <Check size={17} /> : <Copy size={17} />} {copied ? 'تم نسخ الرقم' : 'نسخ رقم الطلب'}
         </button>
       </div>
+      <RememberCode />
       <Link className="button" href={`/track?code=${encodeURIComponent(code)}`}>متابعة طلبي <ArrowLeft size={17} /></Link>
       <Link className="back-link" href="/">العودة إلى الرئيسية</Link>
     </>

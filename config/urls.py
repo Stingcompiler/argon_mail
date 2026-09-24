@@ -18,7 +18,13 @@ from apps.media_library.views import download as file_download
 from apps.media_library.views import storage as storage_status
 from apps.notifications.views import NotificationViewSet
 from apps.inquiries.views import AdminInquiryViewSet, PublicInquiryCreateView
-from apps.orders.views import AdminOrderViewSet, PublicOrderCreateView, PublicTrackingView, StatusViewSet
+from apps.orders.views import (
+    AdminOrderViewSet,
+    PublicOrderCreateView,
+    PublicTrackingLookupView,
+    PublicTrackingView,
+    StatusViewSet,
+)
 
 public = DefaultRouter(trailing_slash=True)
 public.include_root_view = False
@@ -47,6 +53,7 @@ api_v1 = [
     path("public/site/", PublicSiteView.as_view(), name="public-site"),
     path("public/service-redirects/<str:slug>/", service_redirect, name="public-service-redirect"),
     path("public/orders/", PublicOrderCreateView.as_view(), name="public-order-create"),
+    path("public/track/lookup/", PublicTrackingLookupView.as_view(), name="public-track-lookup"),
     path("public/track/<str:code>/", PublicTrackingView.as_view(), name="public-track"),
     path("public/inquiries/", PublicInquiryCreateView.as_view(), name="public-inquiry-create"),
     path("public/", include(public.urls)),

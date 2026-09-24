@@ -92,6 +92,30 @@ class TrackingSerializer(serializers.ModelSerializer):
         return items
 
 
+class TrackingLookupSerializer(serializers.Serializer):
+    full_name = serializers.CharField(max_length=80, min_length=2)
+    phone = serializers.CharField(max_length=24)
+
+    def validate_phone(self, v):
+        try:
+            return normalize_phone(v)
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(e.messages)
+
+
+class TrackingSummarySerializer(serializers.ModelSerializer):
+    """One row per order for the owner who proved name + phone. No personal
+    data beyond what the customer already typed."""
+
+    service_name = serializers.CharField(read_only=True)
+    status = StatusBriefSerializer(read_only=True)
+    updated_at = serializers.DateTimeField(source="public_updated_at")
+
+    class Meta:
+        model = Order
+        fields = ["code", "service_name", "status", "created_at", "updated_at"]
+
+
 # ---------- admin ----------
 
 

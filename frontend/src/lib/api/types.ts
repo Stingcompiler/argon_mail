@@ -34,6 +34,7 @@ export type StatusBrief = { key: string; label: string; meaning: StatusMeaning }
 export type OrderStatus = StatusBrief & { id: number; sort_order: number; is_active: boolean; is_initial: boolean; orders_count: number };
 
 export type TrackingItem = { kind: 'created' | 'status' | 'note'; title: string; text: string; at: string; meaning?: StatusMeaning };
+export type TrackingSummary = { code: string; service_name: string; status: StatusBrief; created_at: string; updated_at: string };
 export type Tracking = { code: string; service_name: string; status: StatusBrief; created_at: string; updated_at: string; timeline: TrackingItem[] };
 
 export type Answer = { key: string; label: string; type: FieldType; value: string | string[] };

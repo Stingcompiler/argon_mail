@@ -33,6 +33,7 @@
 | GET `public/services/<slug>/` | تفاصيل خدمة منشورة مع الحقول | public_read |
 | GET `public/service-redirects/<slug>/` | `{slug}` الجديد لرابط قديم | — |
 | POST `public/orders/` | إنشاء طلب → `{code, service_name, created_at}` | order_create |
+| POST `public/track/lookup/` | `{full_name, phone}` → `{results: [{code, service_name, status, created_at, updated_at}]}` لطلبات العميل. الاسم يُطابَق بعد توحيد الكتابة العربية، والهاتف مطابقة تامة. 404 موحّد إذا لم يتطابق الاثنان | tracking_lookup (5/دقيقة) |
 | GET `public/track/<code>/` | `{code, service_name, status, created_at, updated_at, timeline}` فقط | tracking |
 | POST `public/inquiries/` | إنشاء رسالة → `{id}` | inquiry_create |
 
