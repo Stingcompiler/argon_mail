@@ -18,6 +18,8 @@ curl -s "$BASE/services/$S" > "$T/svc.html"
 check "service page title"          grep -q "<title>إرسال الطرود والمستندات" "$T/svc.html"
 check "service canonical"           grep -q 'rel="canonical"' "$T/svc.html"
 check "service JSON-LD"             grep -q '"@type":"Service"' "$T/svc.html"
+GB="$(curl -s -A 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' "$BASE/services/$S" | sed 's#</head>.*##')"
+check "metadata in <head> for Googlebot" grep -q 'name="description"' <<<"$GB"
 check "unknown service is 404"      [ "$(code "$BASE/services/no-such-service")" = 404 ]
 check "malformed slug not 500"      [ "$(code "$BASE/services/%E0%A4%A")" != 500 ]
 check "sitemap lists service"       grep -q "$S" <(curl -s "$BASE/sitemap.xml")
