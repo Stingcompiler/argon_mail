@@ -169,6 +169,8 @@ REST_FRAMEWORK = {
         "auth": env("THROTTLE_AUTH", default="10/min"),
         "public_read": env("THROTTLE_PUBLIC_READ", default="120/min"),
         "tracking": env("THROTTLE_TRACKING", default="20/min"),
+        # Name + phone lookup: stricter, it could otherwise probe for customers.
+        "tracking_lookup": env("THROTTLE_TRACKING_LOOKUP", default="5/min"),
         "order_create": env("THROTTLE_ORDER_CREATE", default="20/hour"),
         "inquiry_create": env("THROTTLE_INQUIRY_CREATE", default="10/hour"),
     },

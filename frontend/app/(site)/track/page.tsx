@@ -10,7 +10,7 @@ export default function TrackPage() {
       <div className="page-intro">
         <span className="eyebrow">معك، في كل خطوة</span>
         <h1>اطمئن على طلبك.</h1>
-        <p>أدخل رقم المتابعة لمعرفة الحالة وآخر التحديثات.</p>
+        <p>تابع برقم الطلب، أو باسمك الكامل ورقم WhatsApp الذي استخدمته.</p>
       </div>
       <Suspense><TrackingView /></Suspense>
     </section>

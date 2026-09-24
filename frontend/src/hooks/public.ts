@@ -1,7 +1,7 @@
 'use client';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
-import type { Tracking } from '@/lib/api/types';
+import type { Tracking, TrackingSummary } from '@/lib/api/types';
 import { qk } from '@/lib/query-keys';
 
 export function useTracking(code: string) {
@@ -11,6 +11,14 @@ export function useTracking(code: string) {
     enabled: code.length > 0,
     staleTime: 60_000,
     refetchOnWindowFocus: false,
+  });
+}
+
+/** Name + WhatsApp number lookup. POST keeps personal data out of URLs. */
+export function useTrackingLookup() {
+  return useMutation({
+    mutationFn: (v: { full_name: string; phone: string }) =>
+      api<{ results: TrackingSummary[] }>('/public/track/lookup/', { method: 'POST', body: v, auth: false }),
   });
 }
 

@@ -18,6 +18,7 @@ from apps.content.models import upload_limits
 from apps.media_library import signing as file_signing
 from apps.media_library.models import PrivateFile
 from apps.core.idempotency import get_idempotency_key
+from apps.core.text import normalize_name
 from apps.core.throttles import ScopedIPThrottle
 
 from . import services
@@ -26,6 +27,8 @@ from .access import visible_orders
 from .models import Order, OrderNote, OrderStatus, Quote
 from .serializers import (
     AssignSerializer,
+    TrackingLookupSerializer,
+    TrackingSummarySerializer,
     PaymentSerializer,
     PaymentStatusSerializer,
     QuoteDecisionSerializer,
@@ -133,6 +136,37 @@ class PublicTrackingView(APIView):
             code=code.strip().upper(),
         )
         return Response(TrackingSerializer(order).data)
+
+
+class PublicTrackingLookupView(APIView):
+    """Find a customer's orders by full name AND the WhatsApp number used in
+    the order. Both must match: a name alone would reveal other people's
+    orders. POST keeps the name and phone out of URLs and access logs.
+    The answer is the same "not found" whether the name or the phone is wrong."""
+
+    authentication_classes = []
+    permission_classes = [AllowAny]
+    throttle_classes = [ScopedIPThrottle]
+    throttle_scope = "tracking_lookup"
+    MAX_RESULTS = 20
+
+    @extend_schema(request=TrackingLookupSerializer, responses=TrackingSummarySerializer(many=True))
+    def post(self, request):
+        s = TrackingLookupSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        wanted = normalize_name(s.validated_data["full_name"])
+        candidates = (
+            Order.objects.filter(customer_phone=s.validated_data["phone"])
+            .select_related("status")
+            .order_by("-created_at")
+        )
+        matches = [o for o in candidates[:200] if normalize_name(o.customer_name) == wanted][: self.MAX_RESULTS]
+        if not matches:
+            return Response(
+                {"detail": "لم نعثر على طلبات بهذا الاسم ورقم الهاتف. تأكد من كتابتهما كما في الطلب.", "code": "not_found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        return Response({"results": TrackingSummarySerializer(matches, many=True).data})
 
 
 class AdminOrderViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):

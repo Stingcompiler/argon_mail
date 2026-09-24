@@ -33,6 +33,9 @@ CODE="$(python3 -c "import sys,json;print(json.loads(sys.argv[1])['code'])" "$R"
 check "order created"               [ -n "$CODE" ]
 check "tracking works"              grep -q "\"code\":\"$CODE\"" <(curl -s "$BASE/api/v1/public/track/$CODE/")
 check "tracking hides customer"     bash -c "! curl -s '$BASE/api/v1/public/track/$CODE/' | grep -q 'اختبار دخان'"
+LK="$(curl -s -H 'Content-Type: application/json' -d '{"full_name":"اختبار  دخان","phone":"+249911000111"}' "$BASE/api/v1/public/track/lookup/")"
+check "lookup by name + phone"      grep -q "\"code\":\"$CODE\"" <<<"$LK"
+check "lookup needs the phone too"  [ "$(curl -s -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' -d '{"full_name":"اختبار دخان","phone":"+249900000000"}' "$BASE/api/v1/public/track/lookup/")" = 404 ]
 python3 -c "print('{\"x\":\"'+'a'*1_200_000+'\"}')" > "$T/big.json"
 BIG="$(curl -s -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' --data-binary @"$T/big.json" "$BASE/api/v1/public/inquiries/")"
 check "oversized JSON rejected (got $BIG)" [ "$BIG" = 413 ]
