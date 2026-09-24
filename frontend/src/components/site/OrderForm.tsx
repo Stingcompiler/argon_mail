@@ -1,29 +1,57 @@
 'use client';
-import { ArrowLeft, LoaderCircle } from 'lucide-react';
+import { ArrowLeft, FileText, LoaderCircle, UploadCloud, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useRef, useState, type FormEvent } from 'react';
 import { useCreateOrder } from '@/hooks/public';
 import { ApiError, fieldErrors, newIdempotencyKey } from '@/lib/api/client';
 import type { PublicServiceDetail, ServiceField } from '@/lib/api/types';
+import { FILE_ACCEPT, IMAGE_ACCEPT, checkFile, formatSize } from '@/lib/files';
+
+type Limits = { maxFileMb: number; maxFiles: number };
 
 /**
  * Inputs are uncontrolled and live in the DOM, so they survive a failed
  * submission. One idempotency key is kept for all retries of the same
  * submission; the server returns the original order if it already exists.
  */
-export function OrderForm({ service }: { service: PublicServiceDetail }) {
+export function OrderForm({ service, limits }: { service: PublicServiceDetail; limits: Limits }) {
   const router = useRouter();
   const create = useCreateOrder();
   const key = useRef<string>('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  // Selected files are kept in state so they survive a failed submission.
+  const [files, setFiles] = useState<Record<string, File[]>>({});
+  const totalFiles = Object.values(files).reduce((n, l) => n + l.length, 0);
+  const addFiles = (f: ServiceField, picked: FileList | null) => {
+    if (!picked?.length) return;
+    const current = files[f.key] || [];
+    const next = [...current];
+    let problem = '';
+    for (const file of Array.from(picked)) {
+      const err = checkFile(file, f.type === 'image', limits.maxFileMb);
+      if (err) { problem = err; continue; }
+      if (next.length >= f.max_files) { problem = `الحد الأقصى ${f.max_files} ملفات لهذا الحقل.`; break; }
+      if (totalFiles - current.length + next.length >= limits.maxFiles) { problem = `الحد الأقصى ${limits.maxFiles} ملفات لكل طلب.`; break; }
+      next.push(file);
+    }
+    setFiles({ ...files, [f.key]: next });
+    setErrors((e) => { const n = { ...e }; if (problem) n[`answers.${f.key}`] = problem; else delete n[`answers.${f.key}`]; return n; });
+  };
+  const removeFile = (k: string, i: number) => setFiles({ ...files, [k]: (files[k] || []).filter((_, j) => j !== i) });
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (create.isPending) return;
     const data = new FormData(e.currentTarget);
     const answers: Record<string, string | string[]> = {};
+    const missing = service.fields.filter((f) => (f.type === 'file' || f.type === 'image') && f.required && !(files[f.key] || []).length);
+    if (missing.length) {
+      setErrors(Object.fromEntries(missing.map((f) => [`answers.${f.key}`, 'أرفق ملفًا واحدًا على الأقل.'])));
+      return;
+    }
     service.fields.forEach((f) => {
+      if (f.type === 'file' || f.type === 'image') return;
       answers[f.key] = f.type === 'multiselect' ? data.getAll(`f-${f.key}`).map(String) : String(data.get(`f-${f.key}`) || '');
     });
     key.current ||= newIdempotencyKey();
@@ -37,6 +65,7 @@ export function OrderForm({ service }: { service: PublicServiceDetail }) {
         details: String(data.get('details') || ''),
         consent: data.get('consent') === 'on',
         answers,
+        files,
       },
       {
         onSuccess: (order) => router.push(`/order-success?code=${encodeURIComponent(order.code)}`),
@@ -71,7 +100,11 @@ export function OrderForm({ service }: { service: PublicServiceDetail }) {
         <small>أدخل الرقم مع رمز الدولة، مثل ‎+249.</small>
         {err('customer_phone')}
       </label>
-      {service.fields.map((f) => <DynamicField key={f.key} field={f} error={errors[`answers.${f.key}`]} />)}
+      {service.fields.map((f) => (f.type === 'file' || f.type === 'image')
+        ? <FileField key={f.key} field={f} files={files[f.key] || []} maxMb={limits.maxFileMb} error={errors[`answers.${f.key}`] || errors[`answers.${f.key}.0`]}
+            onAdd={(l) => addFiles(f, l)} onRemove={(i) => removeFile(f.key, i)} />
+        : <DynamicField key={f.key} field={f} error={errors[`answers.${f.key}`]} />)}
+      {errors['answers.files'] && <small className="field-error" role="alert">{errors['answers.files']}</small>}
       <label>
         تفاصيل إضافية
         <textarea name="details" placeholder="ما الذي تود أن نعرفه عن طلبك؟" rows={4} maxLength={4000} />
@@ -86,6 +119,39 @@ export function OrderForm({ service }: { service: PublicServiceDetail }) {
         {create.isPending ? <>جارٍ الإرسال <LoaderCircle className="spin" size={18} /></> : <>إرسال الطلب <ArrowLeft size={18} /></>}
       </button>
     </form>
+  );
+}
+
+function FileField({ field: f, files, maxMb, error, onAdd, onRemove }: {
+  field: ServiceField; files: File[]; maxMb: number; error?: string; onAdd: (l: FileList | null) => void; onRemove: (i: number) => void;
+}) {
+  const image = f.type === 'image';
+  const full = files.length >= f.max_files;
+  return (
+    <div className="file-field">
+      <span className="file-field-label">{f.label}{f.required && <em> *</em>}</span>
+      {f.help_text && <small>{f.help_text}</small>}
+      {!full && (
+        <label className="upload-area" aria-invalid={!!error}>
+          <UploadCloud size={27} />
+          <b>{image ? 'اختر صورة' : 'اختر ملفًا'}{f.max_files > 1 ? ` (حتى ${f.max_files})` : ''}</b>
+          <small>{image ? 'PNG أو JPG أو WebP' : 'PDF أو صورة'} · حتى {maxMb} MB للملف</small>
+          <input type="file" accept={image ? IMAGE_ACCEPT : FILE_ACCEPT} multiple={f.max_files > 1}
+            onChange={(e) => { onAdd(e.target.files); e.target.value = ''; }} />
+        </label>
+      )}
+      {files.length > 0 && (
+        <ul className="file-list">
+          {files.map((file, i) => (
+            <li key={`${file.name}-${i}`}>
+              <FileText size={16} /><span dir="auto">{file.name}</span><small>{formatSize(file.size)}</small>
+              <button type="button" className="icon-button" aria-label={`إزالة ${file.name}`} onClick={() => onRemove(i)}><X size={14} /></button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {error && <small className="field-error" role="alert">{error}</small>}
+    </div>
   );
 }
 

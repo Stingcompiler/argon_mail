@@ -5,7 +5,9 @@ from rest_framework import serializers
 from apps.accounts.serializers import UserBriefSerializer
 from apps.core.phone import normalize_phone, whatsapp_link
 
-from .models import Order, OrderEvent, OrderNote, OrderStatus
+from apps.media_library.models import PrivateFile
+
+from .models import CURRENCIES, Order, OrderEvent, OrderNote, OrderStatus, PaymentEntry, PaymentStatus, Quote
 
 
 class StatusSerializer(serializers.ModelSerializer):
@@ -101,7 +103,7 @@ class OrderListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ["id", "code", "customer_name", "customer_phone", "service_name", "status", "assignee",
-                  "created_at", "updated_at"]
+                  "payment_status", "created_at", "updated_at"]
 
 
 class NoteSerializer(serializers.ModelSerializer):
@@ -126,15 +128,61 @@ class EventSerializer(serializers.ModelSerializer):
         fields = ["id", "kind", "is_public", "data", "actor", "created_at"]
 
 
+class AttachmentSerializer(serializers.ModelSerializer):
+    uploaded_by = UserBriefSerializer(read_only=True)
+
+    class Meta:
+        model = PrivateFile
+        fields = ["id", "kind", "field_key", "field_label", "payment", "original_name", "content_type", "size",
+                  "uploaded_by", "created_at"]
+
+
+class QuoteSerializer(serializers.ModelSerializer):
+    created_by = UserBriefSerializer(read_only=True)
+    decided_by = UserBriefSerializer(read_only=True)
+
+    class Meta:
+        model = Quote
+        fields = ["id", "version", "amount", "currency", "note", "status", "created_by", "created_at",
+                  "decided_by", "decided_at", "decision_note"]
+        read_only_fields = ["id", "version", "status", "created_by", "created_at", "decided_by", "decided_at",
+                            "decision_note"]
+
+
+class QuoteDecisionSerializer(serializers.Serializer):
+    decision = serializers.ChoiceField(choices=[Quote.Status.ACCEPTED, Quote.Status.REJECTED])
+    note = serializers.CharField(max_length=300, required=False, allow_blank=True, default="")
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    recorded_by = UserBriefSerializer(read_only=True)
+    method_label = serializers.CharField(source="get_method_display", read_only=True)
+
+    class Meta:
+        model = PaymentEntry
+        fields = ["id", "amount", "currency", "method", "method_label", "reference", "note", "recorded_by", "created_at"]
+        read_only_fields = ["id", "recorded_by", "created_at"]
+
+
+class PaymentStatusSerializer(serializers.Serializer):
+    payment_status = serializers.ChoiceField(choices=PaymentStatus.choices)
+    note = serializers.CharField(max_length=300, required=False, allow_blank=True, default="")
+
+
 class OrderDetailSerializer(OrderListSerializer):
     notes = NoteSerializer(many=True, read_only=True)
     events = EventSerializer(many=True, read_only=True)
+    attachments = AttachmentSerializer(many=True, read_only=True)
+    quotes = QuoteSerializer(many=True, read_only=True)
+    payments = PaymentSerializer(many=True, read_only=True)
+    payment_status_label = serializers.CharField(source="get_payment_status_display", read_only=True)
     whatsapp_url = serializers.SerializerMethodField()
 
     class Meta(OrderListSerializer.Meta):
         fields = OrderListSerializer.Meta.fields + [
             "answers", "details", "service_snapshot", "form_version", "public_updated_at",
-            "notes", "events", "whatsapp_url",
+            "notes", "events", "attachments", "quotes", "payments", "payment_status", "payment_status_label",
+            "whatsapp_url",
         ]
 
     def get_whatsapp_url(self, order):

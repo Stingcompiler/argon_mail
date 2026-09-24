@@ -4,8 +4,8 @@ export type Role = 'admin' | 'operator' | 'executor';
 export type User = { id: number; email: string; full_name: string; role: Role; is_active: boolean; last_login: string | null };
 export type UserBrief = { id: number; full_name: string; role: Role };
 
-export type FieldType = 'text' | 'textarea' | 'number' | 'date' | 'select' | 'multiselect' | 'address';
-export type ServiceField = { key: string; label: string; help_text: string; type: FieldType; required: boolean; options: string[]; max_length: number };
+export type FieldType = 'text' | 'textarea' | 'number' | 'date' | 'select' | 'multiselect' | 'address' | 'file' | 'image';
+export type ServiceField = { key: string; label: string; help_text: string; type: FieldType; required: boolean; options: string[]; max_length: number; max_files: number };
 export type CategoryBrief = { name: string; slug: string };
 export type Category = { id: number; name: string; slug: string; sort_order: number; services_count?: number };
 
@@ -39,14 +39,31 @@ export type Tracking = { code: string; service_name: string; status: StatusBrief
 export type Answer = { key: string; label: string; type: FieldType; value: string | string[] };
 export type OrderListItem = {
   id: number; code: string; customer_name: string; customer_phone: string; service_name: string;
-  status: StatusBrief; assignee: UserBrief | null; created_at: string; updated_at: string;
+  status: StatusBrief; assignee: UserBrief | null; payment_status: PaymentStatus; created_at: string; updated_at: string;
 };
 export type OrderNote = { id: number; visibility: 'public' | 'internal'; body: string; author: UserBrief; created_at: string };
-export type OrderEvent = { id: number; kind: 'created' | 'status_changed' | 'assigned' | 'note_added'; is_public: boolean; data: Record<string, unknown>; actor: UserBrief | null; created_at: string };
+export type OrderEventKind = 'created' | 'status_changed' | 'assigned' | 'note_added' | 'attachment_added' | 'quote_created' | 'quote_decided' | 'payment_status' | 'payment_recorded';
+export type OrderEvent = { id: number; kind: OrderEventKind; is_public: boolean; data: Record<string, unknown>; actor: UserBrief | null; created_at: string };
+export type PaymentStatus = 'not_required' | 'awaiting' | 'verifying' | 'paid' | 'refunded';
+export type Currency = 'SDG' | 'USD' | 'SAR';
+export type Attachment = {
+  id: string; kind: 'order_field' | 'order_document' | 'payment_proof'; field_key: string; field_label: string; payment: number | null;
+  original_name: string; content_type: string; size: number; uploaded_by: UserBrief | null; created_at: string;
+};
+export type Quote = {
+  id: number; version: number; amount: string; currency: Currency; note: string; status: 'pending' | 'accepted' | 'rejected' | 'superseded';
+  created_by: UserBrief; created_at: string; decided_by: UserBrief | null; decided_at: string | null; decision_note: string;
+};
+export type Payment = {
+  id: number; amount: string; currency: Currency; method: 'cash' | 'bank_transfer' | 'mobile_money' | 'other'; method_label: string;
+  reference: string; note: string; recorded_by: UserBrief; created_at: string;
+};
 export type OrderDetail = OrderListItem & {
   answers: Answer[]; details: string; service_snapshot: { name: string; category: string; price_label: string; slug: string };
   form_version: number; public_updated_at: string; notes: OrderNote[]; events: OrderEvent[]; whatsapp_url: string;
+  attachments: Attachment[]; quotes: Quote[]; payments: Payment[]; payment_status_label: string;
 };
+export type StorageStatus = { used: number; quota: number; percent: number; disk_free: number; warning: boolean };
 export type OrderFilters = { q?: string; status?: string; service?: string; assignee?: string; created_after?: string; created_before?: string; page?: number };
 
 export type InquiryStatus = 'new' | 'in_progress' | 'done';
@@ -58,7 +75,7 @@ export type Inquiry = {
 export type SiteSettings = {
   name: string; tagline: string; whatsapp_phone: string; whatsapp_text: string; show_whatsapp: boolean; whatsapp_url: string;
   email: string; address: string; hero_eyebrow: string; hero_title: string; hero_text: string; about: string;
-  seo_title: string; seo_description: string; updated_at: string;
+  seo_title: string; seo_description: string; max_file_mb: number; max_files_per_order: number; updated_at: string;
 };
 export type FAQItem = { id: number; question: string; answer: string; sort_order: number; is_published: boolean };
 export type PublicSite = { settings: SiteSettings; faq: FAQItem[] };

@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "apps.inquiries",
     "apps.content",
     "apps.revalidation",
+    "apps.media_library",
 ]
 
 MIDDLEWARE = [
@@ -108,6 +109,15 @@ DATA_ROOT = Path(env("DATA_ROOT", default=str(BASE_DIR / "var")))
 MEDIA_ROOT = DATA_ROOT / "public"
 MEDIA_URL = "/media/"
 PRIVATE_ROOT = DATA_ROOT / "private"
+# The 10 GB Render disk; private files may use up to this much, with a
+# warning in the dashboard from 85 %.
+STORAGE_QUOTA_BYTES = env.int("STORAGE_QUOTA_BYTES", default=9 * 1024**3)
+STORAGE_WARN_RATIO = 0.85
+# Hard ceilings; the owner's settings can only lower them.
+UPLOAD_HARD_MAX_MB = env.int("UPLOAD_HARD_MAX_MB", default=20)
+UPLOAD_HARD_MAX_FILES = env.int("UPLOAD_HARD_MAX_FILES", default=10)
+FILE_UPLOAD_PERMISSIONS = 0o600
+FILE_UPLOAD_MAX_MEMORY_SIZE = 2 * 1024 * 1024
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

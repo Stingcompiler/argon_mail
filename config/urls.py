@@ -14,6 +14,8 @@ from apps.catalog.views import (
 )
 from apps.content.views import AdminFAQViewSet, AdminSiteSettingsView, PublicSiteView
 from apps.core.views import health
+from apps.media_library.views import download as file_download
+from apps.media_library.views import storage as storage_status
 from apps.inquiries.views import AdminInquiryViewSet, PublicInquiryCreateView
 from apps.orders.views import AdminOrderViewSet, PublicOrderCreateView, PublicTrackingView, StatusViewSet
 
@@ -45,6 +47,8 @@ api_v1 = [
     path("public/track/<str:code>/", PublicTrackingView.as_view(), name="public-track"),
     path("public/inquiries/", PublicInquiryCreateView.as_view(), name="public-inquiry-create"),
     path("public/", include(public.urls)),
+    path("files/download/", file_download, name="file-download"),
+    path("admin/storage/", storage_status, name="admin-storage"),
     path("admin/settings/", AdminSiteSettingsView.as_view(), name="admin-settings"),
     path("admin/", include(staff.urls)),
 ]

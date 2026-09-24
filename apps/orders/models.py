@@ -1,4 +1,7 @@
 import secrets
+from decimal import Decimal
+
+from django.core.validators import MinValueValidator
 
 from django.conf import settings
 from django.db import models
@@ -45,6 +48,17 @@ class OrderStatus(models.Model):
         return self.label
 
 
+class PaymentStatus(models.TextChoices):
+    NOT_REQUIRED = "not_required", "غير مطلوب"
+    AWAITING = "awaiting", "بانتظار الدفع"
+    VERIFYING = "verifying", "قيد التحقق"
+    PAID = "paid", "مدفوع"
+    REFUNDED = "refunded", "مسترد"
+
+
+CURRENCIES = [("SDG", "جنيه سوداني"), ("USD", "دولار أمريكي"), ("SAR", "ريال سعودي")]
+
+
 class Order(models.Model):
     code = models.CharField(max_length=20, unique=True, editable=False)
     service = models.ForeignKey("catalog.Service", on_delete=models.PROTECT, related_name="orders")
@@ -59,6 +73,7 @@ class Order(models.Model):
     assignee = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name="assigned_orders"
     )
+    payment_status = models.CharField(max_length=20, choices=PaymentStatus.choices, default=PaymentStatus.NOT_REQUIRED)
     idempotency_key = models.UUIDField(unique=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -82,6 +97,11 @@ class OrderEvent(models.Model):
         STATUS_CHANGED = "status_changed", "تغيير الحالة"
         ASSIGNED = "assigned", "إسناد"
         NOTE_ADDED = "note_added", "ملاحظة"
+        ATTACHMENT_ADDED = "attachment_added", "مرفق"
+        QUOTE_CREATED = "quote_created", "عرض سعر"
+        QUOTE_DECIDED = "quote_decided", "قرار عرض السعر"
+        PAYMENT_STATUS = "payment_status", "حالة الدفع"
+        PAYMENT_RECORDED = "payment_recorded", "تسجيل دفعة"
 
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="events")
     kind = models.CharField(max_length=20, choices=Kind.choices)
@@ -107,3 +127,50 @@ class OrderNote(models.Model):
 
     class Meta:
         ordering = ["created_at", "id"]
+
+
+class Quote(models.Model):
+    """A versioned price offer. The customer approves outside the platform
+    (WhatsApp, call); staff record that decision with a note."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "بانتظار موافقة العميل"
+        ACCEPTED = "accepted", "وافق العميل"
+        REJECTED = "rejected", "رفض العميل"
+        SUPERSEDED = "superseded", "استُبدل بعرض أحدث"
+
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="quotes")
+    version = models.PositiveIntegerField()
+    amount = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal("0"))])
+    currency = models.CharField(max_length=3, choices=CURRENCIES)
+    note = models.CharField(max_length=500, blank=True)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    decided_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name="+")
+    decided_at = models.DateTimeField(null=True, blank=True)
+    decision_note = models.CharField(max_length=300, blank=True)
+
+    class Meta:
+        ordering = ["version"]
+        constraints = [models.UniqueConstraint(fields=["order", "version"], name="unique_quote_version")]
+
+
+class PaymentEntry(models.Model):
+    class Method(models.TextChoices):
+        CASH = "cash", "نقدًا"
+        BANK = "bank_transfer", "تحويل بنكي"
+        MOBILE = "mobile_money", "تطبيق دفع"
+        OTHER = "other", "أخرى"
+
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="payments")
+    amount = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal("0.01"))])
+    currency = models.CharField(max_length=3, choices=CURRENCIES)
+    method = models.CharField(max_length=20, choices=Method.choices)
+    reference = models.CharField(max_length=120, blank=True)
+    note = models.CharField(max_length=500, blank=True)
+    recorded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]

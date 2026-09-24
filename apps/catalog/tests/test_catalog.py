@@ -59,6 +59,17 @@ class CatalogTests(APITestCase):
         self.assertEqual(r.json()["form_version"], 2)
         self.assertEqual([f["key"] for f in r.json()["fields"]], [f["key"] for f in s["fields"]])
 
+    def test_adding_a_field_bumps_form_version(self):
+        self.client.force_authenticate(self.admin)
+        s = self.client.post("/api/v1/admin/services/", self.payload(), format="json").json()
+        fields = s["fields"] + [{"label": "ملف", "type": "file", "required": True, "max_files": 3}]
+        r = self.client.patch(f"/api/v1/admin/services/{s['id']}/", {"fields": fields}, format="json")
+        self.assertEqual(r.json()["form_version"], 2)
+        self.assertEqual(len(r.json()["fields"]), 3)
+        self.assertEqual(r.json()["fields"][2]["max_files"], 3)
+        r = self.client.patch(f"/api/v1/admin/services/{s['id']}/", {"name": "اسم آخر"}, format="json")
+        self.assertEqual(r.json()["form_version"], 2)
+
     def test_slug_rename_creates_redirect(self):
         service = make_service(name="قديم")
         old = service.slug

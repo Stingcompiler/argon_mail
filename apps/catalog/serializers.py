@@ -25,7 +25,7 @@ class CategoryBriefSerializer(serializers.ModelSerializer):
 class PublicFieldSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceField
-        fields = ["key", "label", "help_text", "type", "required", "options", "max_length"]
+        fields = ["key", "label", "help_text", "type", "required", "options", "max_length", "max_files"]
 
 
 class PublicServiceListSerializer(serializers.ModelSerializer):
@@ -54,7 +54,7 @@ class AdminFieldSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceField
-        fields = ["key", "label", "help_text", "type", "required", "options", "max_length"]
+        fields = ["key", "label", "help_text", "type", "required", "options", "max_length", "max_files"]
 
     def validate_key(self, v):
         if v and not re.fullmatch(r"[a-z0-9_]{1,40}", v):
@@ -81,6 +81,8 @@ class AdminFieldSerializer(serializers.ModelSerializer):
         else:
             options = []
         attrs["options"] = options
+        if not 1 <= attrs.get("max_files", 1) <= 10:
+            raise serializers.ValidationError({"max_files": ["عدد الملفات بين 1 و10."]})
         if not 1 <= attrs.get("max_length", 1000) <= 5000:
             raise serializers.ValidationError({"max_length": ["الحد بين 1 و5000 حرف."]})
         return attrs
@@ -134,8 +136,10 @@ class AdminServiceSerializer(serializers.ModelSerializer):
         return attrs
 
     def _sync_fields(self, service, fields_data):
-        existing = {f.key: f for f in service.fields.all()}
-        before = [f.as_snapshot() for f in service.fields.all()]
+        # Query the table directly: service.fields.all() may be a stale prefetch cache.
+        current = list(ServiceField.objects.filter(service=service).order_by("sort_order", "id"))
+        existing = {f.key: f for f in current}
+        before = [f.as_snapshot() for f in current]
         keep = set()
         for order, data in enumerate(fields_data):
             key = data.pop("key", "") or f"f_{uuid.uuid4().hex[:8]}"
@@ -145,11 +149,13 @@ class AdminServiceSerializer(serializers.ModelSerializer):
                 setattr(field, k, v)
             field.sort_order = order
             field.save()
-        service.fields.exclude(key__in=keep).delete()
-        after = [f.as_snapshot() for f in service.fields.all()]
+        ServiceField.objects.filter(service=service).exclude(key__in=keep).delete()
+        after = [f.as_snapshot() for f in ServiceField.objects.filter(service=service).order_by("sort_order", "id")]
         if before != after and service.pk and before:
             Service.objects.filter(pk=service.pk).update(form_version=service.form_version + 1)
             service.form_version += 1
+        if hasattr(service, "_prefetched_objects_cache"):
+            service._prefetched_objects_cache.pop("fields", None)
 
     @transaction.atomic
     def create(self, validated):

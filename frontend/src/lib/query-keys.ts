@@ -23,6 +23,7 @@ export const qk = {
       list: (f: { q?: string; status?: string }) => ['admin', 'inquiries', 'list', f] as const,
     },
     settings: ['admin', 'settings'] as const,
+    storage: ['admin', 'storage'] as const,
     faq: ['admin', 'faq'] as const,
   },
   public: {

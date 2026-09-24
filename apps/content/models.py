@@ -20,6 +20,8 @@ class SiteSettings(models.Model):
     about = models.TextField(
         max_length=2000, default="منصة تجمع خدمات متنوعة في تجربة بسيطة، وتضع وضوح الخطوات في المقدمة."
     )
+    max_file_mb = models.PositiveSmallIntegerField("حجم الملف الأقصى MB", default=5)
+    max_files_per_order = models.PositiveSmallIntegerField("عدد الملفات لكل طلب", default=5)
     seo_title = models.CharField(max_length=70, default="بريد عرجون | خدمات تقرّب المسافات")
     seo_description = models.CharField(max_length=170, default="خدمات متنوعة، وطلب تتابعه بسهولة.")
     updated_at = models.DateTimeField(auto_now=True)
@@ -45,3 +47,13 @@ class FAQItem(models.Model):
 
     def __str__(self):
         return self.question
+
+
+def upload_limits():
+    """Owner settings, capped by the hard ceilings in settings."""
+    from django.conf import settings as dj
+
+    s = SiteSettings.load()
+    max_mb = max(1, min(s.max_file_mb, dj.UPLOAD_HARD_MAX_MB))
+    max_files = max(1, min(s.max_files_per_order, dj.UPLOAD_HARD_MAX_FILES))
+    return {"max_file_bytes": max_mb * 1024 * 1024, "max_file_mb": max_mb, "max_files": max_files}

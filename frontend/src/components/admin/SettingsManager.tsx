@@ -44,6 +44,12 @@ export function SettingsManager() {
         {input('hero_title', 'عنوان المقدمة', { area: true, max: 160, hint: 'سطر جديد لكل سطر في العنوان.' })}
         {input('hero_text', 'نص المقدمة', { area: true, max: 600 })}
         {input('about', 'نص صفحة عن المنصة', { area: true, max: 2000 })}
+        <h3>الملفات المرفقة</h3>
+        <div className="form-row">
+          <label>حجم الملف الأقصى (MB)<input type="number" min={1} max={20} value={d.max_file_mb} disabled={!canEdit} onChange={(e) => set({ max_file_mb: Number(e.target.value) })} />{errors.max_file_mb && <small className="field-error">{errors.max_file_mb}</small>}</label>
+          <label>عدد الملفات لكل طلب<input type="number" min={1} max={10} value={d.max_files_per_order} disabled={!canEdit} onChange={(e) => set({ max_files_per_order: Number(e.target.value) })} />{errors.max_files_per_order && <small className="field-error">{errors.max_files_per_order}</small>}</label>
+        </div>
+        <p className="subtle-copy">الأنواع المقبولة: PDF وPNG وJPG وWebP، ويُتحقق من محتوى الملف الفعلي. الحد الأعلى على الخادم 20 MB و10 ملفات.</p>
         <h3>محركات البحث</h3>
         {input('seo_title', 'عنوان الصفحة الرئيسية', { max: 70 })}
         {input('seo_description', 'وصف الموقع في نتائج البحث', { area: true, max: 170 })}
