@@ -118,10 +118,12 @@ jobs:
           python manage.py shell < scripts/ci/prepare_e2e.py
       - name: Start the stack
         run: |
+          mkdir -p "$DATA_ROOT/public" "$DATA_ROOT/private"   # start.sh does this on Render
           gunicorn config.wsgi:application --bind 127.0.0.1:8108 --workers 2 --worker-class gthread --threads 4 > gunicorn.log 2>&1 &
           HOSTNAME=127.0.0.1 PORT=3108 node frontend/.next/standalone/server.js > next.log 2>&1 &
           python manage.py send_notifications --loop > worker.log 2>&1 &
-          for i in $(seq 1 30); do curl -sf http://127.0.0.1:3108/api/v1/health/ && break; sleep 1; done
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:3108/api/v1/health/ && exit 0; sleep 1; done
+          echo "::error::stack did not become healthy"; curl -s http://127.0.0.1:3108/api/v1/health/; exit 1
       - name: Smoke test
         run: BASE=http://127.0.0.1:3108 scripts/smoke.sh
       - name: Lighthouse (mobile)

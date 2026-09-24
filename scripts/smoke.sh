@@ -11,7 +11,8 @@ code() { curl -s -o /dev/null -w "%{http_code}" "$@"; }
 enc() { python3 -c "import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1]))" "$1"; }
 
 SLUG="إرسال-الطرود-والمستندات"; S="$(enc "$SLUG")"
-check "health"                      [ "$(code "$BASE/api/v1/health/")" = 200 ]
+if [ "$(code "$BASE/api/v1/health/")" != 200 ]; then echo "FAIL health: $(curl -s "$BASE/api/v1/health/")"; exit 1; fi
+echo "ok   health"; pass=$((pass+1))
 check "home renders services (SSR)" grep -q "إرسال الطرود والمستندات" <(curl -s "$BASE/")
 curl -s "$BASE/services/$S" > "$T/svc.html"
 check "service page title"          grep -q "<title>إرسال الطرود والمستندات" "$T/svc.html"
