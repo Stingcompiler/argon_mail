@@ -13,7 +13,7 @@ from apps.catalog.views import (
     service_redirect,
 )
 from apps.content.views import AdminFAQViewSet, AdminSiteSettingsView, PublicSiteView
-from apps.core.views import health
+from apps.core.views import diagnostics, health
 from apps.media_library.views import download as file_download
 from apps.media_library.views import storage as storage_status
 from apps.notifications.views import NotificationViewSet
@@ -39,6 +39,7 @@ staff.register("notifications", NotificationViewSet, basename="admin-notificatio
 
 api_v1 = [
     path("health/", health, name="health"),
+    path("admin/diagnostics/", diagnostics, name="admin-diagnostics"),
     path("auth/login/", LoginView.as_view(), name="auth-login"),
     path("auth/refresh/", RefreshView.as_view(), name="auth-refresh"),
     path("auth/logout/", LogoutView.as_view(), name="auth-logout"),

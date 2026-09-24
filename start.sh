@@ -20,6 +20,17 @@ export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-config.settings.prod}"
 mkdir -p "${DATA_ROOT:-var}/public" "${DATA_ROOT:-var}/private"
 
 # Threaded workers: a slow upload or download must not block the whole API.
+PIDS=()
+# Graceful stop on deploy: forward SIGTERM to every process and wait for them
+# (Gunicorn finishes in-flight requests within --graceful-timeout).
+shutdown() {
+  trap - TERM INT
+  kill -TERM "${PIDS[@]}" 2>/dev/null || true
+  wait
+  exit 0
+}
+trap shutdown TERM INT
+
 gunicorn config.wsgi:application \
   --bind "127.0.0.1:${DJANGO_PORT}" \
   --workers "${WEB_CONCURRENCY:-2}" \
@@ -27,15 +38,19 @@ gunicorn config.wsgi:application \
   --timeout 120 --graceful-timeout 25 \
   --max-requests 1000 --max-requests-jitter 100 \
   --access-logfile - &
-DJANGO_PID=$!
+PIDS+=($!)
 
 HOSTNAME=0.0.0.0 PORT="$PUBLIC_PORT" node frontend/.next/standalone/server.js &
-NEXT_PID=$!
+PIDS+=($!)
 
 python manage.py send_notifications --loop &
-WORKER_PID=$!
+PIDS+=($!)
 
-trap 'kill $DJANGO_PID $NEXT_PID $WORKER_PID 2>/dev/null || true' TERM INT
-wait -n $DJANGO_PID $NEXT_PID $WORKER_PID
-kill $DJANGO_PID $NEXT_PID $WORKER_PID 2>/dev/null || true
+# If any process dies, stop the rest and exit non-zero so Render restarts us.
+set +e
+wait -n "${PIDS[@]}"
+status=$?
+echo "start.sh: a process exited (status $status); stopping the service" >&2
+kill -TERM "${PIDS[@]}" 2>/dev/null
+wait
 exit 1

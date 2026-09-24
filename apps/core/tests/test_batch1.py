@@ -45,6 +45,23 @@ class RequestSizeLimitTests(APITestCase):
                              CONTENT_LENGTH=str((settings.UPLOAD_MAX_REQUEST_MB + 2) * 1024 * 1024))
         self.assertEqual(r.status_code, 413)
 
+    def test_rejected_body_is_drained(self):
+        """The body must be consumed before the 413, or the proxy gets EPIPE."""
+        import io
+
+        from django.test import RequestFactory
+
+        from apps.core.middleware import RequestSizeLimitMiddleware
+
+        body = b"x" * (3 * 1024 * 1024)
+        stream = io.BytesIO(body)
+        request = RequestFactory().post("/api/v1/public/inquiries/", data=b"", content_type="application/json")
+        request.META["CONTENT_LENGTH"] = str(len(body))
+        request.META["wsgi.input"] = stream
+        response = RequestSizeLimitMiddleware(lambda r: None)(request)
+        self.assertEqual(response.status_code, 413)
+        self.assertEqual(stream.tell(), len(body))
+
     def test_normal_requests_unaffected(self):
         r = self.client.post("/api/v1/public/orders/", order_payload(self.service), format="json",
                              HTTP_IDEMPOTENCY_KEY=str(uuid.uuid4()))

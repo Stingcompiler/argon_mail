@@ -12,7 +12,12 @@ type Props = { params: Promise<{ slug: string }> };
 
 async function load(params: Props['params']) {
   await connection();
-  const slug = decodeURIComponent((await params).slug);
+  let slug: string;
+  try {
+    slug = decodeURIComponent((await params).slug);
+  } catch {
+    notFound(); // malformed percent-encoding
+  }
   const service = await getService(slug);
   if (service) return service;
   const moved = await getServiceRedirect(slug);

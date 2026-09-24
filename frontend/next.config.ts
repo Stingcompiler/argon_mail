@@ -45,6 +45,11 @@ export default function config(phase: string): NextConfig {
     output: 'standalone',
     devIndicators: false,
     experimental: { middlewareClientMaxBodySize: PROXY_BODY_LIMIT },
+    // Always render <title>, description, canonical and OG tags in <head>.
+    // By default Next 15 streams them into <body> for some user agents
+    // (including Googlebot and Lighthouse); crawlers that don't run JS then
+    // miss them. Our metadata comes from the data cache, so blocking is cheap.
+    htmlLimitedBots: /.*/,
     poweredByHeader: false,
     trailingSlash: false,
     // Django URLs end with a slash; keep them as-is when proxying.
