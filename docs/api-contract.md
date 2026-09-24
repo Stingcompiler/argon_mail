@@ -17,7 +17,7 @@
 
 | الطريقة والمسار | الوصف | ملاحظات |
 | --- | --- | --- |
-| POST `auth/login/` | `{email, password}` → `{access, user}` + cookie | يتطلب Origin موثوقًا، throttle `auth` |
+| POST `auth/login/` | `{login, password}` (البريد أو اسم المستخدم؛ `email` مقبول للتوافق) → `{access, user}` + cookie | يتطلب Origin موثوقًا، throttle `auth` |
 | POST `auth/refresh/` | cookie → `{access, user}` + cookie جديد | يبطل القديم |
 | POST `auth/logout/` | يبطل refresh ويمسح cookie | 204 |
 | GET `auth/me/` | المستخدم الحالي | Bearer |

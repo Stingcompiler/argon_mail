@@ -1,7 +1,7 @@
 // Mirrors the DRF serializers in apps/*/serializers.py. See docs/api-contract.md.
 
 export type Role = 'admin' | 'operator' | 'executor';
-export type User = { id: number; email: string; full_name: string; role: Role; is_active: boolean; last_login: string | null };
+export type User = { id: number; email: string; username: string | null; full_name: string; role: Role; is_active: boolean; last_login: string | null };
 export type UserBrief = { id: number; full_name: string; role: Role };
 
 export type FieldType = 'text' | 'textarea' | 'number' | 'date' | 'select' | 'multiselect' | 'address' | 'file' | 'image';

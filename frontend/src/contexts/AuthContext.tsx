@@ -17,7 +17,8 @@ type Session = { access: string; user: User };
 type Auth = {
   status: Status;
   user: User | null;
-  login: (email: string, password: string) => Promise<User>;
+  /** `login` is an e-mail or a username. */
+  login: (login: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
   /** Restores a session from the refresh cookie. Called by admin screens only,
    * so public visitors never hit the auth endpoints. */
@@ -86,8 +87,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refresh();
   }, [refresh]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const s = await authCall<Session>('login', { email, password });
+  const login = useCallback(async (ident: string, password: string) => {
+    const s = await authCall<Session>('login', { login: ident, password });
     if (user && user.id !== s.user.id) queryClient.removeQueries({ queryKey: qk.admin.all });
     apply(s);
     queryClient.invalidateQueries({ queryKey: qk.admin.all });
