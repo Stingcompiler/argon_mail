@@ -3,6 +3,8 @@ import { CheckCircle2, LoaderCircle, Send } from 'lucide-react';
 import { useRef, useState, type FormEvent } from 'react';
 import { useCreateInquiry } from '@/hooks/public';
 import { ApiError, fieldErrors, newIdempotencyKey } from '@/lib/api/client';
+import { phoneProblem } from '@/lib/countries';
+import { PhoneField } from './PhoneField';
 
 export function ContactForm() {
   const create = useCreateInquiry();
@@ -15,6 +17,8 @@ export function ContactForm() {
     if (create.isPending) return;
     const form = e.currentTarget;
     const f = new FormData(form);
+    const phoneErr = phoneProblem(String(f.get('phone') || ''));
+    if (phoneErr) { setErrors({ phone: phoneErr }); return; }
     key.current ||= newIdempotencyKey();
     setErrors({});
     create.mutate(
@@ -40,7 +44,7 @@ export function ContactForm() {
     <form className="request-form contact-form" onSubmit={submit}>
       {create.error && <div className="notice error" role="alert">{Object.keys(errors).length ? 'راجع الحقول المعلّمة ثم أعد الإرسال.' : create.error.message}</div>}
       <label>الاسم<input name="name" required maxLength={80} placeholder="اسمك الكامل" autoComplete="name" />{err('name')}</label>
-      <label>رقم WhatsApp<input name="phone" type="tel" required dir="ltr" placeholder="+249 ..." autoComplete="tel" />{err('phone')}</label>
+      <PhoneField name="phone" label="رقم WhatsApp" error={errors.phone} />
       <label>الموضوع<input name="subject" required maxLength={140} placeholder="بخصوص ماذا تتواصل معنا؟" />{err('subject')}</label>
       <label>رسالتك<textarea name="body" required rows={5} maxLength={4000} placeholder="اكتب رسالتك هنا..." />{err('body')}</label>
       <button className="button" disabled={create.isPending}>

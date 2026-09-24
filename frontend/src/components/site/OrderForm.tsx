@@ -7,6 +7,8 @@ import { useCreateOrder } from '@/hooks/public';
 import { ApiError, fieldErrors, newIdempotencyKey } from '@/lib/api/client';
 import type { PublicServiceDetail, ServiceField } from '@/lib/api/types';
 import { FILE_ACCEPT, IMAGE_ACCEPT, checkFile, formatSize } from '@/lib/files';
+import { phoneProblem } from '@/lib/countries';
+import { PhoneField } from './PhoneField';
 
 type Limits = { maxFileMb: number; maxFiles: number; maxTotalMb: number };
 
@@ -49,6 +51,8 @@ export function OrderForm({ service, limits }: { service: PublicServiceDetail; l
     if (create.isPending) return;
     const data = new FormData(e.currentTarget);
     const answers: Record<string, string | string[]> = {};
+    const phoneErr = phoneProblem(String(data.get('phone') || ''));
+    if (phoneErr) { setErrors({ customer_phone: phoneErr }); return; }
     const missing = service.fields.filter((f) => (f.type === 'file' || f.type === 'image') && f.required && !(files[f.key] || []).length);
     if (missing.length) {
       setErrors(Object.fromEntries(missing.map((f) => [`answers.${f.key}`, 'أرفق ملفًا واحدًا على الأقل.'])));
@@ -98,12 +102,7 @@ export function OrderForm({ service, limits }: { service: PublicServiceDetail; l
         <input name="name" placeholder="كيف نناديك؟" required minLength={2} maxLength={80} autoComplete="name" aria-invalid={!!errors.customer_name} />
         {err('customer_name')}
       </label>
-      <label>
-        رقم الهاتف المستخدم في WhatsApp <em>*</em>
-        <input name="phone" type="tel" dir="ltr" placeholder="+249 9XX XXX XXX" required pattern="[\+0-9 \(\)\-]{8,24}" autoComplete="tel" aria-invalid={!!errors.customer_phone} />
-        <small>أدخل الرقم مع رمز الدولة، مثل ‎+249.</small>
-        {err('customer_phone')}
-      </label>
+      <PhoneField name="phone" label="رقم الهاتف المستخدم في WhatsApp" error={errors.customer_phone} />
       {service.fields.map((f) => (f.type === 'file' || f.type === 'image')
         ? <FileField key={f.key} field={f} files={files[f.key] || []} maxMb={limits.maxFileMb} error={errors[`answers.${f.key}`] || errors[`answers.${f.key}.0`]}
             onAdd={(l) => addFiles(f, l)} onRemove={(i) => removeFile(f.key, i)} />
