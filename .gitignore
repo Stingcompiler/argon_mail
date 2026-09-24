@@ -5,3 +5,11 @@ node_modules/
 *.tsbuildinfo
 .DS_Store
 .next-dev/
+.venv/
+__pycache__/
+*.pyc
+staticfiles/
+var/
+frontend/.next/
+frontend/.next-dev/
+frontend/node_modules/
