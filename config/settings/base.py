@@ -54,6 +54,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "apps.core.middleware.RequestSizeLimitMiddleware",
     "apps.core.middleware.InternalTrailingSlashMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -97,6 +98,10 @@ TIME_ZONE = env("TIME_ZONE", default="Africa/Khartoum")
 USE_I18N = True
 USE_TZ = True
 
+# Django's own admin is a maintenance tool. It is off in production unless
+# explicitly enabled; staff use the Next.js dashboard.
+ENABLE_DJANGO_ADMIN = env.bool("ENABLE_DJANGO_ADMIN", default=True)
+
 STATIC_URL = "/django-static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
@@ -117,6 +122,10 @@ STORAGE_WARN_RATIO = 0.85
 # Hard ceilings; the owner's settings can only lower them.
 UPLOAD_HARD_MAX_MB = env.int("UPLOAD_HARD_MAX_MB", default=20)
 UPLOAD_HARD_MAX_FILES = env.int("UPLOAD_HARD_MAX_FILES", default=10)
+# Total size of all files in one request. Must stay below the Next.js proxy
+# body limit (experimental.middlewareClientMaxBodySize in next.config.ts).
+UPLOAD_MAX_REQUEST_MB = env.int("UPLOAD_MAX_REQUEST_MB", default=20)
+API_MAX_BODY_BYTES = env.int("API_MAX_BODY_BYTES", default=1024 * 1024)
 FILE_UPLOAD_PERMISSIONS = 0o600
 FILE_UPLOAD_MAX_MEMORY_SIZE = 2 * 1024 * 1024
 
@@ -131,6 +140,8 @@ for _k in ("EMAIL_HOST", "EMAIL_PORT", "EMAIL_HOST_USER", "EMAIL_HOST_PASSWORD",
         globals()[_k] = _email[_k]
 EMAIL_TIMEOUT = 15
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="بريد عرجون <no-reply@localhost>")
+# Used when no recipient is configured in the dashboard settings.
+DEFAULT_ALERT_EMAILS = env.list("DEFAULT_ALERT_EMAILS", default=[])
 
 CACHES = {
     "default": {

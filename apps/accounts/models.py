@@ -47,6 +47,12 @@ class User(AbstractUser):
     def __str__(self):
         return self.full_name or self.email
 
+    def save(self, *args, **kwargs):
+        # Django-admin access always follows the dashboard role, so demoting
+        # or deactivating someone also removes their superuser rights.
+        self.is_staff = self.is_superuser = bool(self.is_active and self.role == Role.ADMIN)
+        super().save(*args, **kwargs)
+
     @property
     def is_admin(self):
         return self.is_active and self.role == Role.ADMIN

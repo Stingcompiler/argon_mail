@@ -6,8 +6,9 @@ cd "$(dirname "$0")/.."
 set -a; [ -f .env ] && . ./.env; set +a
 DJANGO_PORT="${DJANGO_PORT:-8108}"; NEXT_PORT="${NEXT_PORT:-3108}"
 export DJANGO_INTERNAL_URL="http://127.0.0.1:${DJANGO_PORT}"
+export NEXT_INTERNAL_URL="http://127.0.0.1:${NEXT_PORT}"
 .venv/bin/gunicorn config.wsgi:application --env DJANGO_SETTINGS_MODULE=config.settings.dev \
-  --bind "127.0.0.1:${DJANGO_PORT}" --workers 2 --access-logfile - &
+  --bind "127.0.0.1:${DJANGO_PORT}" --workers 2 --worker-class gthread --threads 4 --timeout 120 --access-logfile - &
 G=$!
 .venv/bin/python manage.py send_notifications --loop &
 W=$!

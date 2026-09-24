@@ -8,7 +8,7 @@ import { ApiError, fieldErrors, newIdempotencyKey } from '@/lib/api/client';
 import type { PublicServiceDetail, ServiceField } from '@/lib/api/types';
 import { FILE_ACCEPT, IMAGE_ACCEPT, checkFile, formatSize } from '@/lib/files';
 
-type Limits = { maxFileMb: number; maxFiles: number };
+type Limits = { maxFileMb: number; maxFiles: number; maxTotalMb: number };
 
 /**
  * Inputs are uncontrolled and live in the DOM, so they survive a failed
@@ -33,6 +33,10 @@ export function OrderForm({ service, limits }: { service: PublicServiceDetail; l
       if (err) { problem = err; continue; }
       if (next.length >= f.max_files) { problem = `الحد الأقصى ${f.max_files} ملفات لهذا الحقل.`; break; }
       if (totalFiles - current.length + next.length >= limits.maxFiles) { problem = `الحد الأقصى ${limits.maxFiles} ملفات لكل طلب.`; break; }
+      const otherBytes = Object.entries(files).filter(([k]) => k !== f.key).flatMap(([, l]) => l).reduce((n, x) => n + x.size, 0);
+      if (otherBytes + next.reduce((n, x) => n + x.size, 0) + file.size > limits.maxTotalMb * 1024 * 1024) {
+        problem = `مجموع أحجام الملفات لا يتجاوز ${limits.maxTotalMb} MB لكل طلب.`; continue;
+      }
       next.push(file);
     }
     setFiles({ ...files, [f.key]: next });

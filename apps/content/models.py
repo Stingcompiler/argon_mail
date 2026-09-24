@@ -60,4 +60,6 @@ def upload_limits():
     s = SiteSettings.load()
     max_mb = max(1, min(s.max_file_mb, dj.UPLOAD_HARD_MAX_MB))
     max_files = max(1, min(s.max_files_per_order, dj.UPLOAD_HARD_MAX_FILES))
-    return {"max_file_bytes": max_mb * 1024 * 1024, "max_file_mb": max_mb, "max_files": max_files}
+    total_mb = dj.UPLOAD_MAX_REQUEST_MB
+    return {"max_file_bytes": max_mb * 1024 * 1024, "max_file_mb": max_mb, "max_files": max_files,
+            "max_total_bytes": total_mb * 1024 * 1024, "max_total_mb": total_mb}

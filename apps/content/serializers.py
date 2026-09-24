@@ -65,5 +65,12 @@ class FAQSerializer(serializers.ModelSerializer):
 class PublicSiteSettingsSerializer(SiteSettingsSerializer):
     """Never exposes the internal alert recipients."""
 
+    max_order_upload_mb = serializers.SerializerMethodField()
+
+    def get_max_order_upload_mb(self, obj) -> int:
+        from .models import upload_limits
+
+        return upload_limits()["max_total_mb"]
+
     class Meta(SiteSettingsSerializer.Meta):
         exclude = ["id", "notify_emails", "notify_orders", "notify_messages"]

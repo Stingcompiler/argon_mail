@@ -30,8 +30,6 @@ class Command(BaseCommand):
         user, created = User.objects.get_or_create(email=email.lower(), defaults={"full_name": full_name})
         user.full_name = full_name
         user.role = role
-        user.is_staff = role == Role.ADMIN
-        user.is_superuser = role == Role.ADMIN
         user.is_active = True
         user.set_password(password)
         user.save()

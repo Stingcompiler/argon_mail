@@ -57,7 +57,7 @@ export default async function ServicePage({ params }: Props) {
             <p>يطّلع فريق العمل المصرّح له فقط على تفاصيل طلبك، ولا تظهر في صفحة المتابعة.</p>
           </div>
         </aside>
-        <OrderForm service={s} limits={{ maxFileMb: settings.max_file_mb, maxFiles: settings.max_files_per_order }} />
+        <OrderForm service={s} limits={{ maxFileMb: settings.max_file_mb, maxFiles: settings.max_files_per_order, maxTotalMb: settings.max_order_upload_mb ?? 20 }} />
       </div>
       <JsonLd data={[
         {

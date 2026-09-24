@@ -18,3 +18,8 @@ import atexit
 import shutil
 
 atexit.register(shutil.rmtree, DATA_ROOT, ignore_errors=True)
+DEFAULT_ALERT_EMAILS = []
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}

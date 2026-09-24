@@ -68,7 +68,7 @@ class PublicOrderCreateView(APIView):
             length = int(request.META.get("CONTENT_LENGTH") or 0)
         except ValueError:
             length = 0
-        if length <= 0 or length > limits["max_files"] * limits["max_file_bytes"] + 1024 * 1024:
+        if length <= 0 or length > limits["max_total_bytes"] + 1024 * 1024:
             raise PayloadTooLarge()
         try:
             payload = json.loads(request.data.get("payload", "{}"))

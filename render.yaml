@@ -24,6 +24,12 @@ services:
         generateValue: true
       - key: INTERNAL_SECRET
         generateValue: true
+      - key: JWT_SIGNING_KEY
+        generateValue: true  # must differ from DJANGO_SECRET_KEY (checked at startup)
+      - key: DEFAULT_ALERT_EMAILS
+        value: preedargon@gmail.com  # used until recipients are set in the dashboard
+      - key: ENABLE_DJANGO_ADMIN
+        value: "false"
       - key: DATABASE_URL
         fromDatabase:
           name: arjoon-db

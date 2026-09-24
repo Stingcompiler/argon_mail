@@ -115,6 +115,8 @@ def validate_files(fields: list[dict], files: dict) -> list[tuple]:
                 errors.setdefault(key, []).extend(e.detail if isinstance(e.detail, list) else [str(e.detail)])
     if count > limits["max_files"]:
         errors["files"] = [f"الحد الأقصى {limits['max_files']} ملفات لكل طلب."]
+    if total > limits["max_total_bytes"]:
+        errors["files"] = [f"مجموع أحجام الملفات يتجاوز {limits['max_total_mb']} MB لكل طلب."]
     if errors:
         raise ValidationError({"answers": errors})
     if total:
