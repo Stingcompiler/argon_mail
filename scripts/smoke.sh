@@ -31,7 +31,12 @@ CODE="$(python3 -c "import sys,json;print(json.loads(sys.argv[1])['code'])" "$R"
 check "order created"               [ -n "$CODE" ]
 check "tracking works"              grep -q "\"code\":\"$CODE\"" <(curl -s "$BASE/api/v1/public/track/$CODE/")
 check "tracking hides customer"     bash -c "! curl -s '$BASE/api/v1/public/track/$CODE/' | grep -q 'اختبار دخان'"
-check "oversized JSON rejected"     [ "$(python3 -c "print('{\"x\":\"'+'a'*1_200_000+'\"}')" | curl -s -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' --data-binary @- "$BASE/api/v1/public/inquiries/")" = 413 ]
+python3 -c "print('{\"x\":\"'+'a'*1_200_000+'\"}')" > "$T/big.json"
+BIG="$(curl -s -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' --data-binary @"$T/big.json" "$BASE/api/v1/public/inquiries/")"
+check "oversized JSON rejected (got $BIG)" [ "$BIG" = 413 ]
+# A chunked body has no Content-Length; Django must not process it (it reads 0 bytes).
+CH="$(curl -s -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' -H 'Transfer-Encoding: chunked' --data-binary @"$T/big.json" "$BASE/api/v1/public/inquiries/")"
+check "chunked body not processed (got $CH)" [ "$CH" = 400 ] || [ "$CH" = 411 ] || [ "$CH" = 413 ]
 
 # Upload above Next's old 10 MB proxy limit (needs a service with a file field).
 FIELD="$(curl -s "$BASE/api/v1/public/services/" | python3 -c "
