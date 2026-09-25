@@ -7,7 +7,7 @@ import { LoginForm } from '@/components/admin/LoginForm';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
-  const { status, bootstrap } = useAuth();
+  const { status, bootstrap } = useAuth(); // 'offline' just shows the form; login reports its own errors
   const router = useRouter();
   useEffect(() => { bootstrap(); }, [bootstrap]);
   useEffect(() => { if (status === 'authenticated') router.replace('/admin'); }, [status, router]);

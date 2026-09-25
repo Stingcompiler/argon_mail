@@ -319,7 +319,8 @@ class StatusViewSet(viewsets.ModelViewSet):
         return [IsAuthenticated(), IsAdmin()]
 
     def get_queryset(self):
-        return OrderStatus.objects.annotate(orders_count=Count("orders"))
+        # Meta.ordering is dropped in aggregate queries; order explicitly.
+        return OrderStatus.objects.annotate(orders_count=Count("orders")).order_by("sort_order", "id")
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

@@ -17,11 +17,37 @@ class StatusSerializer(serializers.ModelSerializer):
         model = OrderStatus
         fields = ["id", "key", "label", "meaning", "sort_order", "is_active", "is_initial", "orders_count"]
         read_only_fields = ["id", "is_initial"]
+        extra_kwargs = {"key": {"required": False}}
 
     def validate_key(self, v):
         if self.instance and self.instance.key != v:
             raise serializers.ValidationError("لا يمكن تغيير المعرّف الداخلي للحالة.")
         return v
+
+    def validate_label(self, v):
+        v = v.strip()
+        if not v:
+            raise serializers.ValidationError("اكتب اسم الحالة.")
+        qs = OrderStatus.objects.exclude(pk=getattr(self.instance, "pk", None))
+        if qs.filter(label=v).exists():
+            raise serializers.ValidationError("توجد حالة بهذا الاسم.")
+        return v
+
+    def validate(self, attrs):
+        if self.instance and self.instance.is_initial and attrs.get("is_active") is False:
+            raise serializers.ValidationError({"is_active": ["الحالة الأولى للطلبات الجديدة لا تُعطَّل."]})
+        return attrs
+
+    def create(self, validated):
+        # The owner names statuses in Arabic; the internal key is generated.
+        if not validated.get("key"):
+            import secrets
+
+            validated["key"] = f"{validated['meaning'].replace('_', '-')}-{secrets.token_hex(3)}"
+        if "sort_order" not in validated:
+            last = OrderStatus.objects.order_by("-sort_order").values_list("sort_order", flat=True).first()
+            validated["sort_order"] = (last or 0) + 1
+        return super().create(validated)
 
 
 class StatusBriefSerializer(serializers.ModelSerializer):

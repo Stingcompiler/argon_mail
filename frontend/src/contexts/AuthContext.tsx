@@ -12,7 +12,7 @@ import { qk } from '@/lib/query-keys';
  * - 'expired' means the user was signed in and the session ended; admin
  *   screens stay mounted under a re-login dialog so unsaved input survives.
  */
-type Status = 'unknown' | 'loading' | 'authenticated' | 'anonymous' | 'expired';
+type Status = 'unknown' | 'loading' | 'authenticated' | 'anonymous' | 'expired' | 'offline';
 type Session = { access: string; user: User };
 type Auth = {
   status: Status;
@@ -23,6 +23,8 @@ type Auth = {
   /** Restores a session from the refresh cookie. Called by admin screens only,
    * so public visitors never hit the auth endpoints. */
   bootstrap: () => void;
+  /** Retry after 'offline' (the server could not be reached at startup). */
+  retry: () => void;
 };
 
 const AuthContext = createContext<Auth | null>(null);
@@ -62,7 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return s.access;
       } catch (e) {
         const wasSignedIn = statusRef.current === 'authenticated';
-        if (!(e instanceof ApiError) || e.status !== 0) endSession(wasSignedIn ? 'expired' : 'anonymous');
+        if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
+          endSession(wasSignedIn ? 'expired' : 'anonymous');
+        } else if (!wasSignedIn) {
+          // Network error, 5xx or 429: the session may be fine, the server is
+          // not. Offer a retry instead of spinning forever or logging out.
+          setStatus('offline');
+        }
         return null;
       }
     };
@@ -87,6 +95,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refresh();
   }, [refresh]);
 
+  const retry = useCallback(() => {
+    statusRef.current = 'loading';
+    setStatus('loading');
+    refresh();
+  }, [refresh]);
+
   const login = useCallback(async (ident: string, password: string) => {
     const s = await authCall<Session>('login', { login: ident, password });
     if (user && user.id !== s.user.id) queryClient.removeQueries({ queryKey: qk.admin.all });
@@ -105,7 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [endSession]);
 
-  const value = useMemo(() => ({ status, user, login, logout, bootstrap }), [status, user, login, logout, bootstrap]);
+  const value = useMemo(() => ({ status, user, login, logout, bootstrap, retry }), [status, user, login, logout, bootstrap, retry]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
