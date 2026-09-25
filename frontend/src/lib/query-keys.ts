@@ -30,6 +30,7 @@ export const qk = {
       summary: ['admin', 'notifications', 'summary'] as const,
     },
     faq: ['admin', 'faq'] as const,
+    pages: ['admin', 'pages'] as const,
   },
   public: {
     track: (code: string) => ['public', 'track', code] as const,

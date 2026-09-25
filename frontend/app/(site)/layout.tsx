@@ -9,13 +9,13 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   // Rendered per request (never at build time, when Django is not running).
   // Data still comes from the tagged Data Cache, so Django is not hit per visit.
   await connection();
-  const { settings } = await getSite();
+  const { settings, pages } = await getSite();
   return (
     <>
       <a className="skip-link" href="#main">تخطَّ إلى المحتوى</a>
       <SiteHeader name={settings.name} tagline={settings.tagline} />
       <main id="main">{children}</main>
-      <SiteFooter settings={settings} />
+      <SiteFooter settings={settings} pages={pages || []} />
       <WhatsAppButton url={settings.whatsapp_url} />
       <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'Organization', name: settings.name, url: siteUrl(),

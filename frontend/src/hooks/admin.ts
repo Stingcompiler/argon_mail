@@ -2,7 +2,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 import type {
-  AdminNotification, Currency, Payment, PaymentStatus, StorageStatus,
+  AdminNotification, AdminPage, Currency, Payment, PaymentStatus, StorageStatus,
   AdminService, AdminServiceInput, Category, FAQItem, Inquiry, InquiryStatus, OrderDetail, OrderFilters,
   OrderListItem, OrderStatus, Paginated, SiteSettings, User, UserBrief,
 } from '@/lib/api/types';
@@ -293,4 +293,22 @@ export function useInquiry(id: number | null) {
     queryFn: ({ signal }) => api<Inquiry>(`/admin/inquiries/${id}/`, { signal }),
     enabled: id !== null,
   });
+}
+
+// ---------- content pages ----------
+export function usePages() {
+  return useQuery({ queryKey: qk.admin.pages, queryFn: ({ signal }) => api<AdminPage[]>('/admin/pages/', { signal }) });
+}
+
+export function usePageActions() {
+  const client = useQueryClient();
+  const done = () => client.invalidateQueries({ queryKey: qk.admin.pages });
+  return {
+    save: useMutation({
+      mutationFn: ({ id, ...body }: Partial<AdminPage>) =>
+        id ? api<AdminPage>(`/admin/pages/${id}/`, { method: 'PATCH', body }) : api<AdminPage>('/admin/pages/', { method: 'POST', body }),
+      onSuccess: done,
+    }),
+    remove: useMutation({ mutationFn: (id: number) => api<void>(`/admin/pages/${id}/`, { method: 'DELETE' }), onSuccess: done }),
+  };
 }

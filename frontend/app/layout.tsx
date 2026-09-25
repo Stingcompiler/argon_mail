@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   title: { default: 'بريد عرجون | خدمات تقرّب المسافات', template: '%s | بريد عرجون' },
   description: 'خدمات متنوعة، وطلب تتابعه بسهولة.',
   openGraph: { locale: 'ar_SD', type: 'website', siteName: 'بريد عرجون' },
+  twitter: { card: 'summary_large_image' },
   formatDetection: { telephone: false },
 };
 

@@ -1,12 +1,23 @@
 import type { Metadata } from 'next';
-import { PolicyPage } from '@/components/site/PolicyPage';
+import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
+import { PageView } from '@/components/site/PageView';
+import { getPage, ogBase } from '@/lib/server-api';
 
-export const metadata: Metadata = { title: 'شروط الاستخدام', alternates: { canonical: '/terms' } };
+const SLUG = 'terms';
 
-export default function TermsPage() {
-  return <PolicyPage title="شروط واضحة للتعامل." items={[
-    { title: 'الخدمات المتاحة', text: 'يحدد صاحب المنصة الخدمات والأسعار والمتطلبات المنشورة في صفحة كل خدمة.' },
-    { title: 'السعر وبدء التنفيذ', text: 'تعرض كل خدمة طريقة تسعيرها. تُستكمل تفاصيل السعر والموافقة مع المسؤول قبل بدء التنفيذ.' },
-    { title: 'الإلغاء والاسترداد', text: 'تُحدد أحكام الإلغاء والاسترداد لكل خدمة وتُعتمد قبل بدء التشغيل الحقيقي.' },
-  ]} />;
+export async function generateMetadata(): Promise<Metadata> {
+  await connection();
+  const p = await getPage(SLUG);
+  if (!p) return {};
+  const title = p.seo_title || p.title;
+  const description = p.seo_description || p.body.replace(/^## /gm, '').slice(0, 160);
+  return { title, description, alternates: { canonical: '/terms' }, openGraph: { ...ogBase, title, description, url: '/terms' } };
+}
+
+export default async function Page() {
+  await connection();
+  const p = await getPage(SLUG);
+  if (!p) notFound();
+  return <PageView page={p} />;
 }

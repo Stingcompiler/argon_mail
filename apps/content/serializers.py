@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from apps.core.phone import normalize_phone, whatsapp_link
 
-from .models import FAQItem, SiteSettings
+from .models import FAQItem, Page, SiteSettings
 
 
 class SiteSettingsSerializer(serializers.ModelSerializer):
@@ -74,3 +74,55 @@ class PublicSiteSettingsSerializer(SiteSettingsSerializer):
 
     class Meta(SiteSettingsSerializer.Meta):
         exclude = ["id", "notify_emails", "notify_orders", "notify_messages"]
+
+
+class PageLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Page
+        fields = ["slug", "title"]
+
+
+class PublicPageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Page
+        fields = ["slug", "title", "body", "seo_title", "seo_description", "needs_review", "updated_at"]
+
+
+class AdminPageSerializer(serializers.ModelSerializer):
+    slug = serializers.SlugField(max_length=80, allow_unicode=True, required=False, allow_blank=True)
+    is_system = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = Page
+        fields = ["id", "slug", "title", "body", "status", "show_in_footer", "sort_order", "seo_title",
+                  "seo_description", "needs_review", "is_system", "updated_at"]
+        read_only_fields = ["id", "needs_review", "is_system", "updated_at"]
+
+    def validate_title(self, v):
+        if not v.strip():
+            raise serializers.ValidationError("اكتب عنوان الصفحة.")
+        return v.strip()
+
+    def validate(self, attrs):
+        from django.utils.text import slugify
+
+        inst = self.instance
+        if inst and inst.is_system:
+            if attrs.get("slug") not in (None, "", inst.slug):
+                raise serializers.ValidationError({"slug": ["رابط صفحات الخصوصية والشروط ثابت."]})
+            if attrs.get("status") == Page.Status.DRAFT:
+                raise serializers.ValidationError({"status": ["صفحتا الخصوصية والشروط تبقيان منشورتين لأن نموذج الطلب يربط بهما."]})
+            attrs.pop("slug", None)
+        else:
+            slug = attrs.get("slug") or (None if inst else slugify(attrs.get("title", ""), allow_unicode=True))
+            if slug is not None:
+                if not slug:
+                    raise serializers.ValidationError({"slug": ["اكتب رابطًا للصفحة."]})
+                if slug in Page.SYSTEM_SLUGS or Page.objects.exclude(pk=getattr(inst, "pk", None)).filter(slug=slug).exists():
+                    raise serializers.ValidationError({"slug": ["هذا الرابط مستخدم."]})
+                attrs["slug"] = slug
+        return attrs
+
+    def update(self, instance, validated):
+        validated["needs_review"] = False  # the owner has reviewed the text
+        return super().update(instance, validated)

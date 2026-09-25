@@ -40,6 +40,41 @@ class SiteSettings(models.Model):
         return obj
 
 
+class Page(models.Model):
+    """A simple content page: the legal pages (system, fixed slug) and any
+    custom page the owner adds. The body is plain text: blank lines separate
+    paragraphs and a line starting with "## " is a heading. No HTML is
+    accepted, so pages can never inject markup."""
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", "مسودة"
+        PUBLISHED = "published", "منشورة"
+
+    SYSTEM_SLUGS = ("privacy", "terms")
+
+    slug = models.SlugField(max_length=80, unique=True, allow_unicode=True)
+    title = models.CharField(max_length=120)
+    body = models.TextField(max_length=30000, blank=True)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT)
+    show_in_footer = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+    seo_title = models.CharField(max_length=70, blank=True)
+    seo_description = models.CharField(max_length=170, blank=True)
+    # Seeded legal texts are placeholders until the owner saves them once.
+    needs_review = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["sort_order", "id"]
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def is_system(self):
+        return self.slug in self.SYSTEM_SLUGS
+
+
 class FAQItem(models.Model):
     question = models.CharField(max_length=200)
     answer = models.TextField(max_length=2000)

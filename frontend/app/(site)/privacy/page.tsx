@@ -1,12 +1,23 @@
 import type { Metadata } from 'next';
-import { PolicyPage } from '@/components/site/PolicyPage';
+import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
+import { PageView } from '@/components/site/PageView';
+import { getPage, ogBase } from '@/lib/server-api';
 
-export const metadata: Metadata = { title: 'سياسة الخصوصية', alternates: { canonical: '/privacy' } };
+const SLUG = 'privacy';
 
-export default function PrivacyPage() {
-  return <PolicyPage title="خصوصيتك تهمنا." items={[
-    { title: 'بيانات الطلب', text: 'نجمع الاسم ورقم WhatsApp والتفاصيل اللازمة لتنفيذ الخدمة فقط، ويطّلع عليها فريق العمل المصرّح له.' },
-    { title: 'متابعة الحالة', text: 'صفحة المتابعة تعرض حالة الطلب والملاحظات العامة فقط، ولا تعرض الاسم أو الهاتف أو تفاصيل الطلب أو الملاحظات الداخلية.' },
-    { title: 'المرفقات والاحتفاظ', text: 'تُحدد مدة الاحتفاظ بالبيانات والمرفقات وتُعلن قبل التشغيل الفعلي.' },
-  ]} />;
+export async function generateMetadata(): Promise<Metadata> {
+  await connection();
+  const p = await getPage(SLUG);
+  if (!p) return {};
+  const title = p.seo_title || p.title;
+  const description = p.seo_description || p.body.replace(/^## /gm, '').slice(0, 160);
+  return { title, description, alternates: { canonical: '/privacy' }, openGraph: { ...ogBase, title, description, url: '/privacy' } };
+}
+
+export default async function Page() {
+  await connection();
+  const p = await getPage(SLUG);
+  if (!p) notFound();
+  return <PageView page={p} />;
 }
