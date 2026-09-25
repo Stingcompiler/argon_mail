@@ -76,7 +76,7 @@ jobs:
         run: scripts/test-start.sh
 
   e2e:
-    name: End-to-end smoke + Lighthouse
+    name: End-to-end smoke + Playwright + Lighthouse
     runs-on: ubuntu-latest
     needs: [backend, frontend]
     services:
@@ -97,6 +97,10 @@ jobs:
       DJANGO_INTERNAL_URL: http://127.0.0.1:8108
       INTERNAL_SECRET: ci-internal-secret-0123456789abcdef0123
       DATA_ROOT: ${{ github.workspace }}/var
+      # Playwright logs in and looks orders up many times from one IP.
+      THROTTLE_AUTH: 200/min
+      THROTTLE_TRACKING_LOOKUP: 100/min
+      E2E_LOGIN: e2e-admin
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -115,7 +119,10 @@ jobs:
         run: |
           python manage.py migrate --noinput
           python manage.py createcachetable
-          python manage.py shell < scripts/ci/prepare_e2e.py
+          E2E_PASSWORD=$(python3 -c "import secrets;print(secrets.token_urlsafe(24))")
+          echo "::add-mask::$E2E_PASSWORD"
+          echo "E2E_PASSWORD=$E2E_PASSWORD" >> "$GITHUB_ENV"
+          E2E_PASSWORD=$E2E_PASSWORD python manage.py shell < scripts/ci/prepare_e2e.py
       - name: Start the stack
         run: |
           mkdir -p "$DATA_ROOT/public" "$DATA_ROOT/private"   # start.sh does this on Render
@@ -126,6 +133,11 @@ jobs:
           echo "::error::stack did not become healthy"; curl -s http://127.0.0.1:3108/api/v1/health/; exit 1
       - name: Smoke test
         run: BASE=http://127.0.0.1:3108 scripts/smoke.sh
+      - name: Playwright (phone + desktop)
+        working-directory: frontend
+        run: |
+          npx playwright install --with-deps chromium
+          E2E_BASE_URL=http://127.0.0.1:3108 npm run e2e
       - name: Lighthouse (mobile)
         run: |
           SVC=$(python3 -c "import urllib.parse;print(urllib.parse.quote('إرسال-الطرود-والمستندات'))")
@@ -141,4 +153,6 @@ jobs:
           name: e2e-reports
           path: |
             lighthouse/
+            frontend/playwright-report/
+            frontend/test-results/
             *.log

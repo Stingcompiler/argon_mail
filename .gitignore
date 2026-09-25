@@ -15,3 +15,5 @@ frontend/.next-dev/
 frontend/node_modules/
 .coverage
 backups/
+frontend/playwright-report/
+frontend/test-results/

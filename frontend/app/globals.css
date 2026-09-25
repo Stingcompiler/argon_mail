@@ -34,3 +34,7 @@ a{color:inherit;text-decoration:none}a:focus-visible{outline:3px solid #d9a441;o
 .badge.closed{background:#f1ecec;color:#7a3b32}.badge.closed i{background:#a34a3d}
 .detail-image{display:block;width:100%;max-width:420px;height:auto;aspect-ratio:auto;border-radius:12px;margin-bottom:18px;object-fit:cover}.brand-symbol img{width:100%;height:100%;object-fit:contain;border-radius:inherit}.media-upload-dialog label,.media-detail-dialog label{display:block;margin-top:12px}.media-upload-dialog textarea,.media-detail-dialog textarea{width:100%}
 .preview-banner{display:flex;align-items:center;gap:8px;background:#fbf3e3;border:1px solid #ecd6a6;color:#6f531c;border-radius:8px;padding:10px 14px;font-size:12px;margin-bottom:18px}
+/* Grid/flex items default to min-width:auto (their min-content). The country
+   <select> is as wide as its longest option, which widened the service page
+   past the phone screen and made mobile browsers zoom out. */
+.detail-layout>*{min-width:0}.phone-row select{width:0;min-width:0}
