@@ -3,27 +3,21 @@ import { ArrowUpLeft, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import type { PublicImage } from '@/lib/api/types';
+import type { NavItem, PublicImage } from '@/lib/api/types';
 import { Brand } from './Brand';
 
-const NAV = [
-  { href: '/', label: 'الرئيسية' },
-  { href: '/services', label: 'خدماتنا' },
-  { href: '/about', label: 'عن المنصة' },
-  { href: '/contact', label: 'تواصل معنا' },
-];
 
-export function SiteHeader({ name, tagline, logo }: { name: string; tagline: string; logo?: PublicImage | null }) {
+export function SiteHeader({ name, tagline, logo, nav }: { name: string; tagline: string; logo?: PublicImage | null; nav: NavItem[] }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [pathname]);
-  const active = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href));
+  const active = (href: string) => { const h = decodeURIComponent(href); return h === '/' ? pathname === '/' : decodeURIComponent(pathname).startsWith(h); };
   return (
     <header className="site-header">
       <div className="container header-inner">
         <Link className="logo-button" href="/" aria-label={`${name} — الرئيسية`}><Brand name={name} tagline={tagline} logo={logo} /></Link>
         <nav className={open ? 'open' : ''} aria-label="التنقل الرئيسي">
-          {NAV.map((n) => (
+          {nav.filter((n) => n.enabled).map((n) => (
             <Link key={n.href} href={n.href} className={active(n.href) ? 'active' : ''} aria-current={active(n.href) ? 'page' : undefined}>
               {n.label}
             </Link>

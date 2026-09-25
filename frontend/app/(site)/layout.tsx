@@ -13,7 +13,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   return (
     <>
       <a className="skip-link" href="#main">تخطَّ إلى المحتوى</a>
-      <SiteHeader name={settings.name} tagline={settings.tagline} logo={settings.logo_data} />
+      <SiteHeader name={settings.name} tagline={settings.tagline} logo={settings.logo_data} nav={settings.navigation || []} />
       <main id="main">{children}</main>
       <SiteFooter settings={settings} pages={pages || []} />
       <WhatsAppButton url={settings.whatsapp_url} />

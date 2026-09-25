@@ -1,6 +1,22 @@
 from django.db import models
 
 
+def default_navigation():
+    return [
+        {"label": "الرئيسية", "href": "/", "enabled": True},
+        {"label": "خدماتنا", "href": "/services", "enabled": True},
+        {"label": "عن المنصة", "href": "/about", "enabled": True},
+        {"label": "تواصل معنا", "href": "/contact", "enabled": True},
+    ]
+
+
+HOME_SECTIONS = ("services", "how", "faq")
+
+
+def default_home_sections():
+    return [{"key": k, "visible": True} for k in HOME_SECTIONS]
+
+
 class SiteSettings(models.Model):
     """Singleton (pk=1) holding editable identity, contact and home copy."""
 
@@ -26,6 +42,8 @@ class SiteSettings(models.Model):
                                      help_text="عناوين مفصولة بفاصلة")
     notify_orders = models.BooleanField("تنبيه عند طلب جديد", default=True)
     notify_messages = models.BooleanField("تنبيه عند رسالة جديدة", default=True)
+    navigation = models.JSONField(default=default_navigation)
+    home_sections = models.JSONField(default=default_home_sections)
     max_file_mb = models.PositiveSmallIntegerField("حجم الملف الأقصى MB", default=5)
     max_files_per_order = models.PositiveSmallIntegerField("عدد الملفات لكل طلب", default=5)
     seo_title = models.CharField(max_length=70, default="بريد عرجون | خدمات تقرّب المسافات")

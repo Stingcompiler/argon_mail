@@ -6,6 +6,8 @@ export type UserBrief = { id: number; full_name: string; role: Role };
 
 export type FieldType = 'text' | 'textarea' | 'number' | 'date' | 'select' | 'multiselect' | 'address' | 'file' | 'image';
 export type ServiceField = { key: string; label: string; help_text: string; type: FieldType; required: boolean; options: string[]; max_length: number; max_files: number };
+export type NavItem = { label: string; href: string; enabled: boolean };
+export type HomeSection = { key: 'services' | 'how' | 'faq'; visible: boolean };
 export type PublicImage = { url: string; alt: string; width: number; height: number };
 export type Asset = { id: string; url: string; alt_text: string; original_name: string; content_type: string; size: number; width: number; height: number; usage: string[]; created_at: string };
 export type CategoryBrief = { name: string; slug: string };
@@ -78,6 +80,7 @@ export type Inquiry = {
 export type SiteSettings = {
   name: string; tagline: string; whatsapp_phone: string; whatsapp_text: string; show_whatsapp: boolean; whatsapp_url: string;
   email: string; address: string; hero_eyebrow: string; hero_title: string; hero_text: string; about: string;
+  navigation: NavItem[]; home_sections: HomeSection[];
   logo: string | null; hero_image: string | null; logo_data: PublicImage | null; hero_image_data: PublicImage | null;
   seo_title: string; seo_description: string; notify_emails?: string; notify_orders?: boolean; notify_messages?: boolean; max_file_mb: number; max_files_per_order: number; max_order_upload_mb?: number; updated_at: string;
 };

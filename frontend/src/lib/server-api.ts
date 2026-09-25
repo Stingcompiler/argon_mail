@@ -11,10 +11,12 @@ const BASE = (process.env.DJANGO_INTERNAL_URL || 'http://127.0.0.1:8000').replac
 const REVALIDATE = 60;
 export const TAGS = { services: 'services', site: 'site', service: (slug: string) => `service:${slug}`, page: (slug: string) => `page:${slug}` };
 
-async function get<T>(path: string, tags: string[]): Promise<T | null> {
-  const res = await fetch(`${BASE}/api/v1${path}`, {
+async function get<T>(path: string, tags: string[], preview?: string): Promise<T | null> {
+  // Draft previews carry a signed token and must never enter the shared cache.
+  const url = `${BASE}/api/v1${path}${preview ? `?preview=${encodeURIComponent(preview)}` : ''}`;
+  const res = await fetch(url, {
     headers: { Accept: 'application/json', 'X-Internal-Secret': process.env.INTERNAL_SECRET || '' },
-    next: { revalidate: REVALIDATE, tags },
+    ...(preview ? { cache: 'no-store' as const } : { next: { revalidate: REVALIDATE, tags } }),
   });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`API ${path} -> ${res.status}`);
@@ -24,14 +26,14 @@ async function get<T>(path: string, tags: string[]): Promise<T | null> {
 export const getSite = async () => (await get<PublicSite>('/public/site/', [TAGS.site]))!;
 export const getServices = async () => (await get<PublicService[]>('/public/services/', [TAGS.services])) || [];
 export const getCategories = async () => (await get<Category[]>('/public/categories/', [TAGS.services])) || [];
-export const getService = (slug: string) =>
-  get<PublicServiceDetail>(`/public/services/${encodeURIComponent(slug)}/`, [TAGS.service(slug)]);
+export const getService = (slug: string, preview?: string) =>
+  get<PublicServiceDetail>(`/public/services/${encodeURIComponent(slug)}/`, [TAGS.service(slug)], preview);
 export const getServiceRedirect = (slug: string) =>
   get<{ slug: string }>(`/public/service-redirects/${encodeURIComponent(slug)}/`, [TAGS.service(slug), TAGS.services]);
 
 export const siteUrl = () => (process.env.SITE_URL || 'http://127.0.0.1:3000').replace(/\/$/, '');
 
-export const getPage = (slug: string) => get<PublicPage>(`/public/pages/${encodeURIComponent(slug)}/`, [TAGS.page(slug), TAGS.site]);
+export const getPage = (slug: string, preview?: string) => get<PublicPage>(`/public/pages/${encodeURIComponent(slug)}/`, [TAGS.page(slug), TAGS.site], preview);
 
 /** Keeps the site-wide Open Graph fields when a page sets its own OG title/url. */
 export const ogBase = {

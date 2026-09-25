@@ -2,7 +2,7 @@
 import { Eye, FileText, Plus, Save, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import { useUi } from '@/contexts/UiContext';
-import { usePageActions, usePages } from '@/hooks/admin';
+import { usePageActions, usePages, usePreviewLink } from '@/hooks/admin';
 import { fieldErrors } from '@/lib/api/client';
 import type { AdminPage } from '@/lib/api/types';
 import { formatDateTime } from '@/lib/format';
@@ -49,6 +49,7 @@ export function PagesManager() {
 function PageEditor({ draft, setDraft, onClose }: { draft: Partial<AdminPage>; setDraft: (p: Partial<AdminPage>) => void; onClose: () => void }) {
   const { notify } = useUi();
   const { save, remove } = usePageActions();
+  const previewLink = usePreviewLink();
   const [errors, setErrors] = useState<Record<string, string>>({});
   useDialogFocus(true, onClose);
   const set = (p: Partial<AdminPage>) => setDraft({ ...draft, ...p });
@@ -90,6 +91,10 @@ function PageEditor({ draft, setDraft, onClose }: { draft: Partial<AdminPage>; s
               <button className="text-button" disabled={remove.isPending} onClick={() => confirm('حذف هذه الصفحة نهائيًا؟') && remove.mutate(draft.id!, { onSuccess: () => { notify('حُذفت الصفحة.'); onClose(); }, onError: (e) => notify(e.message) })}><Trash2 size={14} />حذف</button>
             )}
             {draft.id && draft.status === 'published' && <a className="text-button" href={publicUrl(draft as AdminPage)} target="_blank"><Eye size={14} />عرض في الموقع</a>}
+            {draft.id && draft.status !== 'published' && (
+              <button className="text-button" disabled={previewLink.isPending} title="تعرض آخر نسخة محفوظة"
+                onClick={() => previewLink.mutate({ kind: 'pages', id: draft.id! }, { onError: (e) => notify(e.message) })}><Eye size={14} />معاينة المسودة</button>
+            )}
           </div>
           <div>
             <button className="button secondary" onClick={onClose}>إلغاء</button>

@@ -6,39 +6,45 @@ import { connection } from 'next/server';
 import { iconFor } from '@/components/icons';
 import { JsonLd } from '@/components/site/JsonLd';
 import { OrderForm } from '@/components/site/OrderForm';
+import { PreviewBanner } from '@/components/site/PreviewBanner';
 import { getService, getServiceRedirect, getSite, ogBase, siteUrl } from '@/lib/server-api';
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ preview?: string }> };
 
-async function load(params: Props['params']) {
+async function load(params: Props['params'], searchParams: Props['searchParams']) {
   await connection();
+  const preview = (await searchParams).preview;
   let slug: string;
   try {
     slug = decodeURIComponent((await params).slug);
   } catch {
     notFound(); // malformed percent-encoding
   }
-  const service = await getService(slug);
-  if (service) return service;
+  const service = await getService(slug, preview);
+  if (service) return { ...service, preview: !!preview };
   const moved = await getServiceRedirect(slug);
   if (moved) permanentRedirect(`/services/${encodeURIComponent(moved.slug)}`);
   notFound();
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const s = await load(params);
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+  const s = await load(params, searchParams);
   const title = s.seo_title || s.name;
   const description = s.seo_description || s.description.slice(0, 160);
   const url = `/services/${encodeURIComponent(s.slug)}`;
-  return { title, description, alternates: { canonical: url }, openGraph: { ...ogBase, title, description, url } };
+  return {
+    title, description, alternates: { canonical: url }, openGraph: { ...ogBase, title, description, url },
+    ...(s.preview && { robots: { index: false, follow: false } }),
+  };
 }
 
-export default async function ServicePage({ params }: Props) {
-  const [s, { settings }] = await Promise.all([load(params), getSite()]);
+export default async function ServicePage({ params, searchParams }: Props) {
+  const [s, { settings }] = await Promise.all([load(params, searchParams), getSite()]);
   const Icon = iconFor(s.icon_key);
   const url = `${siteUrl()}/services/${encodeURIComponent(s.slug)}`;
   return (
     <section className="container page-section">
+      {s.preview && <PreviewBanner />}
       <nav aria-label="مسار التنقل">
         <Link className="back-link" href="/services"><ArrowRight size={17} />العودة إلى الخدمات</Link>
       </nav>

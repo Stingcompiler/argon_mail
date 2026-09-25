@@ -2,7 +2,7 @@
 import { ArrowDown, ArrowLeft, ArrowUp, Check, CircleHelp, Eye, EyeOff, FileText, Globe, Layers3, LockKeyhole, Pencil, Plus, Save, Search, SlidersHorizontal, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import { useUi } from '@/contexts/UiContext';
-import { useCategories, useCategoryActions, useDeleteService, useSaveService, useServices, useSetServiceStatus } from '@/hooks/admin';
+import { useCategories, useCategoryActions, useDeleteService, usePreviewLink, useSaveService, useServices, useSetServiceStatus } from '@/hooks/admin';
 import { ApiError, fieldErrors } from '@/lib/api/client';
 import type { AdminService, AdminServiceInput, FieldType, ServiceField } from '@/lib/api/types';
 import { iconFor, serviceIcons } from '../icons';
@@ -142,6 +142,7 @@ function ServiceEditor({ draft, setDraft, onClose }: { draft: Draft; setDraft: (
   const categories = useCategories();
   const save = useSaveService();
   const remove = useDeleteService();
+  const previewLink = usePreviewLink();
   const [tab, setTab] = useState('general');
   const [errors, setErrors] = useState<Record<string, string>>({});
   useDialogFocus(true, onClose);
@@ -292,6 +293,10 @@ function ServiceEditor({ draft, setDraft, onClose }: { draft: Draft; setDraft: (
           </>}
         </div>
         <footer className="drawer-footer">
+          {draft.id && draft.status !== 'published' && (
+            <button className="text-button" disabled={previewLink.isPending} title="تعرض آخر نسخة محفوظة"
+              onClick={() => previewLink.mutate({ kind: 'services', id: draft.id! }, { onError: (e) => notify(e.message) })}><Eye size={14} />معاينة المسودة</button>
+          )}
           {draft.id ? (
             <button className="text-button" disabled={remove.isPending} onClick={() => {
               if (!confirm('حذف الخدمة نهائيًا؟ الخدمات التي لها طلبات لا تُحذف، بل تُخفى.')) return;

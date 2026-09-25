@@ -2,16 +2,18 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import type { PublicPage } from '@/lib/api/types';
 import { formatDate } from '@/lib/format';
+import { PreviewBanner } from './PreviewBanner';
 
 /**
  * Renders a page body written as plain text: blank lines separate
  * paragraphs and "## " starts a heading. Everything is rendered as text,
  * so an edited page can never inject HTML.
  */
-export function PageView({ page }: { page: PublicPage }) {
+export function PageView({ page, preview = false }: { page: PublicPage; preview?: boolean }) {
   const blocks = page.body.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
   return (
     <section className="container policy-page">
+      {preview && <PreviewBanner />}
       <span className="eyebrow">بريد عرجون</span>
       <h1>{page.title}</h1>
       {page.needs_review && <div className="notice">نص مبدئي. يعتمد صاحب المنصة النص النهائي من لوحة التحكم.</div>}

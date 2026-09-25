@@ -338,3 +338,21 @@ export function useAssetActions() {
     remove: useMutation({ mutationFn: (id: string) => api<void>(`/admin/assets/${id}/`, { method: 'DELETE' }), onSuccess: done }),
   };
 }
+
+// ---------- draft preview ----------
+/** Opens a signed 30-minute preview of an unpublished service or page. */
+export function usePreviewLink() {
+  return useMutation({
+    mutationFn: async (v: { kind: 'services' | 'pages'; id: number }) => {
+      // Open the tab synchronously (popup blockers), then point it at the link.
+      const win = window.open('about:blank', '_blank');
+      try {
+        const { url } = await api<{ url: string }>(`/admin/${v.kind}/${v.id}/preview-link/`, { method: 'POST' });
+        if (win) win.location.href = url; else window.location.href = url;
+      } catch (e) {
+        win?.close();
+        throw e;
+      }
+    },
+  });
+}
