@@ -6,18 +6,22 @@ import { getPage, ogBase } from '@/lib/server-api';
 
 const SLUG = 'terms';
 
-export async function generateMetadata(): Promise<Metadata> {
+type Props = { searchParams: Promise<{ preview?: string }> };
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   await connection();
-  const p = await getPage(SLUG);
+  const preview = (await searchParams).preview;
+  const p = await getPage(SLUG, preview);
   if (!p) return {};
   const title = p.seo_title || p.title;
   const description = p.seo_description || p.body.replace(/^## /gm, '').slice(0, 160);
-  return { title, description, alternates: { canonical: '/terms' }, openGraph: { ...ogBase, title, description, url: '/terms' } };
+  return { title, description, alternates: { canonical: '/terms' }, openGraph: { ...ogBase, title, description, url: '/terms' }, ...(preview && { robots: { index: false, follow: false } }) };
 }
 
-export default async function Page() {
+export default async function Page({ searchParams }: Props) {
   await connection();
-  const p = await getPage(SLUG);
+  const preview = (await searchParams).preview;
+  const p = await getPage(SLUG, preview);
   if (!p) notFound();
-  return <PageView page={p} />;
+  return <PageView page={p} preview={!!preview} />;
 }

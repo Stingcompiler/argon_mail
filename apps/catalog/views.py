@@ -2,7 +2,11 @@ from django.db.models import Count, ProtectedError, Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
-from rest_framework.decorators import api_view, authentication_classes, permission_classes, throttle_classes
+from urllib.parse import quote
+
+from rest_framework.decorators import action, api_view, authentication_classes, permission_classes, throttle_classes
+
+from apps.core import preview
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -52,6 +56,16 @@ class PublicServiceViewSet(PublicMixin, mixins.ListModelMixin, mixins.RetrieveMo
     def get_serializer_class(self):
         return PublicServiceDetailSerializer if self.action == "retrieve" else PublicServiceListSerializer
 
+    def retrieve(self, request, *args, **kwargs):
+        token = request.query_params.get("preview", "")
+        if token:
+            # Draft/hidden service shown only with a valid signed preview link.
+            svc = (Service.objects.select_related("category", "image").prefetch_related("fields")
+                   .filter(slug=kwargs["slug"]).first())
+            if svc and preview.allows(token, "service", svc.pk):
+                return Response(PublicServiceDetailSerializer(svc).data)
+        return super().retrieve(request, *args, **kwargs)
+
 
 @extend_schema(responses={200: dict})
 @api_view(["GET"])
@@ -99,6 +113,13 @@ class AdminServiceViewSet(viewsets.ModelViewSet):
             .annotate(orders_count=Count("orders"))
             .order_by("sort_order", "id")
         )
+
+    @extend_schema(request=None, responses={200: dict})
+    @action(detail=True, methods=["post"], url_path="preview-link")
+    def preview_link(self, request, pk=None):
+        svc = self.get_object()
+        url = f"/services/{quote(svc.slug)}?preview={preview.make('service', svc.pk)}"
+        return Response({"url": url, "expires_in": preview.PREVIEW_MAX_AGE})
 
     def destroy(self, request, *args, **kwargs):
         try:

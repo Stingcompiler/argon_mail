@@ -18,9 +18,15 @@ export default async function Home() {
   await connection(); // rendered per request; data comes from the tagged cache
   const [{ settings, faq }, services] = await Promise.all([getSite(), getServices()]);
   const featured = services.filter((s) => s.is_featured);
+  const sections = settings.home_sections?.length ? settings.home_sections : [{ key: 'services', visible: true }, { key: 'how', visible: true }, { key: 'faq', visible: true }];
+  // Owner-controlled order and visibility (hero and tracking strip always come first).
+  const place = (key: string) => {
+    const i = sections.findIndex((x) => x.key === key);
+    return { order: i < 0 ? 99 : i, display: i >= 0 && !sections[i].visible ? 'none' : undefined } as const;
+  };
   return (
     <div className="home-layout">
-      <section className="hero container">
+      <section className="hero container" style={{ order: -2 }}>
         <div className="hero-copy">
           <span className="eyebrow"><span />{settings.hero_eyebrow}</span>
           <h1 className="preserve-lines">{settings.hero_title}</h1>
@@ -58,7 +64,7 @@ export default async function Home() {
           <div className="visual-bottom"><span>ARJOON POST</span><span>نهتم بالتفاصيل الصغيرة <ArrowUpLeft size={13} /></span></div>
         </div>
       </section>
-      <section className="container tracking-strip" aria-labelledby="track-heading">
+      <section className="container tracking-strip" aria-labelledby="track-heading" style={{ order: -1 }}>
         <div className="tracking-label">
           <span className="tracking-icon"><Package size={27} /></span>
           <div><h2 id="track-heading">طلبك، أين وصل؟</h2><p>رقم واحد يبقيك على اطلاع.</p></div>
@@ -66,7 +72,7 @@ export default async function Home() {
         <TrackForm />
       </section>
       {featured.length > 0 && (
-        <section className="container services-section">
+        <section className="container services-section" style={place('services')}>
           <div className="section-heading">
             <div><span className="eyebrow">مساحات متعددة، عناية واحدة</span><h2>كيف نقدر نساعدك؟</h2></div>
             <Link className="text-button" href="/services">جميع الخدمات <ArrowUpLeft size={18} /></Link>
@@ -74,7 +80,7 @@ export default async function Home() {
           <div className="services-grid">{featured.map((s) => <ServiceCard key={s.slug} service={s} />)}</div>
         </section>
       )}
-      <section className="how-section" id="how">
+      <section className="how-section" id="how" style={place('how')}>
         <div className="container how-inner">
           <div>
             <span className="eyebrow">ببساطة، من البداية للنهاية</span>
@@ -95,7 +101,7 @@ export default async function Home() {
         </div>
       </section>
       {faq.length > 0 && (
-        <section className="container faq-section">
+        <section className="container faq-section" style={place('faq')}>
           <div>
             <span className="eyebrow">قبل أن تبدأ</span>
             <h2>أسئلة في بالك؟</h2>

@@ -1,5 +1,8 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets
+from rest_framework.decorators import action
+
+from apps.core import preview
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -65,7 +68,9 @@ class PublicPageView(APIView):
 
     @extend_schema(responses=PublicPageSerializer)
     def get(self, request, slug):
-        page = Page.objects.filter(slug=slug, status=Page.Status.PUBLISHED).first()
+        page = Page.objects.filter(slug=slug).first()
+        if page and page.status != Page.Status.PUBLISHED and not preview.allows(request.query_params.get("preview", ""), "page", page.pk):
+            page = None
         if page is None:
             return Response({"detail": "الصفحة غير موجودة.", "code": "not_found"}, status=404)
         return Response(PublicPageSerializer(page).data)
@@ -76,6 +81,15 @@ class AdminPageViewSet(viewsets.ModelViewSet):
     serializer_class = AdminPageSerializer
     queryset = Page.objects.all()
     pagination_class = None
+
+    @extend_schema(request=None, responses={200: dict})
+    @action(detail=True, methods=["post"], url_path="preview-link")
+    def preview_link(self, request, pk=None):
+        from urllib.parse import quote
+
+        page = self.get_object()
+        base = f"/{page.slug}" if page.is_system else f"/p/{quote(page.slug)}"
+        return Response({"url": f"{base}?preview={preview.make('page', page.pk)}", "expires_in": preview.PREVIEW_MAX_AGE})
 
     def destroy(self, request, *args, **kwargs):
         if self.get_object().is_system:

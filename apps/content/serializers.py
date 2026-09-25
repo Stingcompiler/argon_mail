@@ -25,6 +25,34 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
     def get_whatsapp_url(self, obj):
         return whatsapp_link(obj.whatsapp_phone, obj.whatsapp_text) if obj.show_whatsapp else ""
 
+    def validate_navigation(self, v):
+        import re
+
+        if not isinstance(v, list) or not 1 <= len(v) <= 8:
+            raise serializers.ValidationError("من 1 إلى 8 روابط.")
+        out = []
+        for item in v:
+            if not isinstance(item, dict):
+                raise serializers.ValidationError("صيغة غير صحيحة.")
+            label = str(item.get("label", "")).strip()
+            href = str(item.get("href", "")).strip()
+            if not label or len(label) > 30:
+                raise serializers.ValidationError("اسم الرابط مطلوب (حتى 30 حرفًا).")
+            # Internal links only: no external URLs, schemes or protocol-relative paths.
+            if not re.fullmatch(r"/[^\s:]*", href) or href.startswith("//"):
+                raise serializers.ValidationError(f"«{label}»: الروابط داخلية فقط وتبدأ بـ /.")
+            out.append({"label": label, "href": href, "enabled": bool(item.get("enabled", True))})
+        if not any(i["enabled"] for i in out):
+            raise serializers.ValidationError("فعّل رابطًا واحدًا على الأقل.")
+        return out
+
+    def validate_home_sections(self, v):
+        from .models import HOME_SECTIONS
+
+        if not isinstance(v, list) or sorted(str(i.get("key")) for i in v if isinstance(i, dict)) != sorted(HOME_SECTIONS):
+            raise serializers.ValidationError("يجب أن تحتوي القائمة الأقسام الثلاثة مرة واحدة.")
+        return [{"key": i["key"], "visible": bool(i.get("visible", True))} for i in v]
+
     def validate_notify_emails(self, v):
         from django.core.validators import validate_email
         from django.core.exceptions import ValidationError as DjangoError
