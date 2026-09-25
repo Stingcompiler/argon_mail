@@ -178,7 +178,7 @@ export function useCategoryActions() {
 }
 
 // ---------- inquiries ----------
-export function useInquiries(f: { q?: string; status?: string }) {
+export function useInquiries(f: { q?: string; status?: string; page?: number }) {
   return useQuery({
     queryKey: qk.admin.inquiries.list(f),
     queryFn: ({ signal }) => api<Paginated<Inquiry>>(`/admin/inquiries/${qs(f)}`, { signal }),
@@ -264,5 +264,33 @@ export function useResendNotification() {
   return useMutation({
     mutationFn: (id: number) => api<AdminNotification & { sent_now: boolean | null }>(`/admin/notifications/${id}/resend/`, { method: 'POST' }),
     onSettled: () => client.invalidateQueries({ queryKey: qk.admin.notifications.all }),
+  });
+}
+
+// ---------- statuses ----------
+export function useStatusActions() {
+  const client = useQueryClient();
+  const done = () => {
+    client.invalidateQueries({ queryKey: qk.admin.statuses });
+    client.invalidateQueries({ queryKey: qk.admin.orders.all });
+  };
+  return {
+    create: useMutation({
+      mutationFn: (v: { label: string; meaning: OrderStatus['meaning'] }) => api<OrderStatus>('/admin/statuses/', { method: 'POST', body: v }),
+      onSuccess: done,
+    }),
+    update: useMutation({
+      mutationFn: ({ id, ...body }: Partial<OrderStatus> & { id: number }) => api<OrderStatus>(`/admin/statuses/${id}/`, { method: 'PATCH', body }),
+      onSuccess: done,
+    }),
+    remove: useMutation({ mutationFn: (id: number) => api<void>(`/admin/statuses/${id}/`, { method: 'DELETE' }), onSuccess: done }),
+  };
+}
+
+export function useInquiry(id: number | null) {
+  return useQuery({
+    queryKey: [...qk.admin.inquiries.all, 'detail', id] as const,
+    queryFn: ({ signal }) => api<Inquiry>(`/admin/inquiries/${id}/`, { signal }),
+    enabled: id !== null,
   });
 }

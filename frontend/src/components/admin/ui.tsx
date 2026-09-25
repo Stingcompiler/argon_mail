@@ -3,6 +3,10 @@ import { LoaderCircle, RotateCw, type LucideIcon } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { ApiError } from '@/lib/api/client';
 
+// Open dialogs, newest last. Only the topmost one handles Escape and Tab, so
+// closing the session-expired dialog never closes the order drawer below it.
+const dialogStack: symbol[] = [];
+
 /** Focus trap + Escape for dialogs (from the approved preview). */
 export function useDialogFocus(open: boolean, onClose: () => void, selector = '[role="dialog"]') {
   const close = useRef(onClose);
@@ -12,12 +16,16 @@ export function useDialogFocus(open: boolean, onClose: () => void, selector = '[
     const previous = document.activeElement as HTMLElement | null;
     const dialog = document.querySelector<HTMLElement>(selector);
     if (!dialog) return;
+    const id = Symbol('dialog');
+    dialogStack.push(id);
+    const isTop = () => dialogStack[dialogStack.length - 1] === id;
     const oldOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     const selectors = 'a[href],button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),[tabindex="0"]';
     const visible = () => Array.from(dialog.querySelectorAll<HTMLElement>(selectors)).filter((el) => el.offsetParent !== null);
     visible()[0]?.focus();
     const handle = (e: KeyboardEvent) => {
+      if (!isTop()) return;
       if (e.key === 'Escape') { e.preventDefault(); close.current(); return; }
       if (e.key !== 'Tab') return;
       const items = visible();
@@ -26,7 +34,12 @@ export function useDialogFocus(open: boolean, onClose: () => void, selector = '[
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
     };
     document.addEventListener('keydown', handle);
-    return () => { document.body.style.overflow = oldOverflow; document.removeEventListener('keydown', handle); previous?.focus(); };
+    return () => {
+      dialogStack.splice(dialogStack.indexOf(id), 1);
+      document.body.style.overflow = oldOverflow;
+      document.removeEventListener('keydown', handle);
+      previous?.focus();
+    };
   }, [open, selector]);
 }
 
@@ -62,7 +75,8 @@ export function LoadError({ error, retry }: { error: unknown; retry: () => void 
 }
 
 export function StatusBadge({ meaning, label }: { meaning: string; label: string }) {
-  const tone = meaning === 'completed' ? 'complete' : meaning === 'new' ? 'new' : meaning === 'waiting_customer' ? 'waiting' : 'progress';
+  const tone = meaning === 'completed' ? 'complete' : meaning === 'new' ? 'new' : meaning === 'waiting_customer' ? 'waiting'
+    : meaning === 'cancelled' || meaning === 'failed' ? 'closed' : 'progress';
   return <span className={'badge ' + tone}><i />{label}</span>;
 }
 

@@ -3,7 +3,7 @@ import { ArrowUpLeft, Inbox, MessageCircle, Save, Search } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useUi } from '@/contexts/UiContext';
-import { useInquiries, useStaff, useUpdateInquiry } from '@/hooks/admin';
+import { useInquiries, useInquiry, useStaff, useUpdateInquiry } from '@/hooks/admin';
 import type { Inquiry, InquiryStatus } from '@/lib/api/types';
 import { formatDateTime } from '@/lib/format';
 import { LoadError, Loading } from './ui';
@@ -15,11 +15,17 @@ export function MessagesManager() {
   const [q, setQ] = useState('');
   const [query, setQuery] = useState('');
   useEffect(() => { const t = setTimeout(() => setQuery(q), 350); return () => clearTimeout(t); }, [q]);
-  const list = useInquiries({ status: status || undefined, q: query || undefined });
+  const [page, setPage] = useState(1);
+  useEffect(() => setPage(1), [status, query]);
+  const list = useInquiries({ status: status || undefined, q: query || undefined, page });
   const openParam = Number(useSearchParams().get('open')) || null;
   const [activeId, setActiveId] = useState<number | null>(openParam);
   const items = list.data?.results || [];
-  const active = items.find((m) => m.id === activeId) || null;
+  const pages = list.data ? Math.max(1, Math.ceil(list.data.count / 25)) : 1;
+  // A message opened from an e-mail link may be on another page: load it directly.
+  const fromList = items.find((m) => m.id === activeId) || null;
+  const single = useInquiry(fromList ? null : activeId);
+  const active = fromList || single.data || null;
 
   return (
     <>
@@ -41,10 +47,20 @@ export function MessagesManager() {
               </button>
             ))}
             {!items.length && <div className="compact-empty"><Inbox size={30} /><p>لا توجد رسائل مطابقة.</p></div>}
+            {pages > 1 && (
+              <div className="pagination">
+                <button className="button secondary" disabled={page <= 1} onClick={() => setPage(page - 1)}>الأحدث</button>
+                <span className="subtle-copy">صفحة {page} من {pages}</span>
+                <button className="button secondary" disabled={page >= pages} onClick={() => setPage(page + 1)}>الأقدم</button>
+              </div>
+            )}
           </>}
         </aside>
         <section className="message-reader">
-          {active ? <Reader key={active.id} message={active} /> : <div className="compact-empty"><MessageCircle size={40} /><h3>اختر رسالة لقراءة التفاصيل</h3></div>}
+          {active ? <Reader key={active.id} message={active} />
+            : single.isLoading ? <Loading />
+            : single.isError ? <LoadError error={single.error} retry={() => single.refetch()} />
+            : <div className="compact-empty"><MessageCircle size={40} /><h3>اختر رسالة لقراءة التفاصيل</h3></div>}
         </section>
       </div>
     </>

@@ -1,5 +1,5 @@
 'use client';
-import { Bell, Clock3, ExternalLink, Inbox, LayoutDashboard, Layers3, LoaderCircle, LogOut, MessageCircle, Settings, ShieldCheck, Users } from 'lucide-react';
+import { Bell, Clock3, RotateCw, WifiOff, ExternalLink, Inbox, LayoutDashboard, Layers3, LoaderCircle, LogOut, MessageCircle, Settings, ShieldCheck, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Suspense, useEffect, type ReactNode } from 'react';
@@ -15,13 +15,14 @@ const NAV: { href: string; name: string; icon: typeof Inbox; roles: Role[] }[] =
   { href: '/admin/orders', name: 'الطلبات', icon: Inbox, roles: ['admin', 'operator', 'executor'] },
   { href: '/admin/services', name: 'الخدمات والمجالات', icon: Layers3, roles: ['admin', 'operator'] },
   { href: '/admin/messages', name: 'الرسائل', icon: MessageCircle, roles: ['admin', 'operator'] },
+  { href: '/admin/statuses', name: 'حالات الطلب', icon: Clock3, roles: ['admin', 'operator'] },
   { href: '/admin/notifications', name: 'تنبيهات البريد', icon: Bell, roles: ['admin', 'operator'] },
   { href: '/admin/settings', name: 'المحتوى والإعدادات', icon: Settings, roles: ['admin', 'operator'] },
   { href: '/admin/team', name: 'الفريق والصلاحيات', icon: Users, roles: ['admin'] },
 ];
 
 export function AdminShell({ children }: { children: ReactNode }) {
-  const { status, user, logout, bootstrap } = useAuth();
+  const { status, user, logout, bootstrap, retry } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   useEffect(() => { bootstrap(); }, [bootstrap]);
@@ -33,6 +34,16 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const storage = useStorage(canSeeStorage);
   const alerts = useNotificationSummary(canSeeStorage);
 
+  if (status === 'offline') {
+    return (
+      <div className="admin-boot" role="alert">
+        <WifiOff size={30} />
+        <b>تعذّر الوصول إلى الخادم.</b>
+        <span>تحقق من اتصالك بالإنترنت ثم أعد المحاولة.</span>
+        <button className="button" onClick={retry}><RotateCw size={16} />إعادة المحاولة</button>
+      </div>
+    );
+  }
   if (!user || status === 'unknown' || status === 'loading' || status === 'anonymous') {
     return <div className="admin-boot" role="status"><LoaderCircle className="spin" size={30} /><span>جارٍ التحقق من الجلسة...</span></div>;
   }

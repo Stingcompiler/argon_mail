@@ -33,6 +33,7 @@ class PublicCategoryViewSet(PublicMixin, mixins.ListModelMixin, viewsets.Generic
         return (
             Category.objects.annotate(services_count=Count("services", filter=Q(services__status="published")))
             .filter(services_count__gt=0)
+            .order_by("sort_order", "id")
         )
 
 
@@ -70,7 +71,7 @@ class AdminCategoryViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
     def get_queryset(self):
-        return Category.objects.annotate(services_count=Count("services"))
+        return Category.objects.annotate(services_count=Count("services")).order_by("sort_order", "id")
 
     def destroy(self, request, *args, **kwargs):
         try:
@@ -96,6 +97,7 @@ class AdminServiceViewSet(viewsets.ModelViewSet):
             Service.objects.select_related("category")
             .prefetch_related("fields")
             .annotate(orders_count=Count("orders"))
+            .order_by("sort_order", "id")
         )
 
     def destroy(self, request, *args, **kwargs):

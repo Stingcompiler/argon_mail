@@ -20,7 +20,7 @@ export const qk = {
     team: ['admin', 'team'] as const,
     inquiries: {
       all: ['admin', 'inquiries'] as const,
-      list: (f: { q?: string; status?: string }) => ['admin', 'inquiries', 'list', f] as const,
+      list: (f: { q?: string; status?: string; page?: number }) => ['admin', 'inquiries', 'list', f] as const,
     },
     settings: ['admin', 'settings'] as const,
     storage: ['admin', 'storage'] as const,
