@@ -2,6 +2,8 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
 from apps.core.phone import normalize_phone, whatsapp_link
+from apps.media_library.models import PublicAsset
+from apps.media_library.serializers import PublicImageSerializer
 
 from .models import FAQItem, Page, SiteSettings
 
@@ -10,6 +12,10 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
     """Admin view. The public endpoint uses PublicSiteSettingsSerializer."""
 
     whatsapp_url = serializers.SerializerMethodField()
+    logo = serializers.PrimaryKeyRelatedField(queryset=PublicAsset.objects.all(), allow_null=True, required=False)
+    hero_image = serializers.PrimaryKeyRelatedField(queryset=PublicAsset.objects.all(), allow_null=True, required=False)
+    logo_data = PublicImageSerializer(source="logo", read_only=True)
+    hero_image_data = PublicImageSerializer(source="hero_image", read_only=True)
 
     class Meta:
         model = SiteSettings

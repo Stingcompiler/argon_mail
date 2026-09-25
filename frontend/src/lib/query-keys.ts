@@ -31,6 +31,7 @@ export const qk = {
     },
     faq: ['admin', 'faq'] as const,
     pages: ['admin', 'pages'] as const,
+    assets: ['admin', 'assets'] as const,
   },
   public: {
     track: (code: string) => ['public', 'track', code] as const,

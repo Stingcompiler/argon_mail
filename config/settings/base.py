@@ -130,6 +130,7 @@ UPLOAD_HARD_MAX_FILES = env.int("UPLOAD_HARD_MAX_FILES", default=10)
 # Total size of all files in one request. Must stay below the Next.js proxy
 # body limit (experimental.middlewareClientMaxBodySize in next.config.ts).
 UPLOAD_MAX_REQUEST_MB = env.int("UPLOAD_MAX_REQUEST_MB", default=20)
+PUBLIC_IMAGE_MAX_MB = env.int("PUBLIC_IMAGE_MAX_MB", default=5)
 API_MAX_BODY_BYTES = env.int("API_MAX_BODY_BYTES", default=1024 * 1024)
 FILE_UPLOAD_PERMISSIONS = 0o600
 FILE_UPLOAD_MAX_MEMORY_SIZE = 2 * 1024 * 1024

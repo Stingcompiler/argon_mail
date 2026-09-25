@@ -14,6 +14,7 @@ from apps.catalog.views import (
 )
 from apps.content.views import AdminFAQViewSet, AdminPageViewSet, AdminSiteSettingsView, PublicPageView, PublicSiteView
 from apps.core.views import diagnostics, health
+from apps.media_library.views import AssetViewSet, public_media
 from apps.media_library.views import download as file_download
 from apps.media_library.views import storage as storage_status
 from apps.notifications.views import NotificationViewSet
@@ -40,6 +41,7 @@ staff.register("statuses", StatusViewSet, basename="admin-status")
 staff.register("inquiries", AdminInquiryViewSet, basename="admin-inquiry")
 staff.register("faq", AdminFAQViewSet, basename="admin-faq")
 staff.register("pages", AdminPageViewSet, basename="admin-page")
+staff.register("assets", AssetViewSet, basename="admin-asset")
 staff.register("staff", StaffDirectoryViewSet, basename="admin-staff")
 staff.register("team", TeamViewSet, basename="admin-team")
 staff.register("notifications", NotificationViewSet, basename="admin-notification")
@@ -67,6 +69,7 @@ api_v1 = [
 
 urlpatterns = [
     path("api/v1/", include(api_v1)),
+    path("media/<path:path>", public_media, name="public-media"),
 ]
 if settings.ENABLE_DJANGO_ADMIN:
     urlpatterns.append(path("django-admin/", admin.site.urls))
@@ -75,4 +78,4 @@ if settings.DEBUG:
     from django.conf.urls.static import static
 
     urlpatterns += [path("api/v1/schema/", SpectacularAPIView.as_view(), name="schema")]
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # /media/ is always served by public_media (public images only).

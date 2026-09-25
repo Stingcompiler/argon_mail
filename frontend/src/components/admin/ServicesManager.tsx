@@ -6,6 +6,7 @@ import { useCategories, useCategoryActions, useDeleteService, useSaveService, us
 import { ApiError, fieldErrors } from '@/lib/api/client';
 import type { AdminService, AdminServiceInput, FieldType, ServiceField } from '@/lib/api/types';
 import { iconFor, serviceIcons } from '../icons';
+import { AssetPicker } from './MediaLibrary';
 import { LoadError, Loading, SectionTitle, Toggle, useDialogFocus } from './ui';
 
 const FIELD_TYPES: { v: FieldType; l: string }[] = [
@@ -19,7 +20,7 @@ type Draft = AdminServiceInput & { optionsText: Record<number, string> };
 
 const blank = (category: number): Draft => ({
   category, name: '', slug: '', description: '', tagline: 'خدمة جديدة، عناية متجددة', requirements: '', duration_text: '',
-  price_type: 'after_review', price_amount: null, price_currency: 'SDG', icon_key: 'package', color: 'sage', status: 'draft',
+  price_type: 'after_review', price_amount: null, price_currency: 'SDG', icon_key: 'package', image: null, color: 'sage', status: 'draft',
   is_featured: true, sort_order: 0, seo_title: '', seo_description: '', fields: [], optionsText: {},
 });
 const toDraft = (s: AdminService): Draft => ({
@@ -66,6 +67,8 @@ export function ServicesManager() {
                 <article className="managed-card" key={s.id}>
                   <div className={'managed-art ' + s.color}>
                     <Icon size={36} strokeWidth={1.3} />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    {s.image_data && <img className="managed-custom-image" src={s.image_data.url} alt={s.image_data.alt} loading="lazy" />}
                     <span className={'publish-pill ' + (published ? '' : 'draft')}>{STATUS_LABEL[s.status]}</span>
                     <small>{s.category_name}</small>
                   </div>
@@ -153,7 +156,7 @@ function ServiceEditor({ draft, setDraft, onClose }: { draft: Draft; setDraft: (
   };
 
   const submit = () => {
-    const { optionsText, ...rest } = draft;
+    const { optionsText, image_data: _img, ...rest } = draft; // eslint-disable-line @typescript-eslint/no-unused-vars
     const payload: AdminServiceInput = {
       ...rest,
       price_amount: rest.price_type === 'after_review' ? null : rest.price_amount,
@@ -258,6 +261,7 @@ function ServiceEditor({ draft, setDraft, onClose }: { draft: Draft; setDraft: (
             </button>
           </>}
           {tab === 'publish' && <>
+            <AssetPicker label="صورة الخدمة (اختيارية)" value={draft.image} onChange={(id) => change({ image: id })} />
             <h3>مظهر البطاقة</h3>
             <label>الأيقونة</label>
             <div className="icon-picker">
@@ -284,7 +288,7 @@ function ServiceEditor({ draft, setDraft, onClose }: { draft: Draft; setDraft: (
               <div className={draft.color}>{(() => { const I = iconFor(draft.icon_key); return <I size={35} />; })()}</div>
               <section><small>{categories.data?.find((c) => c.id === draft.category)?.name}</small><h3>{draft.name || 'اسم خدمتك هنا'}</h3><p>{draft.tagline}</p></section>
             </div>
-            <div className="design-tip"><CircleHelp size={17} /><span>الصور المخصصة لبطاقات الخدمات تُضاف مع مكتبة الوسائط العامة.</span></div>
+            <div className="design-tip"><CircleHelp size={17} /><span>أضف الصور أولًا من «مكتبة الوسائط» مع وصف لكل صورة. دون صورة تظهر الأيقونة واللون.</span></div>
           </>}
         </div>
         <footer className="drawer-footer">

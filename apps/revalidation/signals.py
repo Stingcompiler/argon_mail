@@ -3,6 +3,7 @@ from django.dispatch import receiver
 
 from apps.catalog.models import Category, Service, ServiceField, ServiceSlugRedirect
 from apps.content.models import FAQItem, Page, SiteSettings
+from apps.media_library.models import PublicAsset
 
 from .client import revalidate
 
@@ -41,3 +42,8 @@ def site_changed(sender, instance, **kwargs):
 def page_changed(sender, instance, **kwargs):
     # "site" carries the footer links; "page:<slug>" the page itself.
     revalidate(SITE, f"page:{instance.slug}")
+
+
+@receiver([post_save, post_delete], sender=PublicAsset)
+def asset_changed(sender, instance, **kwargs):
+    revalidate(SERVICES, SITE)

@@ -8,7 +8,7 @@ export function SiteFooter({ settings, pages }: { settings: SiteSettings; pages:
     <footer>
       <div className="container footer-main">
         <div>
-          <Brand name={settings.name} tagline={settings.tagline} />
+          <Brand name={settings.name} tagline={settings.tagline} logo={settings.logo_data} />
           <p>خدمات متنوعة، وخطوات واضحة.<br />نقرّب لك المسافات، ونهتم بالتفاصيل.</p>
         </div>
         <div>

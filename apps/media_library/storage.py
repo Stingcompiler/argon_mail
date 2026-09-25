@@ -31,7 +31,33 @@ def absolute(relpath: str) -> Path:
 
 
 def used_bytes() -> int:
-    return PrivateFile.objects.aggregate(n=Sum("size"))["n"] or 0
+    from .models import PublicAsset
+
+    private = PrivateFile.objects.aggregate(n=Sum("size"))["n"] or 0
+    public = PublicAsset.objects.aggregate(n=Sum("size"))["n"] or 0
+    return private + public
+
+
+def public_absolute(relpath: str) -> Path:
+    root = Path(settings.MEDIA_ROOT).resolve()
+    p = (root / relpath).resolve()
+    if root not in p.parents:
+        raise ValueError("path escapes media root")
+    return p
+
+
+def store_public(relpath: str, data: bytes):
+    final = public_absolute(relpath)
+    final.parent.mkdir(parents=True, exist_ok=True)
+    tmp = final.with_suffix(final.suffix + ".part")
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
+    try:
+        with os.fdopen(fd, "wb") as out:
+            out.write(data)
+        os.replace(tmp, final)
+    except BaseException:
+        tmp.unlink(missing_ok=True)
+        raise
 
 
 def storage_status() -> dict:

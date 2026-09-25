@@ -6,6 +6,7 @@ import { useUi } from '@/contexts/UiContext';
 import { useFaq, useFaqActions, useSaveSiteSettings, useSiteSettings } from '@/hooks/admin';
 import { fieldErrors } from '@/lib/api/client';
 import type { FAQItem, SiteSettings } from '@/lib/api/types';
+import { AssetPicker } from './MediaLibrary';
 import { LoadError, Loading, SectionTitle, Toggle } from './ui';
 
 export function SettingsManager() {
@@ -35,11 +36,13 @@ export function SettingsManager() {
       <section className="editor-panel">
         <SectionTitle icon={Globe} title="الهوية والتواصل والرئيسية" text="تظهر في الموقع خلال ثوانٍ من الحفظ." />
         {!canEdit && <div className="notice">تعديل الإعدادات متاح للمدير فقط. يمكنك تحرير الأسئلة الشائعة أدناه.</div>}
+        {canEdit && <AssetPicker label="شعار المنصة" value={d.logo} onChange={(id) => set({ logo: id })} />}
         <div className="form-row">{input('name', 'اسم المنصة', { max: 80 })}{input('tagline', 'العبارة التعريفية', { max: 120 })}</div>
         <div className="form-row">{input('whatsapp_phone', 'رقم WhatsApp للمنصة', { ltr: true, hint: 'مع رمز الدولة. يظهر زر WhatsApp عند ضبطه.' })}{input('email', 'البريد الإلكتروني العام', { ltr: true })}</div>
         {input('whatsapp_text', 'نص بداية المحادثة', { area: true, max: 300 })}
         <div className="switch-row"><div><b>إظهار زر WhatsApp</b><p>زر عائم في صفحات الموقع العامة.</p></div><Toggle checked={d.show_whatsapp} disabled={!canEdit} onChange={(v) => set({ show_whatsapp: v })} label="إظهار زر واتساب" /></div>
         {input('address', 'العنوان', { max: 200 })}
+        {canEdit && <AssetPicker label="صورة المقدمة في الرئيسية" value={d.hero_image} onChange={(id) => set({ hero_image: id })} />}
         {input('hero_eyebrow', 'عبارة أعلى المقدمة', { max: 120 })}
         {input('hero_title', 'عنوان المقدمة', { area: true, max: 160, hint: 'سطر جديد لكل سطر في العنوان.' })}
         {input('hero_text', 'نص المقدمة', { area: true, max: 600 })}

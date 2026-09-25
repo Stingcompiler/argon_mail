@@ -1,5 +1,5 @@
 'use client';
-import { Bell, Clock3, FileText, RotateCw, WifiOff, ExternalLink, Inbox, LayoutDashboard, Layers3, LoaderCircle, LogOut, MessageCircle, Settings, ShieldCheck, Users } from 'lucide-react';
+import { Bell, Clock3, FileText, Image as ImageIcon, RotateCw, WifiOff, ExternalLink, Inbox, LayoutDashboard, Layers3, LoaderCircle, LogOut, MessageCircle, Settings, ShieldCheck, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Suspense, useEffect, type ReactNode } from 'react';
@@ -17,6 +17,7 @@ const NAV: { href: string; name: string; icon: typeof Inbox; roles: Role[] }[] =
   { href: '/admin/messages', name: 'الرسائل', icon: MessageCircle, roles: ['admin', 'operator'] },
   { href: '/admin/statuses', name: 'حالات الطلب', icon: Clock3, roles: ['admin', 'operator'] },
   { href: '/admin/notifications', name: 'تنبيهات البريد', icon: Bell, roles: ['admin', 'operator'] },
+  { href: '/admin/media', name: 'مكتبة الوسائط', icon: ImageIcon, roles: ['admin', 'operator'] },
   { href: '/admin/pages', name: 'الصفحات', icon: FileText, roles: ['admin', 'operator'] },
   { href: '/admin/settings', name: 'المحتوى والإعدادات', icon: Settings, roles: ['admin', 'operator'] },
   { href: '/admin/team', name: 'الفريق والصلاحيات', icon: Users, roles: ['admin'] },

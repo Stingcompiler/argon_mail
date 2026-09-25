@@ -3,6 +3,7 @@ import { ArrowUpLeft, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import type { PublicImage } from '@/lib/api/types';
 import { Brand } from './Brand';
 
 const NAV = [
@@ -12,7 +13,7 @@ const NAV = [
   { href: '/contact', label: 'تواصل معنا' },
 ];
 
-export function SiteHeader({ name, tagline }: { name: string; tagline: string }) {
+export function SiteHeader({ name, tagline, logo }: { name: string; tagline: string; logo?: PublicImage | null }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [pathname]);
@@ -20,7 +21,7 @@ export function SiteHeader({ name, tagline }: { name: string; tagline: string })
   return (
     <header className="site-header">
       <div className="container header-inner">
-        <Link className="logo-button" href="/" aria-label={`${name} — الرئيسية`}><Brand name={name} tagline={tagline} /></Link>
+        <Link className="logo-button" href="/" aria-label={`${name} — الرئيسية`}><Brand name={name} tagline={tagline} logo={logo} /></Link>
         <nav className={open ? 'open' : ''} aria-label="التنقل الرئيسي">
           {NAV.map((n) => (
             <Link key={n.href} href={n.href} className={active(n.href) ? 'active' : ''} aria-current={active(n.href) ? 'page' : undefined}>
