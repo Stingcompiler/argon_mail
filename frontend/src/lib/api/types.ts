@@ -79,7 +79,10 @@ export type SiteSettings = {
   seo_title: string; seo_description: string; notify_emails?: string; notify_orders?: boolean; notify_messages?: boolean; max_file_mb: number; max_files_per_order: number; max_order_upload_mb?: number; updated_at: string;
 };
 export type FAQItem = { id: number; question: string; answer: string; sort_order: number; is_published: boolean };
-export type PublicSite = { settings: SiteSettings; faq: FAQItem[] };
+export type PageLink = { slug: string; title: string };
+export type PublicPage = { slug: string; title: string; body: string; seo_title: string; seo_description: string; needs_review: boolean; updated_at: string };
+export type AdminPage = PublicPage & { id: number; status: 'draft' | 'published'; show_in_footer: boolean; sort_order: number; is_system: boolean };
+export type PublicSite = { settings: SiteSettings; faq: FAQItem[]; pages: PageLink[] };
 
 export type Paginated<T> = { count: number; next: string | null; previous: string | null; results: T[] };
 

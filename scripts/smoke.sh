@@ -26,6 +26,11 @@ check "sitemap lists service"       grep -q "$S" <(curl -s "$BASE/sitemap.xml")
 check "robots blocks admin"         grep -q "Disallow: /admin" <(curl -s "$BASE/robots.txt")
 check "admin is noindex"            grep -qi "x-robots-tag: noindex" <(curl -sI "$BASE/admin")
 check "CSP header"                  grep -qi "content-security-policy" <(curl -sI "$BASE/")
+check "favicon (no 404)"            [ "$(code "$BASE/favicon.ico")" = 200 ]
+check "share image"                 [ "$(curl -s -o /dev/null -w '%{content_type}' "$BASE/opengraph-image")" = image/png ]
+check "og:image on service page"    grep -q 'property="og:image"' "$T/svc.html"
+check "privacy page from CMS"       [ "$(code "$BASE/privacy")" = 200 ]
+check "unknown custom page is 404"  [ "$(code "$BASE/p/no-such-page")" = 404 ]
 
 P="{\"service\":\"$SLUG\",\"customer_name\":\"اختبار دخان\",\"customer_phone\":\"+249911000111\",\"answers\":{\"destination\":\"بورتسودان\",\"kind\":\"مستندات\"},\"consent\":true}"
 R="$(curl -s -H 'Content-Type: application/json' -H "Idempotency-Key: $(uuidgen 2>/dev/null || python3 -c 'import uuid;print(uuid.uuid4())')" -d "$P" "$BASE/api/v1/public/orders/")"

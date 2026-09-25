@@ -7,8 +7,15 @@ from rest_framework.views import APIView
 from apps.accounts.permissions import IsAdmin, IsOperatorOrAdmin
 from apps.core.throttles import ScopedIPThrottle
 
-from .models import FAQItem, SiteSettings
-from .serializers import FAQSerializer, PublicSiteSettingsSerializer, SiteSettingsSerializer
+from .models import FAQItem, Page, SiteSettings
+from .serializers import (
+    AdminPageSerializer,
+    FAQSerializer,
+    PageLinkSerializer,
+    PublicPageSerializer,
+    PublicSiteSettingsSerializer,
+    SiteSettingsSerializer,
+)
 
 
 class PublicSiteView(APIView):
@@ -21,7 +28,8 @@ class PublicSiteView(APIView):
     def get(self, request):
         s = PublicSiteSettingsSerializer(SiteSettings.load()).data
         faq = FAQSerializer(FAQItem.objects.filter(is_published=True), many=True).data
-        return Response({"settings": s, "faq": faq})
+        pages = PageLinkSerializer(Page.objects.filter(status=Page.Status.PUBLISHED, show_in_footer=True), many=True).data
+        return Response({"settings": s, "faq": faq, "pages": pages})
 
 
 class AdminSiteSettingsView(APIView):
@@ -47,3 +55,29 @@ class AdminFAQViewSet(viewsets.ModelViewSet):
     serializer_class = FAQSerializer
     queryset = FAQItem.objects.all()
     pagination_class = None
+
+
+class PublicPageView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+    throttle_classes = [ScopedIPThrottle]
+    throttle_scope = "public_read"
+
+    @extend_schema(responses=PublicPageSerializer)
+    def get(self, request, slug):
+        page = Page.objects.filter(slug=slug, status=Page.Status.PUBLISHED).first()
+        if page is None:
+            return Response({"detail": "الصفحة غير موجودة.", "code": "not_found"}, status=404)
+        return Response(PublicPageSerializer(page).data)
+
+
+class AdminPageViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated, IsOperatorOrAdmin]
+    serializer_class = AdminPageSerializer
+    queryset = Page.objects.all()
+    pagination_class = None
+
+    def destroy(self, request, *args, **kwargs):
+        if self.get_object().is_system:
+            return Response({"detail": "صفحتا الخصوصية والشروط لا تُحذفان.", "code": "protected"}, status=409)
+        return super().destroy(request, *args, **kwargs)

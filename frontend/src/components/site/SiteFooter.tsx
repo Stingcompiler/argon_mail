@@ -1,9 +1,9 @@
 import { Leaf } from 'lucide-react';
 import Link from 'next/link';
-import type { SiteSettings } from '@/lib/api/types';
+import type { PageLink, SiteSettings } from '@/lib/api/types';
 import { Brand } from './Brand';
 
-export function SiteFooter({ settings }: { settings: SiteSettings }) {
+export function SiteFooter({ settings, pages }: { settings: SiteSettings; pages: PageLink[] }) {
   return (
     <footer>
       <div className="container footer-main">
@@ -21,8 +21,9 @@ export function SiteFooter({ settings }: { settings: SiteSettings }) {
           <h3>نرافق خطوتك</h3>
           <Link href="/track">متابعة الطلب</Link>
           <Link href="/admin/login" rel="nofollow">دخول الإدارة</Link>
-          <Link href="/privacy">الخصوصية</Link>
-          <Link href="/terms">شروط الاستخدام</Link>
+          {pages.map((p) => (
+            <Link key={p.slug} href={p.slug === 'privacy' || p.slug === 'terms' ? `/${p.slug}` : `/p/${encodeURIComponent(p.slug)}`}>{p.title}</Link>
+          ))}
           <span className="footer-note">{settings.address || 'من السودان، بكل عناية.'}</span>
         </div>
         <div className="footer-message">

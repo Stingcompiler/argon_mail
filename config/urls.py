@@ -12,7 +12,7 @@ from apps.catalog.views import (
     PublicServiceViewSet,
     service_redirect,
 )
-from apps.content.views import AdminFAQViewSet, AdminSiteSettingsView, PublicSiteView
+from apps.content.views import AdminFAQViewSet, AdminPageViewSet, AdminSiteSettingsView, PublicPageView, PublicSiteView
 from apps.core.views import diagnostics, health
 from apps.media_library.views import download as file_download
 from apps.media_library.views import storage as storage_status
@@ -39,6 +39,7 @@ staff.register("orders", AdminOrderViewSet, basename="admin-order")
 staff.register("statuses", StatusViewSet, basename="admin-status")
 staff.register("inquiries", AdminInquiryViewSet, basename="admin-inquiry")
 staff.register("faq", AdminFAQViewSet, basename="admin-faq")
+staff.register("pages", AdminPageViewSet, basename="admin-page")
 staff.register("staff", StaffDirectoryViewSet, basename="admin-staff")
 staff.register("team", TeamViewSet, basename="admin-team")
 staff.register("notifications", NotificationViewSet, basename="admin-notification")
@@ -51,6 +52,7 @@ api_v1 = [
     path("auth/logout/", LogoutView.as_view(), name="auth-logout"),
     path("auth/me/", MeView.as_view(), name="auth-me"),
     path("public/site/", PublicSiteView.as_view(), name="public-site"),
+    path("public/pages/<str:slug>/", PublicPageView.as_view(), name="public-page"),
     path("public/service-redirects/<str:slug>/", service_redirect, name="public-service-redirect"),
     path("public/orders/", PublicOrderCreateView.as_view(), name="public-order-create"),
     path("public/track/lookup/", PublicTrackingLookupView.as_view(), name="public-track-lookup"),

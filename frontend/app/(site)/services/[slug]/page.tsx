@@ -6,7 +6,7 @@ import { connection } from 'next/server';
 import { iconFor } from '@/components/icons';
 import { JsonLd } from '@/components/site/JsonLd';
 import { OrderForm } from '@/components/site/OrderForm';
-import { getService, getServiceRedirect, getSite, siteUrl } from '@/lib/server-api';
+import { getService, getServiceRedirect, getSite, ogBase, siteUrl } from '@/lib/server-api';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = s.seo_title || s.name;
   const description = s.seo_description || s.description.slice(0, 160);
   const url = `/services/${encodeURIComponent(s.slug)}`;
-  return { title, description, alternates: { canonical: url }, openGraph: { title, description, url, type: 'website' } };
+  return { title, description, alternates: { canonical: url }, openGraph: { ...ogBase, title, description, url } };
 }
 
 export default async function ServicePage({ params }: Props) {
