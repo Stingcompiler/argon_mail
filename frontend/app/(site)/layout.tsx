@@ -13,13 +13,13 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   return (
     <>
       <a className="skip-link" href="#main">تخطَّ إلى المحتوى</a>
-      <SiteHeader name={settings.name} tagline={settings.tagline} />
+      <SiteHeader name={settings.name} tagline={settings.tagline} logo={settings.logo_data} />
       <main id="main">{children}</main>
       <SiteFooter settings={settings} pages={pages || []} />
       <WhatsAppButton url={settings.whatsapp_url} />
       <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'Organization', name: settings.name, url: siteUrl(),
-        logo: `${siteUrl()}/brand/arjoon-mark.svg`, description: settings.seo_description,
+        logo: settings.logo_data ? `${siteUrl()}${settings.logo_data.url}` : `${siteUrl()}/brand/arjoon-mark.svg`, description: settings.seo_description,
         ...(settings.email && { email: settings.email }),
         ...(settings.whatsapp_phone && { telephone: settings.whatsapp_phone }),
       }} />

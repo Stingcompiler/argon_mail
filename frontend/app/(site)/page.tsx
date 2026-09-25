@@ -35,7 +35,9 @@ export default async function Home() {
             <span><Clock3 size={16} />متابعة واضحة</span>
           </div>
         </div>
-        <div className="hero-visual" aria-hidden="true">
+        <div className={'hero-visual' + (settings.hero_image_data ? ' has-image' : '')} aria-hidden={settings.hero_image_data ? undefined : true}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {settings.hero_image_data && <img className="custom-hero-image" src={settings.hero_image_data.url} alt={settings.hero_image_data.alt} width={settings.hero_image_data.width} height={settings.hero_image_data.height} fetchPriority="high" />}
           <div className="orbit orbit-one" /><div className="orbit orbit-two" />
           <span className="visual-top">من أول خطوة، إلى تمام الإنجاز.</span>
           <div className="visual-spark"><Sparkles size={24} /></div>

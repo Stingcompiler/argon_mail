@@ -4,6 +4,9 @@ import uuid
 from django.db import transaction
 from rest_framework import serializers
 
+from apps.media_library.models import PublicAsset
+from apps.media_library.serializers import PublicImageSerializer
+
 from .models import Category, Service, ServiceField
 
 
@@ -30,11 +33,12 @@ class PublicFieldSerializer(serializers.ModelSerializer):
 
 class PublicServiceListSerializer(serializers.ModelSerializer):
     category = CategoryBriefSerializer(read_only=True)
+    image = PublicImageSerializer(read_only=True)
 
     class Meta:
         model = Service
         fields = [
-            "slug", "name", "category", "description", "tagline", "icon_key", "color",
+            "slug", "name", "category", "description", "tagline", "icon_key", "color", "image",
             "price_label", "duration_text", "is_featured", "updated_at",
         ]
 
@@ -94,12 +98,14 @@ class AdminServiceSerializer(serializers.ModelSerializer):
     fields = AdminFieldSerializer(many=True, required=False)
     slug = serializers.SlugField(max_length=140, allow_unicode=True, required=False, allow_blank=True)
     orders_count = serializers.IntegerField(read_only=True, required=False)
+    image = serializers.PrimaryKeyRelatedField(queryset=PublicAsset.objects.all(), allow_null=True, required=False)
+    image_data = PublicImageSerializer(source="image", read_only=True)
 
     class Meta:
         model = Service
         fields = [
             "id", "category", "category_name", "name", "slug", "description", "tagline", "requirements",
-            "duration_text", "price_type", "price_amount", "price_currency", "price_label", "icon_key",
+            "duration_text", "price_type", "price_amount", "price_currency", "price_label", "icon_key", "image", "image_data",
             "color", "status", "is_featured", "sort_order", "seo_title", "seo_description",
             "form_version", "fields", "orders_count", "created_at", "updated_at",
         ]

@@ -44,7 +44,9 @@ export default async function ServicePage({ params }: Props) {
       </nav>
       <div className="detail-layout">
         <aside className="detail-info">
-          <span className={`detail-icon ${s.color}`}><Icon size={42} strokeWidth={1.3} /></span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {s.image ? <img className="detail-image" src={s.image.url} alt={s.image.alt} width={s.image.width} height={s.image.height} fetchPriority="high" />
+            : <span className={`detail-icon ${s.color}`}><Icon size={42} strokeWidth={1.3} /></span>}
           <span className="eyebrow">{s.category.name}</span>
           <h1>{s.name}</h1>
           <p className="preserve-lines">{s.description}</p>
@@ -67,6 +69,7 @@ export default async function ServicePage({ params }: Props) {
       <JsonLd data={[
         {
           '@context': 'https://schema.org', '@type': 'Service', name: s.name, description: s.description, url,
+          ...(s.image && { image: `${siteUrl()}${s.image.url}` }),
           serviceType: s.category.name, areaServed: 'SD',
           provider: { '@type': 'Organization', name: settings.name, url: siteUrl() },
           ...(s.price_type !== 'after_review' && s.price_amount && {

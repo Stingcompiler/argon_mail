@@ -44,7 +44,7 @@ class PublicServiceViewSet(PublicMixin, mixins.ListModelMixin, mixins.RetrieveMo
     filterset_fields = {"category__slug": ["exact"], "is_featured": ["exact"]}
 
     def get_queryset(self):
-        qs = Service.objects.filter(status=Service.Status.PUBLISHED).select_related("category")
+        qs = Service.objects.filter(status=Service.Status.PUBLISHED).select_related("category", "image")
         if self.action == "retrieve":
             qs = qs.prefetch_related("fields")
         return qs
@@ -94,7 +94,7 @@ class AdminServiceViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return (
-            Service.objects.select_related("category")
+            Service.objects.select_related("category", "image")
             .prefetch_related("fields")
             .annotate(orders_count=Count("orders"))
             .order_by("sort_order", "id")

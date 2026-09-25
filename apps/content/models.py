@@ -11,6 +11,8 @@ class SiteSettings(models.Model):
     show_whatsapp = models.BooleanField(default=True)
     email = models.EmailField(blank=True)
     address = models.CharField(max_length=200, blank=True)
+    logo = models.ForeignKey("media_library.PublicAsset", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
+    hero_image = models.ForeignKey("media_library.PublicAsset", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
     hero_eyebrow = models.CharField(max_length=120, default="من السودان، أقرب إليك")
     hero_title = models.CharField(max_length=160, default="خدمات متنوعة.\nومسافات أقرب.")
     hero_text = models.TextField(

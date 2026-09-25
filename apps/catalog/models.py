@@ -62,6 +62,7 @@ class Service(models.Model):
     )
     price_currency = models.CharField(max_length=3, blank=True, default="SDG")
     icon_key = models.CharField(max_length=20, default="package")
+    image = models.ForeignKey("media_library.PublicAsset", null=True, blank=True, on_delete=models.PROTECT, related_name="services")
     color = models.CharField(max_length=10, default="sage")
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT, db_index=True)
     is_featured = models.BooleanField("تظهر في الرئيسية", default=True)

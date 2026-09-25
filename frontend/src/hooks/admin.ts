@@ -2,7 +2,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 import type {
-  AdminNotification, AdminPage, Currency, Payment, PaymentStatus, StorageStatus,
+  AdminNotification, AdminPage, Asset, Currency, Payment, PaymentStatus, StorageStatus,
   AdminService, AdminServiceInput, Category, FAQItem, Inquiry, InquiryStatus, OrderDetail, OrderFilters,
   OrderListItem, OrderStatus, Paginated, SiteSettings, User, UserBrief,
 } from '@/lib/api/types';
@@ -310,5 +310,31 @@ export function usePageActions() {
       onSuccess: done,
     }),
     remove: useMutation({ mutationFn: (id: number) => api<void>(`/admin/pages/${id}/`, { method: 'DELETE' }), onSuccess: done }),
+  };
+}
+
+// ---------- media library ----------
+export function useAssets() {
+  return useQuery({ queryKey: qk.admin.assets, queryFn: ({ signal }) => api<Asset[]>('/admin/assets/', { signal }) });
+}
+
+export function useAssetActions() {
+  const client = useQueryClient();
+  const done = () => client.invalidateQueries({ queryKey: qk.admin.assets });
+  return {
+    upload: useMutation({
+      mutationFn: (v: { file: File; alt_text: string }) => {
+        const form = new FormData();
+        form.append('file', v.file, v.file.name);
+        form.append('alt_text', v.alt_text);
+        return api<Asset>('/admin/assets/', { method: 'POST', body: form });
+      },
+      onSuccess: done,
+    }),
+    update: useMutation({
+      mutationFn: ({ id, alt_text }: { id: string; alt_text: string }) => api<Asset>(`/admin/assets/${id}/`, { method: 'PATCH', body: { alt_text } }),
+      onSuccess: done,
+    }),
+    remove: useMutation({ mutationFn: (id: string) => api<void>(`/admin/assets/${id}/`, { method: 'DELETE' }), onSuccess: done }),
   };
 }

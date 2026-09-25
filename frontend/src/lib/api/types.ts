@@ -6,12 +6,14 @@ export type UserBrief = { id: number; full_name: string; role: Role };
 
 export type FieldType = 'text' | 'textarea' | 'number' | 'date' | 'select' | 'multiselect' | 'address' | 'file' | 'image';
 export type ServiceField = { key: string; label: string; help_text: string; type: FieldType; required: boolean; options: string[]; max_length: number; max_files: number };
+export type PublicImage = { url: string; alt: string; width: number; height: number };
+export type Asset = { id: string; url: string; alt_text: string; original_name: string; content_type: string; size: number; width: number; height: number; usage: string[]; created_at: string };
 export type CategoryBrief = { name: string; slug: string };
 export type Category = { id: number; name: string; slug: string; sort_order: number; services_count?: number };
 
 export type PublicService = {
   slug: string; name: string; category: CategoryBrief; description: string; tagline: string;
-  icon_key: string; color: string; price_label: string; duration_text: string; is_featured: boolean; updated_at: string;
+  icon_key: string; color: string; image: PublicImage | null; price_label: string; duration_text: string; is_featured: boolean; updated_at: string;
 };
 export type PublicServiceDetail = PublicService & {
   requirements: string; price_type: PriceType; price_amount: string | null; price_currency: string;
@@ -23,11 +25,11 @@ export type ServiceStatus = 'draft' | 'published' | 'hidden';
 export type AdminService = {
   id: number; category: number; category_name: string; name: string; slug: string; description: string; tagline: string;
   requirements: string; duration_text: string; price_type: PriceType; price_amount: string | null; price_currency: string;
-  price_label: string; icon_key: string; color: string; status: ServiceStatus; is_featured: boolean; sort_order: number;
+  price_label: string; icon_key: string; image: string | null; image_data: PublicImage | null; color: string; status: ServiceStatus; is_featured: boolean; sort_order: number;
   seo_title: string; seo_description: string; form_version: number; fields: ServiceField[]; orders_count: number;
   created_at: string; updated_at: string;
 };
-export type AdminServiceInput = Omit<AdminService, 'id' | 'category_name' | 'price_label' | 'form_version' | 'orders_count' | 'created_at' | 'updated_at'> & { id?: number };
+export type AdminServiceInput = Omit<AdminService, 'id' | 'category_name' | 'price_label' | 'form_version' | 'orders_count' | 'created_at' | 'updated_at' | 'image_data'> & { id?: number; image_data?: PublicImage | null };
 
 export type StatusMeaning = 'new' | 'in_review' | 'waiting_customer' | 'in_progress' | 'ready' | 'completed' | 'cancelled' | 'failed';
 export type StatusBrief = { key: string; label: string; meaning: StatusMeaning };
@@ -76,6 +78,7 @@ export type Inquiry = {
 export type SiteSettings = {
   name: string; tagline: string; whatsapp_phone: string; whatsapp_text: string; show_whatsapp: boolean; whatsapp_url: string;
   email: string; address: string; hero_eyebrow: string; hero_title: string; hero_text: string; about: string;
+  logo: string | null; hero_image: string | null; logo_data: PublicImage | null; hero_image_data: PublicImage | null;
   seo_title: string; seo_description: string; notify_emails?: string; notify_orders?: boolean; notify_messages?: boolean; max_file_mb: number; max_files_per_order: number; max_order_upload_mb?: number; updated_at: string;
 };
 export type FAQItem = { id: number; question: string; answer: string; sort_order: number; is_published: boolean };

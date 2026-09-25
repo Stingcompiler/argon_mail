@@ -11,6 +11,8 @@ export function ServiceCard({ service: s, cta = 'اكتشف الخدمة' }: { s
       <Link className={`service-art ${s.color}`} href={href} tabIndex={-1} aria-hidden="true">
         <div className="art-ring" />
         <Icon size={46} strokeWidth={1.25} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {s.image && <img className="service-custom-image" src={s.image.url} alt={s.image.alt} width={s.image.width} height={s.image.height} loading="lazy" decoding="async" />}
         <span>{s.tagline}</span>
         <ArrowUpLeft className="art-arrow" size={18} />
       </Link>
