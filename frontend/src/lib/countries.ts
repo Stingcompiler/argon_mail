@@ -41,7 +41,10 @@ export function countries() {
   const all = Object.entries(DIAL).map(([iso, dial]) => ({ iso, dial, name: names.of(iso) || iso }));
   const byIso = new Map(all.map((c) => [c.iso, c]));
   const common = COMMON.map((iso) => byIso.get(iso)!).filter(Boolean);
-  const others = all.filter((c) => !COMMON.includes(c.iso)).sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+  // One collator for the whole sort: localeCompare(…, 'ar') builds a new one
+  // per comparison, which cost ~70ms of main thread on a throttled phone.
+  const { compare } = new Intl.Collator('ar');
+  const others = all.filter((c) => !COMMON.includes(c.iso)).sort((a, b) => compare(a.name, b.name));
   cache = { common, others };
   return cache;
 }
