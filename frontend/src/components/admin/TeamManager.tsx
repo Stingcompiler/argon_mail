@@ -21,6 +21,7 @@ export function TeamManager() {
         <p className="subtle-copy">الفريق المناسب، والصلاحية المناسبة. الأعضاء يُعطّلون ولا يُحذفون حفاظًا على السجل.</p>
         <button className="button" onClick={() => setAdding(true)}><UserPlus size={17} />إضافة عضو</button>
       </div>
+      <h2 className="sr-only">الأدوار</h2>
       <div className="role-cards">
         {[
           { title: 'المدير', text: 'كل الأقسام بما فيها الفريق والإعدادات.', icon: ShieldCheck },

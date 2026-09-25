@@ -1,6 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { DEFAULT_COUNTRY, composePhone, countries, dialCode } from '@/lib/countries';
+import { FieldError, describedBy, errorId } from '@/lib/forms';
 
 /**
  * Country picker + local number. The customer only chooses the country
@@ -17,7 +18,7 @@ export function PhoneField({ name, label, error, required = true }: { name: stri
   const hint = `${id}-hint`;
   const intl = local.trim().startsWith('+') || local.replace(/\D/g, '').startsWith('00');
   return (
-    <fieldset className="phone-field" aria-invalid={!!error}>
+    <fieldset className="phone-field">
       <legend>{label}{required && <em> *</em>}</legend>
       <div className="phone-row">
         <select aria-label="الدولة" value={iso} onChange={(e) => setIso(e.target.value)} autoComplete="country">
@@ -35,7 +36,8 @@ export function PhoneField({ name, label, error, required = true }: { name: stri
           inputMode="tel"
           dir="ltr"
           aria-label="رقم الهاتف بدون مفتاح الدولة"
-          aria-describedby={hint}
+          aria-describedby={describedBy(hint, error && errorId(name))}
+          aria-invalid={!!error}
           placeholder="9XX XXX XXX"
           autoComplete="tel-national"
           required={required}
@@ -49,7 +51,7 @@ export function PhoneField({ name, label, error, required = true }: { name: stri
       <small id={hint}>
         {full ? <>سيُحفظ الرقم: <bdi dir="ltr">{full}</bdi>{intl && ' (رقم دولي كامل)'}</> : 'اختر دولتك ثم اكتب رقمك كما تستخدمه في WhatsApp.'}
       </small>
-      {error && <small className="field-error" role="alert">{error}</small>}
+      <FieldError name={name} error={error} />
     </fieldset>
   );
 }

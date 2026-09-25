@@ -7,6 +7,7 @@ import { iconFor } from '@/components/icons';
 import { JsonLd } from '@/components/site/JsonLd';
 import { OrderForm } from '@/components/site/OrderForm';
 import { PreviewBanner } from '@/components/site/PreviewBanner';
+import { QueryProvider } from '@/contexts/QueryProvider';
 import { getService, getServiceRedirect, getSite, ogBase, siteUrl } from '@/lib/server-api';
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ preview?: string }> };
@@ -70,7 +71,7 @@ export default async function ServicePage({ params, searchParams }: Props) {
             <p>يطّلع فريق العمل المصرّح له فقط على تفاصيل طلبك، ولا تظهر في صفحة المتابعة.</p>
           </div>
         </aside>
-        <OrderForm service={s} limits={{ maxFileMb: settings.max_file_mb, maxFiles: settings.max_files_per_order, maxTotalMb: settings.max_order_upload_mb ?? 20 }} />
+        <QueryProvider><OrderForm service={s} limits={{ maxFileMb: settings.max_file_mb, maxFiles: settings.max_files_per_order, maxTotalMb: settings.max_order_upload_mb ?? 20 }} /></QueryProvider>
       </div>
       <JsonLd data={[
         {

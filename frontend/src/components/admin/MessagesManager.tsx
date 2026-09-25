@@ -37,6 +37,7 @@ export function MessagesManager() {
       </div>
       <div className="inbox-layout">
         <aside className="inbox-list">
+          <h2 className="sr-only">الرسائل الواردة</h2>
           <div className="workspace-search"><Search size={17} /><input value={q} aria-label="بحث الرسائل" onChange={(e) => setQ(e.target.value)} placeholder="ابحث في الرسائل..." /></div>
           {list.isLoading ? <Loading /> : list.isError ? <LoadError error={list.error} retry={() => list.refetch()} /> : <>
             {items.map((m) => (

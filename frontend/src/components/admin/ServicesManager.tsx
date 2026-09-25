@@ -59,6 +59,7 @@ export function ServicesManager() {
             <input aria-label="البحث في الخدمات" placeholder="ابحث بالاسم أو المجال..." value={search} onChange={(e) => setSearch(e.target.value)} />
             <span>{list.length} خدمات</span>
           </div>
+          <h2 className="sr-only">قائمة الخدمات</h2>
           <div className="management-grid">
             {list.map((s) => {
               const Icon = iconFor(s.icon_key);

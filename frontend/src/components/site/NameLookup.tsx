@@ -6,6 +6,7 @@ import { useTrackingLookup } from '@/hooks/public';
 import { ApiError, fieldErrors } from '@/lib/api/client';
 import { phoneProblem } from '@/lib/countries';
 import { formatDate, statusTone } from '@/lib/format';
+import { FieldError, describedBy, errorId, useFocusInvalid } from '@/lib/forms';
 import { PhoneField } from './PhoneField';
 import { RememberCode } from './RememberCode';
 
@@ -13,6 +14,7 @@ import { RememberCode } from './RememberCode';
 export function NameLookup() {
   const lookup = useTrackingLookup();
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [formRef, focusInvalid] = useFocusInvalid();
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -20,9 +22,9 @@ export function NameLookup() {
     const phone = String(f.get('phone') || '');
     const full_name = String(f.get('full_name') || '').trim();
     const pe = phoneProblem(phone);
-    if (pe) { setErrors({ phone: pe }); return; }
+    if (pe) { setErrors({ phone: pe }); focusInvalid(); return; }
     setErrors({});
-    lookup.mutate({ full_name, phone }, { onError: (err) => setErrors(fieldErrors(err)) });
+    lookup.mutate({ full_name, phone }, { onError: (err) => { setErrors(fieldErrors(err)); focusInvalid(); } });
   };
 
   const notFound = lookup.error instanceof ApiError && lookup.error.status === 404;
@@ -30,12 +32,13 @@ export function NameLookup() {
 
   return (
     <>
-      <form className="request-form name-lookup" onSubmit={submit}>
+      <form ref={formRef} className="request-form name-lookup" onSubmit={submit}>
         <p className="subtle-copy">اكتب اسمك الكامل ورقم WhatsApp كما أدخلتهما في الطلب. يجب أن يتطابق الاثنان، حفاظًا على خصوصيتك.</p>
         <label>
           الاسم الكامل <em>*</em>
-          <input name="full_name" required minLength={2} maxLength={80} autoComplete="name" aria-invalid={!!errors.full_name} />
-          {errors.full_name && <small className="field-error" role="alert">{errors.full_name}</small>}
+          <input name="full_name" required minLength={2} maxLength={80} autoComplete="name" aria-invalid={!!errors.full_name}
+            aria-describedby={describedBy(errors.full_name && errorId('full_name'))} />
+          <FieldError name="full_name" error={errors.full_name} />
         </label>
         <PhoneField name="phone" label="رقم WhatsApp المستخدم في الطلب" error={errors.phone} />
         <button className="button" disabled={lookup.isPending}>

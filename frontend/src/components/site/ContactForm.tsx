@@ -4,6 +4,7 @@ import { useRef, useState, type FormEvent } from 'react';
 import { useCreateInquiry } from '@/hooks/public';
 import { ApiError, fieldErrors, newIdempotencyKey } from '@/lib/api/client';
 import { phoneProblem } from '@/lib/countries';
+import { FieldError, describedBy, errorId, useFocusInvalid } from '@/lib/forms';
 import { PhoneField } from './PhoneField';
 
 export function ContactForm() {
@@ -11,6 +12,7 @@ export function ContactForm() {
   const key = useRef('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sent, setSent] = useState(false);
+  const [formRef, focusInvalid] = useFocusInvalid();
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -18,14 +20,14 @@ export function ContactForm() {
     const form = e.currentTarget;
     const f = new FormData(form);
     const phoneErr = phoneProblem(String(f.get('phone') || ''));
-    if (phoneErr) { setErrors({ phone: phoneErr }); return; }
+    if (phoneErr) { setErrors({ phone: phoneErr }); focusInvalid(); return; }
     key.current ||= newIdempotencyKey();
     setErrors({});
     create.mutate(
       { key: key.current, name: String(f.get('name')), phone: String(f.get('phone')), subject: String(f.get('subject')), body: String(f.get('body')) },
       {
         onSuccess: () => { form.reset(); key.current = ''; setSent(true); },
-        onError: (err) => { if (err instanceof ApiError && err.status === 400) key.current = ''; setErrors(fieldErrors(err)); },
+        onError: (err) => { if (err instanceof ApiError && err.status === 400) key.current = ''; setErrors(fieldErrors(err)); focusInvalid(); },
       },
     );
   };
@@ -39,14 +41,14 @@ export function ContactForm() {
     </div>
   );
 
-  const err = (n: string) => errors[n] && <small className="field-error" role="alert">{errors[n]}</small>;
+  const invalid = (n: string) => ({ 'aria-invalid': !!errors[n], 'aria-describedby': describedBy(errors[n] && errorId(n)) });
   return (
-    <form className="request-form contact-form" onSubmit={submit}>
+    <form ref={formRef} className="request-form contact-form" onSubmit={submit}>
       {create.error && <div className="notice error" role="alert">{Object.keys(errors).length ? 'راجع الحقول المعلّمة ثم أعد الإرسال.' : create.error.message}</div>}
-      <label>الاسم<input name="name" required maxLength={80} placeholder="اسمك الكامل" autoComplete="name" />{err('name')}</label>
+      <label>الاسم<input name="name" required maxLength={80} placeholder="اسمك الكامل" autoComplete="name" {...invalid('name')} /><FieldError name="name" error={errors.name} /></label>
       <PhoneField name="phone" label="رقم WhatsApp" error={errors.phone} />
-      <label>الموضوع<input name="subject" required maxLength={140} placeholder="بخصوص ماذا تتواصل معنا؟" />{err('subject')}</label>
-      <label>رسالتك<textarea name="body" required rows={5} maxLength={4000} placeholder="اكتب رسالتك هنا..." />{err('body')}</label>
+      <label>الموضوع<input name="subject" required maxLength={140} placeholder="بخصوص ماذا تتواصل معنا؟" {...invalid('subject')} /><FieldError name="subject" error={errors.subject} /></label>
+      <label>رسالتك<textarea name="body" required rows={5} maxLength={4000} placeholder="اكتب رسالتك هنا..." {...invalid('body')} /><FieldError name="body" error={errors.body} /></label>
       <button className="button" disabled={create.isPending}>
         {create.isPending ? <>جارٍ الإرسال <LoaderCircle className="spin" size={17} /></> : <>إرسال الرسالة <Send size={17} /></>}
       </button>

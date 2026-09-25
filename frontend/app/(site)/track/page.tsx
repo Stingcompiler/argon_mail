@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { TrackingView } from '@/components/site/TrackingView';
+import { QueryProvider } from '@/contexts/QueryProvider';
 
 export const metadata: Metadata = { title: 'متابعة الطلب', robots: { index: false, follow: false } };
 
@@ -12,7 +13,7 @@ export default function TrackPage() {
         <h1>اطمئن على طلبك.</h1>
         <p>تابع برقم الطلب، أو باسمك الكامل ورقم WhatsApp الذي استخدمته.</p>
       </div>
-      <Suspense><TrackingView /></Suspense>
+      <QueryProvider><Suspense><TrackingView /></Suspense></QueryProvider>
     </section>
   );
 }
