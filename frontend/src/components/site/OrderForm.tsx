@@ -8,6 +8,7 @@ import { ApiError, fieldErrors, newIdempotencyKey } from '@/lib/api/client';
 import type { PublicServiceDetail, ServiceField } from '@/lib/api/types';
 import { FILE_ACCEPT, IMAGE_ACCEPT, checkFile, formatSize } from '@/lib/files';
 import { phoneProblem } from '@/lib/countries';
+import { FieldError, describedBy, errorId, useFocusInvalid } from '@/lib/forms';
 import { PhoneField } from './PhoneField';
 
 type Limits = { maxFileMb: number; maxFiles: number; maxTotalMb: number };
@@ -22,6 +23,7 @@ export function OrderForm({ service, limits }: { service: PublicServiceDetail; l
   const create = useCreateOrder();
   const key = useRef<string>('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [formRef, focusInvalid] = useFocusInvalid();
   // Selected files are kept in state so they survive a failed submission.
   const [files, setFiles] = useState<Record<string, File[]>>({});
   const totalFiles = Object.values(files).reduce((n, l) => n + l.length, 0);
@@ -51,11 +53,12 @@ export function OrderForm({ service, limits }: { service: PublicServiceDetail; l
     if (create.isPending) return;
     const data = new FormData(e.currentTarget);
     const answers: Record<string, string | string[]> = {};
-    const phoneErr = phoneProblem(String(data.get('phone') || ''));
-    if (phoneErr) { setErrors({ customer_phone: phoneErr }); return; }
+    const phoneErr = phoneProblem(String(data.get('customer_phone') || ''));
+    if (phoneErr) { setErrors({ customer_phone: phoneErr }); focusInvalid(); return; }
     const missing = service.fields.filter((f) => (f.type === 'file' || f.type === 'image') && f.required && !(files[f.key] || []).length);
     if (missing.length) {
       setErrors(Object.fromEntries(missing.map((f) => [`answers.${f.key}`, 'أرفق ملفًا واحدًا على الأقل.'])));
+      focusInvalid();
       return;
     }
     service.fields.forEach((f) => {
@@ -69,7 +72,7 @@ export function OrderForm({ service, limits }: { service: PublicServiceDetail; l
         key: key.current,
         service: service.slug,
         customer_name: String(data.get('name') || ''),
-        customer_phone: String(data.get('phone') || ''),
+        customer_phone: String(data.get('customer_phone') || ''),
         details: String(data.get('details') || ''),
         consent: data.get('consent') === 'on',
         answers,
@@ -81,16 +84,16 @@ export function OrderForm({ service, limits }: { service: PublicServiceDetail; l
           // A validation error means nothing was created: the next attempt is a new submission.
           if (err instanceof ApiError && err.status === 400) key.current = '';
           setErrors(fieldErrors(err));
+          focusInvalid();
         },
       },
     );
   };
 
-  const err = (name: string) => errors[name] && <small className="field-error" role="alert">{errors[name]}</small>;
   const general = create.error && !Object.keys(errors).length ? create.error.message : '';
 
   return (
-    <form className="request-form" onSubmit={submit} noValidate={false}>
+    <form ref={formRef} className="request-form" onSubmit={submit} noValidate={false}>
       <span className="eyebrow">لنبدأ الخطوة الأولى</span>
       <h2>أخبرنا عن طلبك</h2>
       <p>املأ التفاصيل التالية، وسيتمكن المسؤول من مراجعة طلبك والتواصل معك.</p>
@@ -99,25 +102,28 @@ export function OrderForm({ service, limits }: { service: PublicServiceDetail; l
       )}
       <label>
         الاسم الكامل <em>*</em>
-        <input name="name" placeholder="كيف نناديك؟" required minLength={2} maxLength={80} autoComplete="name" aria-invalid={!!errors.customer_name} />
-        {err('customer_name')}
+        <input name="name" placeholder="كيف نناديك؟" required minLength={2} maxLength={80} autoComplete="name"
+          aria-invalid={!!errors.customer_name} aria-describedby={describedBy(errors.customer_name && errorId('customer_name'))} />
+        <FieldError name="customer_name" error={errors.customer_name} />
       </label>
-      <PhoneField name="phone" label="رقم الهاتف المستخدم في WhatsApp" error={errors.customer_phone} />
+      <PhoneField name="customer_phone" label="رقم الهاتف المستخدم في WhatsApp" error={errors.customer_phone} />
       {service.fields.map((f) => (f.type === 'file' || f.type === 'image')
         ? <FileField key={f.key} field={f} files={files[f.key] || []} maxMb={limits.maxFileMb} error={errors[`answers.${f.key}`] || errors[`answers.${f.key}.0`]}
             onAdd={(l) => addFiles(f, l)} onRemove={(i) => removeFile(f.key, i)} />
         : <DynamicField key={f.key} field={f} error={errors[`answers.${f.key}`]} />)}
-      {errors['answers.files'] && <small className="field-error" role="alert">{errors['answers.files']}</small>}
+      <FieldError name="answers.files" error={errors['answers.files']} />
       <label>
         تفاصيل إضافية
-        <textarea name="details" placeholder="ما الذي تود أن نعرفه عن طلبك؟" rows={4} maxLength={4000} />
-        {err('details')}
+        <textarea name="details" placeholder="ما الذي تود أن نعرفه عن طلبك؟" rows={4} maxLength={4000}
+          aria-invalid={!!errors.details} aria-describedby={describedBy(errors.details && errorId('details'))} />
+        <FieldError name="details" error={errors.details} />
       </label>
       <label className="checkbox-row">
-        <input type="checkbox" name="consent" required />
+        <input type="checkbox" name="consent" required
+          aria-invalid={!!errors.consent} aria-describedby={describedBy(errors.consent && errorId('consent'))} />
         <span>أوافق على <Link href="/terms" target="_blank">شروط الاستخدام</Link> و<Link href="/privacy" target="_blank">سياسة الخصوصية</Link>.</span>
       </label>
-      {err('consent')}
+      <FieldError name="consent" error={errors.consent} />
       <button className="button wide" disabled={create.isPending} aria-busy={create.isPending}>
         {create.isPending ? <>جارٍ الإرسال <LoaderCircle className="spin" size={18} /></> : <>إرسال الطلب <ArrowLeft size={18} /></>}
       </button>
@@ -135,11 +141,12 @@ function FileField({ field: f, files, maxMb, error, onAdd, onRemove }: {
       <span className="file-field-label">{f.label}{f.required && <em> *</em>}</span>
       {f.help_text && <small>{f.help_text}</small>}
       {!full && (
-        <label className="upload-area" aria-invalid={!!error}>
+        <label className="upload-area">
           <UploadCloud size={27} />
           <b>{image ? 'اختر صورة' : 'اختر ملفًا'}{f.max_files > 1 ? ` (حتى ${f.max_files})` : ''}</b>
           <small>{image ? 'PNG أو JPG أو WebP' : 'PDF أو صورة'} · حتى {maxMb} MB للملف</small>
           <input type="file" accept={image ? IMAGE_ACCEPT : FILE_ACCEPT} multiple={f.max_files > 1}
+            aria-invalid={!!error} aria-describedby={describedBy(error && errorId(`answers.${f.key}`))}
             onChange={(e) => { onAdd(e.target.files); e.target.value = ''; }} />
         </label>
       )}
@@ -153,14 +160,15 @@ function FileField({ field: f, files, maxMb, error, onAdd, onRemove }: {
           ))}
         </ul>
       )}
-      {error && <small className="field-error" role="alert">{error}</small>}
+      <FieldError name={`answers.${f.key}`} error={error} live />
     </div>
   );
 }
 
 function DynamicField({ field: f, error }: { field: ServiceField; error?: string }) {
   const name = `f-${f.key}`;
-  const common = { name, required: f.required, 'aria-invalid': !!error, 'aria-describedby': f.help_text ? `${name}-help` : undefined };
+  const errName = `answers.${f.key}`;
+  const common = { name, required: f.required, 'aria-invalid': !!error, 'aria-describedby': describedBy(f.help_text && `${name}-help`, error && errorId(errName)) };
   let control;
   if (f.type === 'textarea' || f.type === 'address') control = <textarea {...common} rows={3} maxLength={f.max_length} placeholder={f.type === 'address' ? 'المدينة، الحي، أقرب معلم' : undefined} />;
   else if (f.type === 'select') control = (
@@ -170,11 +178,11 @@ function DynamicField({ field: f, error }: { field: ServiceField; error?: string
     </select>
   );
   else if (f.type === 'multiselect') return (
-    <fieldset className="choice-group" aria-invalid={!!error}>
+    <fieldset className="choice-group" aria-describedby={describedBy(f.help_text && `${name}-help`, error && errorId(errName))}>
       <legend>{f.label}{f.required && <em> *</em>}</legend>
       {f.help_text && <small id={`${name}-help`}>{f.help_text}</small>}
-      {f.options.map((o) => <label className="checkbox-row" key={o}><input type="checkbox" name={name} value={o} />{o}</label>)}
-      {error && <small className="field-error" role="alert">{error}</small>}
+      {f.options.map((o) => <label className="checkbox-row" key={o}><input type="checkbox" name={name} value={o} aria-invalid={!!error} />{o}</label>)}
+      <FieldError name={errName} error={error} />
     </fieldset>
   );
   else control = <input {...common} type={f.type === 'number' ? 'text' : f.type} inputMode={f.type === 'number' ? 'decimal' : undefined} maxLength={f.type === 'text' ? f.max_length : undefined} />;
@@ -183,7 +191,7 @@ function DynamicField({ field: f, error }: { field: ServiceField; error?: string
       {f.label}{f.required && <em> *</em>}
       {control}
       {f.help_text && <small id={`${name}-help`}>{f.help_text}</small>}
-      {error && <small className="field-error" role="alert">{error}</small>}
+      <FieldError name={errName} error={error} />
     </label>
   );
 }

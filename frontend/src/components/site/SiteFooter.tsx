@@ -12,13 +12,13 @@ export function SiteFooter({ settings, pages }: { settings: SiteSettings; pages:
           <p>خدمات متنوعة، وخطوات واضحة.<br />نقرّب لك المسافات، ونهتم بالتفاصيل.</p>
         </div>
         <div>
-          <h3>اكتشف عرجون</h3>
+          <h2>اكتشف عرجون</h2>
           <Link href="/services">خدماتنا</Link>
           <Link href="/about">عن المنصة</Link>
           <Link href="/contact">تواصل معنا</Link>
         </div>
         <div>
-          <h3>نرافق خطوتك</h3>
+          <h2>نرافق خطوتك</h2>
           <Link href="/track">متابعة الطلب</Link>
           <Link href="/admin/login" rel="nofollow">دخول الإدارة</Link>
           {pages.map((p) => (

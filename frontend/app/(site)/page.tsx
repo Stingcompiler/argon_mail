@@ -94,7 +94,7 @@ export default async function Home() {
               { n: '03', title: 'تابع حتى الإنجاز', text: 'احتفظ برقم طلبك واعرف كل جديد في أي وقت.', icon: CheckCheck },
             ].map((s) => (
               <div className="step" key={s.n}>
-                <span className="step-number">{s.n}</span><s.icon size={25} strokeWidth={1.4} /><h3>{s.title}</h3><p>{s.text}</p>
+                <span className="step-number" aria-hidden="true">{s.n}</span><s.icon size={25} strokeWidth={1.4} /><h3>{s.title}</h3><p>{s.text}</p>
               </div>
             ))}
           </div>

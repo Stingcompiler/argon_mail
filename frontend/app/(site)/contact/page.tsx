@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { ContactForm } from '@/components/site/ContactForm';
+import { QueryProvider } from '@/contexts/QueryProvider';
 
 export const metadata: Metadata = { title: 'تواصل معنا', description: 'أرسل سؤالك أو استفسارك إلى فريق بريد عرجون وسنتواصل معك عبر WhatsApp.', alternates: { canonical: '/contact' } };
 
@@ -11,7 +12,7 @@ export default function ContactPage() {
         <h1>كل سؤال، بداية تواصل.</h1>
         <p>أخبرنا كيف نقدر نساعدك.</p>
       </div>
-      <ContactForm />
+      <QueryProvider><ContactForm /></QueryProvider>
     </section>
   );
 }

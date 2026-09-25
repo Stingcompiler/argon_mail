@@ -21,9 +21,12 @@ export default async function ServicesPage() {
         <p>استكشف ما يناسبك، واترك لنا الاهتمام بالتفاصيل.</p>
       </div>
       {services.length ? (
-        <ServicesBrowser services={services}>
-          {services.map((s) => <ServiceCard key={s.slug} service={s} cta="تفاصيل الخدمة" />)}
-        </ServicesBrowser>
+        <>
+          <h2 className="sr-only">كل الخدمات</h2>
+          <ServicesBrowser services={services}>
+            {services.map((s) => <ServiceCard key={s.slug} service={s} cta="تفاصيل الخدمة" />)}
+          </ServicesBrowser>
+        </>
       ) : (
         <div className="empty-state"><h2>لا توجد خدمات منشورة حاليًا</h2><p>عد قريبًا، أو تواصل معنا لمعرفة المزيد.</p></div>
       )}
