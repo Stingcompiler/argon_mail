@@ -1,8 +1,8 @@
 'use client';
-import { Bell, Clock3, FileText, Image as ImageIcon, LayoutTemplate, RotateCw, WifiOff, ExternalLink, Inbox, LayoutDashboard, Layers3, LoaderCircle, LogOut, MessageCircle, Settings, ShieldCheck, Users } from 'lucide-react';
+import { Bell, Clock3, FileText, Image as ImageIcon, LayoutTemplate, Menu, RotateCw, WifiOff, ExternalLink, Inbox, LayoutDashboard, Layers3, LoaderCircle, LogOut, MessageCircle, Settings, ShieldCheck, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Suspense, useEffect, type ReactNode } from 'react';
+import { Suspense, useEffect, useState, type ReactNode } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotificationSummary, useStorage } from '@/hooks/admin';
 import { formatSize } from '@/lib/files';
@@ -33,6 +33,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
     if (status === 'anonymous') router.replace(`/admin/login?next=${encodeURIComponent(pathname)}`);
   }, [status, router, pathname]);
   useDialogFocus(status === 'expired', () => {}, '.relogin-dialog');
+  // Phones and tablets: the sidebar is a drawer opened from the top bar.
+  // On desktop the toggle is hidden, so this stays false.
+  const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => { setMenuOpen(false); }, [pathname]);
+  useDialogFocus(menuOpen, () => setMenuOpen(false), '.admin-sidebar');
   const canSeeStorage = status === 'authenticated' && (user?.role === 'admin' || user?.role === 'operator');
   const storage = useStorage(canSeeStorage);
   const alerts = useNotificationSummary(canSeeStorage);
@@ -55,17 +60,24 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const allowed = nav.some((n) => n === current);
 
   return (
-    <div className="admin-layout">
-      <aside className="admin-sidebar">
-        <Link className="logo-button" href="/admin">
-          <span className="brand"><span className="brand-symbol"><ShieldCheck size={22} /></span><span>بريد عرجون<small>مساحة العمل</small></span></span>
-        </Link>
-        <span className="sidebar-label">مساحة العمل</span>
-        {nav.map((n) => (
-          <Link key={n.href} href={n.href} className={current === n ? 'active' : ''} aria-current={current === n ? 'page' : undefined}>
-            <n.icon size={19} />{n.name}{n.href === '/admin/notifications' && !!alerts.data?.failed && <b>{alerts.data.failed}</b>}
+    <div className={'admin-layout' + (menuOpen ? ' menu-open' : '')}>
+      <aside id="admin-nav" className="admin-sidebar" aria-label="قائمة لوحة التحكم"
+        {...(menuOpen ? { role: 'dialog', 'aria-modal': true } : {})}>
+        <div className="sidebar-head">
+          <Link className="logo-button" href="/admin">
+            <span className="brand"><span className="brand-symbol"><ShieldCheck size={22} /></span><span>بريد عرجون<small>مساحة العمل</small></span></span>
           </Link>
-        ))}
+          <button type="button" className="icon-button menu-close" aria-label="إغلاق القائمة" onClick={() => setMenuOpen(false)}><X size={20} /></button>
+        </div>
+        <nav className="sidebar-nav" aria-label="أقسام لوحة التحكم">
+          <span className="sidebar-label">مساحة العمل</span>
+          {nav.map((n) => (
+            <Link key={n.href} href={n.href} className={current === n ? 'active' : ''} aria-current={current === n ? 'page' : undefined}
+              onClick={() => setMenuOpen(false)}>
+              <n.icon size={19} />{n.name}{n.href === '/admin/notifications' && !!alerts.data?.failed && <b>{alerts.data.failed}</b>}
+            </Link>
+          ))}
+        </nav>
         <div className="sidebar-bottom">
           {storage.data && (
             <div className="storage">
@@ -83,16 +95,19 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </div>
         </div>
       </aside>
+      {menuOpen && <div className="sidebar-backdrop" onClick={() => setMenuOpen(false)} />}
       <main className="admin-main">
         <header className="admin-top">
-          <span>مساحة العمل <span>/</span> {current?.name}</span>
+          <button type="button" className="icon-button menu-toggle" aria-label="القائمة" aria-expanded={menuOpen} aria-controls="admin-nav"
+            onClick={() => setMenuOpen(true)}><Menu size={22} /></button>
+          <span className="admin-crumbs"><span className="crumb-root">مساحة العمل</span><span className="sep" aria-hidden="true">/</span><b>{current?.name}</b></span>
           <span className="admin-top-user">
             {canSeeStorage && (
               <Link className="icon-button bell" href="/admin/notifications" aria-label={alerts.data?.failed ? `${alerts.data.failed} تنبيهات فاشلة` : 'تنبيهات البريد'}>
                 <Bell size={18} />{!!alerts.data?.failed && <i className="dot" />}
               </Link>
             )}
-            <Clock3 size={15} />{roleLabel[user.role]} · {user.full_name}
+            <span className="admin-top-name"><Clock3 size={15} />{roleLabel[user.role]} · {user.full_name}</span>
           </span>
         </header>
         <div className="admin-content">
