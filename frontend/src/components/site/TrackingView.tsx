@@ -17,13 +17,13 @@ const STAGE_OF: Partial<Record<StatusMeaning, number>> = { new: 1, in_review: 2,
 
 /** Ring that fills to the current stage (SVG stroke, animated in CSS). */
 function ProgressRing({ stage }: { stage: number }) {
-  const r = 26, c = 2 * Math.PI * r;
+  const r = 34, c = 2 * Math.PI * r;
   const done = stage === STAGES.length;
   return (
     <div className={'progress-ring' + (done ? ' done' : '')} role="img" aria-label={`المرحلة ${stage} من ${STAGES.length}: ${STAGES[stage - 1]}`}>
-      <svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
-        <circle cx="32" cy="32" r={r} className="ring-track" />
-        <circle cx="32" cy="32" r={r} className="ring-fill" style={{ ['--c' as string]: c, ['--off' as string]: c * (1 - stage / STAGES.length) }} />
+      <svg viewBox="0 0 84 84" width="84" height="84" aria-hidden="true">
+        <circle cx="42" cy="42" r={r} className="ring-track" />
+        <circle cx="42" cy="42" r={r} className="ring-fill" style={{ ['--c' as string]: c, ['--off' as string]: c * (1 - stage / STAGES.length) }} />
       </svg>
       <span aria-hidden="true">{done ? <Check size={20} /> : <><b>{stage}</b>/{STAGES.length}</>}</span>
       <small aria-hidden="true">{STAGES[stage - 1]}</small>

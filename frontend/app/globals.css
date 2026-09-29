@@ -91,10 +91,10 @@ a{color:inherit;text-decoration:none}a:focus-visible{outline:3px solid #d9a441;o
 .result-status{display:flex;align-items:center;gap:14px;flex-shrink:0}
 .progress-ring{position:relative;display:grid;justify-items:center;gap:2px}
 .progress-ring svg{transform:rotate(-90deg)}
-.ring-track{fill:none;stroke:#e5ecdc;stroke-width:6}
-.ring-fill{fill:none;stroke:var(--green);stroke-width:6;stroke-linecap:round;stroke-dasharray:var(--c);stroke-dashoffset:var(--off)}
-.progress-ring>span{position:absolute;top:0;height:64px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);direction:ltr}
-.progress-ring>span b{font-size:18px;color:var(--green);font-weight:700}
+.ring-track{fill:none;stroke:#e5ecdc;stroke-width:7}
+.ring-fill{fill:none;stroke:var(--green);stroke-width:7;stroke-linecap:round;stroke-dasharray:var(--c);stroke-dashoffset:var(--off)}
+.progress-ring>span{position:absolute;top:0;height:84px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);direction:ltr}
+.progress-ring>span b{font-size:22px;color:var(--green);font-weight:700}
 .progress-ring.done>span{color:var(--green)}
 .progress-ring>small{font-size:11px;color:var(--muted)}
 @media (max-width:560px){.result-status{flex-direction:column;align-items:flex-end;gap:8px}}
@@ -107,7 +107,7 @@ a{color:inherit;text-decoration:none}a:focus-visible{outline:3px solid #d9a441;o
 /* Success page: small burst of brand-coloured dots around the icon. */
 .success-icon{position:relative}
 .burst{position:absolute;inset:0;pointer-events:none}
-.burst i{position:absolute;left:50%;top:50%;width:7px;height:7px;margin:-3.5px;border-radius:50%;background:var(--green);opacity:0}
+.burst i{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px;border-radius:50%;background:var(--green);opacity:0}
 .burst i:nth-child(3n+2){background:var(--gold)}
 .burst i:nth-child(3n){background:#9fbf8f;border-radius:2px}
 .burst i:nth-child(1){--a:0deg;--d:54px}.burst i:nth-child(2){--a:30deg;--d:64px}.burst i:nth-child(3){--a:60deg;--d:52px}
@@ -118,43 +118,47 @@ a{color:inherit;text-decoration:none}a:focus-visible{outline:3px solid #d9a441;o
 .count-up{font-variant-numeric:tabular-nums}
 
 @media (prefers-reduced-motion:no-preference){
-[data-pill=ready]::before{transition:transform .32s cubic-bezier(.3,.8,.25,1),width .32s cubic-bezier(.3,.8,.25,1),height .32s cubic-bezier(.3,.8,.25,1)}
-.segmented>button,.filters>button{transition:color .2s}
-.ring-fill{animation:ring-fill 1.1s cubic-bezier(.3,.8,.25,1) .15s both}
-.drawn-check circle{stroke-dasharray:63;animation:draw-circle .4s ease-out both}
-.drawn-check path{stroke-dasharray:16;animation:draw-tick .3s ease-out .3s both}
-.button.is-done{animation:done-pop .4s ease-out}
+[data-pill=ready]::before{transition:transform .5s cubic-bezier(.34,1.35,.5,1),width .5s cubic-bezier(.34,1.35,.5,1),height .5s cubic-bezier(.34,1.35,.5,1)}
+.segmented>button,.filters>button{transition:color .3s}
+.ring-fill{animation:ring-fill 1.6s cubic-bezier(.3,.8,.25,1) .2s both}
+.progress-ring>span{animation:pop-in .5s cubic-bezier(.3,1.4,.5,1) 1.2s both}
+.drawn-check circle{stroke-dasharray:63;animation:draw-circle .5s ease-out both}
+.drawn-check path{stroke-dasharray:16;animation:draw-tick .4s ease-out .4s both}
+.button.is-done{animation:done-pop .5s ease-out}
 .success-icon{animation:pop-in .5s cubic-bezier(.3,1.4,.5,1) both}
-.burst i{animation:burst .9s cubic-bezier(.2,.7,.3,1) .3s both}
+.burst i{animation:burst 1.3s cubic-bezier(.2,.7,.3,1) .35s both}
 /* Service filter: matching cards come in one after another. */
-.services-grid.stagger .service-card{animation:rise .4s cubic-bezier(.3,.8,.25,1) both;animation-delay:calc(min(var(--i,0),8) * 45ms)}
-.lookup-list li{animation:rise .35s cubic-bezier(.3,.8,.25,1) both}
+.services-grid.stagger .service-card{animation:rise-far .6s cubic-bezier(.3,.8,.25,1) both;animation-delay:calc(min(var(--i,0),8) * 80ms)}
+.lookup-list li{animation:rise .5s cubic-bezier(.3,.8,.25,1) both}
 .lookup-list li:nth-child(2){animation-delay:60ms}.lookup-list li:nth-child(3){animation-delay:120ms}.lookup-list li:nth-child(n+4){animation-delay:180ms}
-.timeline>div{animation:rise .4s cubic-bezier(.3,.8,.25,1) both}
-.timeline>div:nth-child(2){animation-delay:70ms}.timeline>div:nth-child(3){animation-delay:140ms}.timeline>div:nth-child(n+4){animation-delay:200ms}
+.timeline>div{animation:rise .55s cubic-bezier(.3,.8,.25,1) both}
+.timeline>div:nth-child(2){animation-delay:120ms}.timeline>div:nth-child(3){animation-delay:240ms}.timeline>div:nth-child(n+4){animation-delay:360ms}
 }
 /* Scroll-linked (no JavaScript): the "three steps" line draws as the section
    comes into view, steps rise in turn, and service images unveil. Browsers
    without scroll timelines simply show everything in place. */
 @supports (animation-timeline:view()){
 @media (prefers-reduced-motion:no-preference){
-.steps{position:relative;container-type:inline-size}
-.steps::before{content:'';position:absolute;top:-22px;right:0;left:0;height:2px;background:repeating-linear-gradient(to left,#b7c7a6 0 7px,transparent 7px 13px);transform-origin:right;animation:line-draw linear both;animation-timeline:view();animation-range:entry 10% cover 40%}
-.steps::after{content:'';position:absolute;top:-26px;right:0;width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px #d9a44133;animation:dot-run linear both;animation-timeline:view();animation-range:entry 10% cover 40%}
-.step{animation:rise linear both;animation-timeline:view();animation-range:entry 5% cover 30%}
-.step:nth-child(2){animation-range:entry 15% cover 36%}
-.step:nth-child(3){animation-range:entry 25% cover 42%}
+.steps{position:relative;view-timeline:--steps}
+.steps::before{content:'';position:absolute;top:-22px;right:0;left:0;height:3px;border-radius:2px;background:repeating-linear-gradient(to left,#9fb58c 0 9px,transparent 9px 16px);transform-origin:right;animation:line-draw linear both;animation-timeline:--steps;animation-range:entry 0% cover 55%}
+.steps::after{content:'';position:absolute;top:-28px;right:0;width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 5px #d9a44140;animation:dot-run linear both;animation-timeline:--steps;animation-range:entry 0% cover 55%}
+.step{animation:rise-far linear both;animation-timeline:--steps;animation-range:entry 0% cover 40%}
+.step:nth-child(2){animation-range:entry 10% cover 47%}
+.step:nth-child(3){animation-range:entry 20% cover 54%}
 .service-custom-image{animation:unveil linear both;animation-timeline:view();animation-range:entry 0% entry 90%}
 }
 }
-@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+@keyframes rise{from{opacity:0;transform:translateY(20px)}}
+@keyframes rise-far{from{opacity:0;transform:translateY(40px) scale(.97)}}
 @keyframes ring-fill{from{stroke-dashoffset:var(--c)}}
 @keyframes draw-circle{from{stroke-dashoffset:63}}
 @keyframes draw-tick{from{stroke-dashoffset:16}}
-@keyframes done-pop{40%{transform:scale(1.03)}}
+@keyframes done-pop{40%{transform:scale(1.05)}}
 @keyframes pop-in{from{transform:scale(.6);opacity:0}}
-@keyframes burst{0%{opacity:1;transform:rotate(var(--a)) translateY(0) scale(.5)}70%{opacity:1}100%{opacity:0;transform:rotate(var(--a)) translateY(calc(-1 * var(--d))) scale(1)}}
+@keyframes burst{0%{opacity:1;transform:rotate(var(--a)) translateY(0) scale(.5)}70%{opacity:1}100%{opacity:0;transform:rotate(var(--a)) translateY(calc(-1.45 * var(--d))) scale(1)}}
 @keyframes line-draw{from{transform:scaleX(0)}}
-/* The dot travels with the line as it draws, then fades out, leaving the line. */
-@keyframes dot-run{from{transform:translateX(0);opacity:0}15%{opacity:1}85%{opacity:1}to{transform:translateX(calc(-1 * (100cqw - 10px)));opacity:0}}
+/* The dot travels with the line's tip (same named timeline, --steps), then fades out.
+   It moves with `right` in % of the steps box: cqw in a pseudo-element's keyframes was
+   painted against the viewport in Chrome, so the dot ran ahead of the line. */
+@keyframes dot-run{from{right:0;opacity:0}15%{opacity:1}85%{opacity:1}to{right:calc(100% - 14px);opacity:0}}
 @keyframes unveil{from{clip-path:inset(0 0 100% 0);transform:scale(1.06)}}

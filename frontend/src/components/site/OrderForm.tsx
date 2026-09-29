@@ -87,7 +87,7 @@ export function OrderForm({ service, limits }: { service: PublicServiceDetail; l
           if (reducedMotion()) return router.push(next);
           router.prefetch(next);
           setDone(true);
-          setTimeout(() => router.push(next), 700);
+          setTimeout(() => router.push(next), 1000);
         },
         onError: (err) => {
           // A validation error means nothing was created: the next attempt is a new submission.

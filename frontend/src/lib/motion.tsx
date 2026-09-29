@@ -42,7 +42,7 @@ export function SlidingGroup({ active, children, ...rest }: HTMLAttributes<HTMLD
   return <div ref={ref} {...rest}>{children}</div>;
 }
 
-/** Counts up to `value` (ease-out, ~0.7s) the first time it is known and on change. */
+/** Counts up to `value` (ease-out, ~1.2s) the first time it is known and on change. */
 export function CountUp({ value, pad = 2 }: { value: number | null | undefined; pad?: number }) {
   const [shown, setShown] = useState<number | null>(null);
   const from = useRef(0);
@@ -53,7 +53,7 @@ export function CountUp({ value, pad = 2 }: { value: number | null | undefined; 
     const a = from.current;
     let raf = 0;
     const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / 700);
+      const t = Math.min(1, (now - start) / 1200);
       const eased = 1 - (1 - t) ** 3;
       setShown(Math.round(a + (value - a) * eased));
       if (t < 1) raf = requestAnimationFrame(tick);
