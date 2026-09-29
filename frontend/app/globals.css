@@ -1073,5 +1073,9 @@ a.contact-line:hover{background:#f2f5ec}
 .closing-actions{flex-direction:column}
 .closing-actions .button{justify-content:center;width:100%}}
 /* With the on-screen keyboard open, fixed bars would sit on top of the field
-   being typed in: hide them while a text field has focus. */
-@media (max-width:760px){body:has(:is(input:not([type=checkbox],[type=radio],[type=file],[type=submit],[type=button]),textarea,select):focus) :is(.tab-bar,.whatsapp,.order-cta){display:none}}
+   being typed in: hide them while focus is in a form with text fields. They
+   come back 0.3s after focus leaves, so they never slide under a finger that
+   is mid-tap on the form's own submit button. */
+@media (max-width:760px){:is(.tab-bar,.whatsapp,.order-cta){transition:visibility 0s .3s}
+body:has(form:focus-within :is(input:not([type=checkbox],[type=radio],[type=file],[type=submit],[type=button]),textarea,select)) :is(.tab-bar,.whatsapp,.order-cta){visibility:hidden;transition-delay:0s}}
+@media (max-width:760px) and (prefers-reduced-motion:no-preference){.order-cta{transition:opacity .25s ease,transform .25s ease,visibility 0s .3s}}

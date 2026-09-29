@@ -171,12 +171,16 @@ test('home: closing action leads to services and a contact route', async ({ page
   expect(end).toBeLessThanOrEqual(bar!.y);
 });
 
-test('phone: fixed bars step aside while typing', async ({ page }) => {
-  await page.goto('/track');
+test('phone: fixed bars step aside while typing, without stealing the submit tap', async ({ page }) => {
+  await page.goto('/');
   const bar = page.locator('.tab-bar');
   await expect(bar).toBeVisible();
-  await page.locator('main input').first().focus();
+  const strip = page.locator('.tracking-strip');
+  await strip.getByLabel('رقم الطلب').fill('ARJ-NOTREAL1');
   await expect(bar).toBeHidden();
-  await page.locator('main input').first().blur();
+  // The button may sit where the bar returns; the tap must still submit.
+  await strip.getByRole('button', { name: /تتبع الطلب/ }).click();
+  await expect(page).toHaveURL(/\/track\?code=ARJ-NOTREAL1/);
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await expect(bar).toBeVisible();
 });
