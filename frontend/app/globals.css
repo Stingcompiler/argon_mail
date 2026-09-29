@@ -468,14 +468,9 @@ a.contact-line:hover{background:#f2f5ec}
 .order-cta{transition:opacity .25s ease,transform .25s ease}
 /* M3: pages fade in on in-app navigation (never on the first page). */
 .page-enter{animation:page-in .28s ease-out}
-/* M5: the decorative hero cards float gently. */
-.floating-chip{animation:float 6s ease-in-out infinite alternate}
-.chip-two{animation-delay:-3s}
 }
 /* M2: press feedback where there is no hover (touch screens). */
 @media (hover:none) and (prefers-reduced-motion:no-preference){
 :is(.button,.service-card,.tab-bar a,.nav-sheet nav a,.filters button,.contact-line,.order-cta):active{transform:scale(.97);transition:transform .1s ease}
 }
 @keyframes page-in{from{opacity:0;transform:translateY(8px)}}
-/* `translate` (not transform) so it combines with the chips' rotate(). */
-@keyframes float{from{translate:0 0}to{translate:0 -8px}}
