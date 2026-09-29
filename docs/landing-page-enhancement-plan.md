@@ -1,6 +1,18 @@
 # Landing page enhancement plan
 
-Status: proposed. This document is a plan, not a record of completed changes.
+Status: implemented in five stacked pull requests (#26–#30), awaiting the owner's copy review. The plan below is kept as written; this table records what was done.
+
+| Phase | PR | Done | Left for the owner |
+| --- | --- | --- | --- |
+| 1. Message and conversion path | #26 | New hero title and text (editable in settings; a migration updates only the untouched default), «استعرض الخدمات» first, «تابع طلبك» second, tracking band moved after «كيف تعمل» | Approve the final wording |
+| 2. Visual story | #27 | Default artwork shows the request journey with the featured services' own icons; hidden on phones so services come sooner; a custom hero image still replaces it | — |
+| 3. Trust | #28 | Three verifiable facts under the hero (privacy fact links to /privacy); «بعد إرسال طلبك» panel; no ratings, testimonials or counts | Add real proof (reviews, partner names, counts) only when it exists |
+| 4. Mobile discovery and closing | #29 | Position dots on the phone services row; closing section after the FAQ (WhatsApp only when configured, else /contact); fixed bars hide while a form has focus | — |
+| 5. Validation | #30 | Journey tests, widths 320–1920 (320 also covers 200% zoom), keyboard and reduced-motion tests; before/after measurements; privacy-safe events | Choose an analytics tool, if any (see below) |
+
+**Measurements (mobile Lighthouse).** Before the hero change (batch E, CI): home LCP 3.0 s, CLS 0. After (CI, phases 2–4): home LCP 3.0 s, CLS 0. Locally, 3 runs each on the same build: home TBT 267–304 ms and LCP 2.9–3.3 s, services TBT 236–279 ms and LCP 3.0–3.3 s. The new artwork added no measurable LCP or CLS cost. CI's home TBT varies widely between single runs (90–520 ms, one outlier of 3,930 ms where every script, framework chunks included, ran about 4× slower), so compare medians over several runs rather than one. INP needs real interactions: Lighthouse navigation runs report TBT as its lab proxy. LCP remains above the 2.5 s goal, as before.
+
+**Events.** `frontend/src/lib/analytics.ts` names six events: `cta_click` (services or track, with the page area), `service_select` (service slug), `contact_click` (whatsapp, email, phone or contact_page), `tracking_start` (code or name_phone), `request_start` and `request_complete` (service slug). Each is dispatched in the browser as an `arjoon:event` CustomEvent and pushed to `window.dataLayer` only if a tag manager already created it. Nothing is sent over the network, and no names, phone numbers, order codes or form contents are included (a Playwright test checks this). To start measuring, the owner picks a tool; its snippet then reads `dataLayer` or listens for `arjoon:event`, and the privacy page should say so.
 
 ## Goal
 

@@ -35,7 +35,7 @@ export default async function Home() {
           <span className="eyebrow"><span />{settings.hero_eyebrow}</span>
           <h1 className="preserve-lines">{settings.hero_title}</h1>
           <p className="preserve-lines">{settings.hero_text}</p>
-          <div className="hero-actions">
+          <div className="hero-actions" data-area="hero">
             {/* New visitors start by choosing a service; existing customers track. */}
             <Link className="button" href="/services">استعرض الخدمات <ArrowUpLeft size={19} /></Link>
             <Link className="button secondary" href="/track"><Package size={18} />تابع طلبك</Link>
@@ -63,7 +63,7 @@ export default async function Home() {
         <TrackForm />
       </section>
       {featured.length > 0 && (
-        <section className="container services-section" style={place('services')}>
+        <section className="container services-section" data-area="featured" style={place('services')}>
           <div className="section-heading">
             <div><span className="eyebrow">مساحات متعددة، عناية واحدة</span><h2>كيف نقدر نساعدك؟</h2></div>
             <Link className="text-button" href="/services">جميع الخدمات <ArrowUpLeft size={18} /></Link>
@@ -119,7 +119,7 @@ export default async function Home() {
       )}
       {/* Closing action (landing plan, phase 4): a clear next step at the bottom.
           WhatsApp only when the platform number is set; otherwise the contact page. */}
-      <section className="container closing-cta" aria-labelledby="closing-title" style={{ order: 995 }}>
+      <section className="container closing-cta" data-area="closing" aria-labelledby="closing-title" style={{ order: 995 }}>
         <div>
           <h2 id="closing-title">جاهز لخطوتك التالية؟</h2>
           <p>اختر الخدمة المناسبة وأرسل طلبك في دقائق، أو اسألنا قبل أن تبدأ.</p>

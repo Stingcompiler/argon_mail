@@ -3,6 +3,7 @@ import { ArrowLeft, LoaderCircle, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useState, type FormEvent } from 'react';
 import { useTrackingLookup } from '@/hooks/public';
+import { track } from '@/lib/analytics';
 import { ApiError, fieldErrors } from '@/lib/api/client';
 import { phoneProblem } from '@/lib/countries';
 import { formatDate, statusTone } from '@/lib/format';
@@ -24,6 +25,7 @@ export function NameLookup() {
     const pe = phoneProblem(phone);
     if (pe) { setErrors({ phone: pe }); focusInvalid(); return; }
     setErrors({});
+    track({ name: 'tracking_start', method: 'name_phone' });
     lookup.mutate({ full_name, phone }, { onError: (err) => { setErrors(fieldErrors(err)); focusInvalid(); } });
   };
 

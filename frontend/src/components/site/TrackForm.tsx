@@ -2,6 +2,7 @@
 import { ArrowLeft, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
+import { track } from '@/lib/analytics';
 
 /**
  * A plain GET form to /track?code=…, so it works before the page hydrates
@@ -13,6 +14,7 @@ export function TrackForm({ initial = '' }: { initial?: string }) {
     e.preventDefault();
     const value = String(new FormData(e.currentTarget).get('code') || '').trim().toUpperCase();
     if (!value) return;
+    track({ name: 'tracking_start', method: 'code' });
     router.push(`/track?code=${encodeURIComponent(value)}`);
   };
   return (
