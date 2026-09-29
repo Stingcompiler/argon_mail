@@ -1,5 +1,6 @@
 import { Package, Search } from 'lucide-react';
 import Link from 'next/link';
+import { connection } from 'next/server';
 import { TabBar } from '@/components/site/MobileNav';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteHeader } from '@/components/site/SiteHeader';
@@ -24,6 +25,9 @@ function Body() {
  * visitor never loses the way back. Falls back to the bare page if the site
  * settings can't be loaded. */
 export default async function NotFound() {
+  // Per request, like the site layout: at build time Django isn't running, so a
+  // prerendered 404 would bake in the bare fallback.
+  await connection();
   let site: Awaited<ReturnType<typeof getSite>> | null = null;
   try { site = await getSite(); } catch { /* bare page below */ }
   if (!site) return <Body />;
