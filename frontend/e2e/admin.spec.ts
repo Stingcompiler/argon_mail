@@ -90,4 +90,24 @@ test.describe('admin dashboard', () => {
     await expect(preview.getByText('معاينة مسودة غير منشورة')).toBeVisible();
     await expect(preview.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
   });
+
+  test('login returns to the requested dashboard page, never to another site', async ({ page }) => {
+    const { login, password } = creds();
+    let refreshCalls = 0;
+    page.on('request', (r) => { if (r.url().includes('/auth/refresh')) refreshCalls++; });
+    await page.goto('/admin/orders');
+    await expect(page).toHaveURL(/\/admin\/login\?next=/);
+    expect(refreshCalls, 'no session request for a browser that never signed in').toBe(0);
+    await page.getByLabel('البريد الإلكتروني أو اسم المستخدم').fill(login);
+    await page.getByLabel('كلمة المرور').fill(password);
+    await page.getByRole('button', { name: /دخول/ }).click();
+    await expect(page).toHaveURL(/\/admin\/orders$/);
+
+    await page.context().clearCookies();
+    await page.goto('/admin/login?next=' + encodeURIComponent('https://example.com/phish'));
+    await page.getByLabel('البريد الإلكتروني أو اسم المستخدم').fill(login);
+    await page.getByLabel('كلمة المرور').fill(password);
+    await page.getByRole('button', { name: /دخول/ }).click();
+    await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/admin$/);
+  });
 });

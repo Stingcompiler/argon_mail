@@ -57,13 +57,15 @@ export function AttachmentList({ order, items, canUpload, maxMb }: { order: Orde
 
 export function OrderMoney({ order, canEdit, maxMb }: { order: OrderDetail; canEdit: boolean; maxMb: number }) {
   const { notify } = useUi();
+  const quotes = order.quotes ?? [];
+  const payments = order.payments ?? [];
   const a = useOrderActions(order.id);
   const download = useDownloadAttachment(order.id);
   const [quote, setQuote] = useState({ amount: '', currency: 'SDG' as Currency, note: '' });
   const [decisionNote, setDecisionNote] = useState('');
   const [pay, setPay] = useState({ amount: '', currency: 'SDG' as Currency, method: 'bank_transfer' as Payment['method'], reference: '', note: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const pending = order.quotes.find((q) => q.status === 'pending');
+  const pending = quotes.find((q) => q.status === 'pending');
   const proofs = order.attachments.filter((f) => f.kind === 'payment_proof');
   const fail = (e: Error) => { setErrors(fieldErrors(e)); notify(e.message); };
 
@@ -83,9 +85,9 @@ export function OrderMoney({ order, canEdit, maxMb }: { order: OrderDetail; canE
 
       <section className="detail-block">
         <h3><Receipt size={16} /> عروض الأسعار</h3>
-        {order.quotes.length === 0 && <p className="subtle-copy">لم يُسجَّل عرض سعر بعد.</p>}
+        {quotes.length === 0 && <p className="subtle-copy">لم يُسجَّل عرض سعر بعد.</p>}
         <div className="note-list">
-          {[...order.quotes].reverse().map((q) => (
+          {[...quotes].reverse().map((q) => (
             <article key={q.id} className={q.status === 'superseded' ? 'muted-card' : ''}>
               <small>الإصدار {q.version} · {q.created_by.full_name} · {formatDateTime(q.created_at)}</small>
               <b>{money(q.amount, q.currency)}</b> <span className="subtle-copy">— {QUOTE_STATUS[q.status]}</span>
@@ -115,9 +117,9 @@ export function OrderMoney({ order, canEdit, maxMb }: { order: OrderDetail; canE
 
       <section className="detail-block">
         <h3><Banknote size={16} /> الدفعات المسجلة</h3>
-        {order.payments.length === 0 && <p className="subtle-copy">لا توجد دفعات مسجلة.</p>}
+        {payments.length === 0 && <p className="subtle-copy">لا توجد دفعات مسجلة.</p>}
         <div className="note-list">
-          {order.payments.map((p) => (
+          {payments.map((p) => (
             <article key={p.id}>
               <small>{p.recorded_by.full_name} · {formatDateTime(p.created_at)}</small>
               <b>{money(p.amount, p.currency)}</b> <span className="subtle-copy">— {p.method_label}{p.reference && ` · ${p.reference}`}</span>
@@ -159,7 +161,7 @@ export function OrderMoney({ order, canEdit, maxMb }: { order: OrderDetail; canE
               if (!file) return;
               const err = checkFile(file, false, maxMb);
               if (err) { notify(err); return; }
-              a.upload.mutate({ file, kind: 'payment_proof', payment: order.payments.at(-1)?.id }, { onSuccess: () => notify('رُفع الإثبات. تحقق منه ثم غيّر حالة الدفع يدويًا.'), onError: (er) => notify(fieldErrors(er).file || er.message) });
+              a.upload.mutate({ file, kind: 'payment_proof', payment: payments.at(-1)?.id }, { onSuccess: () => notify('رُفع الإثبات. تحقق منه ثم غيّر حالة الدفع يدويًا.'), onError: (er) => notify(fieldErrors(er).file || er.message) });
             }} />
           </label>
         )}

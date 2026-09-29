@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import APIException, PermissionDenied, ValidationError
+from rest_framework.exceptions import APIException, NotFound, PermissionDenied, ValidationError
 from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -192,7 +192,7 @@ class AdminOrderViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
 
     def _detail(self, order):
         order = self.get_queryset().get(pk=order.pk)
-        return Response(OrderDetailSerializer(order).data)
+        return Response(OrderDetailSerializer(order, context=self.get_serializer_context()).data)
 
     @extend_schema(request=StatusChangeSerializer, responses=OrderDetailSerializer)
     @action(detail=True, methods=["post"])
@@ -253,6 +253,8 @@ class AdminOrderViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
     def attachment_link(self, request, pk=None, file_id=None):
         order = self.get_object()
         f = get_object_or_404(PrivateFile, pk=file_id, order=order)
+        if f.kind == PrivateFile.Kind.PAYMENT_PROOF and request.user.role == Role.EXECUTOR:
+            raise NotFound()
         token = file_signing.make_token(f.pk, request.user.pk)
         return Response({"url": f"/api/v1/files/download/?t={token}", "expires_in": file_signing.MAX_AGE})
 

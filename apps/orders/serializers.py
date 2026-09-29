@@ -9,6 +9,20 @@ from apps.media_library.models import PrivateFile
 
 from .models import CURRENCIES, Order, OrderEvent, OrderNote, OrderStatus, PaymentEntry, PaymentStatus, Quote
 
+# Prices and payments are for admins and operators only. Executors can't change
+# them (the money actions refuse them) and don't see them either.
+MONEY_EVENTS = {
+    OrderEvent.Kind.QUOTE_CREATED, OrderEvent.Kind.QUOTE_DECIDED,
+    OrderEvent.Kind.PAYMENT_STATUS, OrderEvent.Kind.PAYMENT_RECORDED,
+}
+
+
+def hides_money(context) -> bool:
+    from apps.accounts.models import Role
+
+    user = getattr(context.get("request"), "user", None)
+    return getattr(user, "role", None) == Role.EXECUTOR
+
 
 class StatusSerializer(serializers.ModelSerializer):
     orders_count = serializers.IntegerField(read_only=True, required=False)
@@ -155,6 +169,12 @@ class OrderListSerializer(serializers.ModelSerializer):
         fields = ["id", "code", "customer_name", "customer_phone", "service_name", "status", "assignee",
                   "payment_status", "created_at", "updated_at"]
 
+    def to_representation(self, order):
+        data = super().to_representation(order)
+        if hides_money(self.context):
+            data.pop("payment_status", None)
+        return data
+
 
 class NoteSerializer(serializers.ModelSerializer):
     author = UserBriefSerializer(read_only=True)
@@ -234,6 +254,15 @@ class OrderDetailSerializer(OrderListSerializer):
             "notes", "events", "attachments", "quotes", "payments", "payment_status", "payment_status_label",
             "whatsapp_url",
         ]
+
+    def to_representation(self, order):
+        data = super().to_representation(order)
+        if hides_money(self.context):
+            for key in ("quotes", "payments", "payment_status_label"):
+                data.pop(key, None)
+            data["events"] = [e for e in data["events"] if e["kind"] not in MONEY_EVENTS]
+            data["attachments"] = [a for a in data["attachments"] if a["kind"] != PrivateFile.Kind.PAYMENT_PROOF]
+        return data
 
     def get_whatsapp_url(self, order):
         text = f"مرحبًا {order.customer_name}، بخصوص طلبك {order.code} لدى بريد عرجون."

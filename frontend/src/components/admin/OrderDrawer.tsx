@@ -65,7 +65,9 @@ export function OrderDrawer({ id, onClose }: { id: number; onClose: () => void }
             <StatusBadge meaning={o.status.meaning} label={o.status.label} />
           </div>
           <div className="editor-tabs" role="tablist">
-            {[{ id: 'details', name: 'التفاصيل', icon: FileText }, { id: 'notes', name: 'الملاحظات', icon: StickyNote }, { id: 'money', name: 'السعر والدفع', icon: Banknote }, { id: 'history', name: 'السجل', icon: History }].map((t) => (
+            {[{ id: 'details', name: 'التفاصيل', icon: FileText }, { id: 'notes', name: 'الملاحظات', icon: StickyNote }, { id: 'money', name: 'السعر والدفع', icon: Banknote }, { id: 'history', name: 'السجل', icon: History }]
+              // Prices and payments are for admins and operators; the server omits them for executors.
+              .filter((t) => t.id !== 'money' || canAssign).map((t) => (
               <button key={t.id} role="tab" aria-selected={tab === t.id} className={tab === t.id ? 'selected' : ''} onClick={() => setTab(t.id)}><t.icon size={15} />{t.name}</button>
             ))}
           </div>
@@ -130,7 +132,7 @@ export function OrderDrawer({ id, onClose }: { id: number; onClose: () => void }
                 {!o.notes.length && <p className="subtle-copy">لا توجد ملاحظات بعد.</p>}
               </div>
             </>}
-            {tab === 'money' && <OrderMoney order={o} canEdit={canAssign} maxMb={MAX_MB} />}
+            {tab === 'money' && canAssign && <OrderMoney order={o} canEdit={canAssign} maxMb={MAX_MB} />}
             {tab === 'history' && (
               <div className="activity-list">
                 {[...o.events].reverse().map((ev) => (
