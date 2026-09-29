@@ -1,0 +1,59 @@
+/* The original envelope hero illustration, now used only by the legacy design
+   preview (the site uses HeroJourney). Moved out of globals.css so public pages
+   don't download it. */
+.visual-top{position:absolute;top:27px;width:100%;text-align:center;font-size:10px;color:#849174}
+.orbit{position:absolute;border:1px solid #d9dfca;border-radius:50%;width:330px;height:330px;top:67px;left:50%;transform:translateX(-50%);z-index:-1}
+.orbit-two{width:260px;height:260px;top:100px}
+.visual-spark{position:absolute;left:54px;top:85px;color:#bd9346;transform:rotate(-12deg)}
+.mail-illustration{position:absolute;left:50%;top:83px;width:250px;height:248px;transform:translateX(-50%) rotate(-9deg)}
+.letter{position:absolute;background:#faf8ec;width:188px;height:176px;top:0;left:29px;border-radius:5px;box-shadow:0 5px 25px #3953320b;padding:20px;transform:rotate(6deg)}
+.letter-head{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--green);padding-bottom:15px;border-bottom:1px solid #e2e3d5}
+.letter-line{height:4px;background:#d5dacb;width:70%;margin-top:10px;border-radius:3px}
+.letter-line.long{width:94%;margin-top:15px}
+.letter-stamp{position:absolute;left:20px;bottom:24px;width:33px;height:33px;border:1px solid #b6c4a9;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#7d976c}
+.envelope{position:absolute;bottom:0;left:0;width:250px;height:158px;background:#456c50;border-radius:5px 5px 10px 10px;box-shadow:0 22px 22px #35573622;overflow:hidden}
+.envelope-flap{position:absolute;inset:0;background:#76906b;clip-path:polygon(0 0,50% 55%,100% 0)}
+.envelope-front{position:absolute;inset:0;background:#587b57;clip-path:polygon(0 0,50% 55%,100% 0,100% 100%,0 100%)}
+.envelope-front:after{content:'';position:absolute;inset:0;background:#61805b;clip-path:polygon(0 100%,50% 48%,100% 100%)}
+.seal{position:absolute;z-index:2;left:99px;top:63px;width:53px;height:53px;background:#d5b368;border-radius:50%;border:5px solid #dcbf7f;display:flex;align-items:center;justify-content:center;color:#836734;box-shadow:0 4px 6px #273e1b22}
+.floating-chip{background:#fffdf6;box-shadow:0 9px 30px #35402e0b;position:absolute;border:1px solid #ebece0;border-radius:9px;padding:12px;display:flex;align-items:center;gap:10px;z-index:3}
+.floating-chip b{font-size:10px;display:block;color:#3e533b}
+.floating-chip small{font-size:8px;display:block;color:#84907a;margin-top:2px}
+.chip-one{right:19px;bottom:79px;transform:rotate(3deg)}
+.chip-one>svg{color:#7a9462;margin-right:5px}
+.mini-icon{display:flex;align-items:center;justify-content:center;width:35px;height:35px;background:#e8eedf;border-radius:7px;color:#5a7950}
+.mini-icon.gold{background:#f5edda;color:#ad8844}
+.chip-two{left:21px;top:101px;transform:rotate(-5deg);padding:8px 11px}
+.chip-two b{font-size:9px}
+.visual-bottom{position:absolute;bottom:19px;left:22px;right:22px;display:flex;justify-content:space-between;font-size:8px;color:#829177;direction:ltr}
+.visual-bottom>span:first-child{letter-spacing:2px}
+.visual-bottom>span:last-child{display:flex;gap:5px;align-items:center;direction:rtl}
+@media(min-width:1500px){.mail-illustration{top:108px}
+.chip-two{top:125px}
+.chip-one{bottom:104px}
+.orbit{top:92px}
+.orbit-two{top:125px}}
+@media(max-width:1100px){.chip-one{right:9px}
+.chip-two{left:7px}}
+@media(max-width:800px){.mail-illustration{transform:translateX(-50%) rotate(-9deg) scale(.86);top:60px}
+.chip-one{bottom:64px;padding:8px;gap:6px}
+.chip-one b{font-size:8px}
+.chip-one small{font-size:7px}
+.chip-one>svg{width:13px}
+.mini-icon{width:29px;height:29px}
+.chip-two{top:82px;left:8px;padding:6px}
+.chip-two b{font-size:7px}
+.visual-top{font-size:8px}
+.visual-spark{left:38px;top:60px}
+.visual-bottom{font-size:6px;left:13px;right:13px}}
+@media(max-width:560px){.mail-illustration{top:42px;transform:translateX(-50%) rotate(-9deg) scale(.85)}
+.visual-top{top:19px}
+.orbit{top:35px;width:285px;height:285px}
+.orbit-two{top:66px;width:220px;height:220px}
+.chip-one{bottom:57px;right:13px;padding:9px}
+.chip-one b{font-size:9px}
+.chip-one small{font-size:7px}
+.chip-two{top:62px;left:14px}
+.chip-two b{font-size:8px}
+.visual-spark{top:49px;left:51px}
+.visual-bottom{font-size:7px}}

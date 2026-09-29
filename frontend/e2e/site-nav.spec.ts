@@ -113,3 +113,14 @@ test('home: both journeys are on the first screen, each with one destination', a
   await expect(browse).toHaveAttribute('href', '/services');
   await expect(track).toHaveAttribute('href', '/track');
 });
+
+/** Landing plan, phase 2: on phones the default artwork gives way, so the
+ * featured services start right after the hero actions. */
+test('home (phone): no default artwork before the services', async ({ page }) => {
+  await page.goto('/');
+  const visual = page.locator('.hero-visual:not(.has-image)');
+  if (await visual.count()) await expect(visual).toBeHidden();
+  const actions = await page.locator('.hero-actions').boundingBox();
+  const services = await page.locator('.services-section').boundingBox();
+  expect(services!.y - (actions!.y + actions!.height)).toBeLessThan(160);
+});

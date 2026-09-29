@@ -1,10 +1,12 @@
-import { ArrowLeft, ArrowUpLeft, Check, CheckCheck, CheckCircle2, Clock3, Layers3, Leaf, MessageCircle, Package, Send, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowUpLeft, CheckCheck, Clock3, Layers3, MessageCircle, Package, Send, ShieldCheck } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { FaqList } from '@/components/site/FaqList';
 import { JsonLd } from '@/components/site/JsonLd';
+import { HeroJourney } from '@/components/site/HeroJourney';
 import { ServiceCard } from '@/components/site/ServiceCard';
+import { iconFor } from '@/components/icons';
 import { TrackForm } from '@/components/site/TrackForm';
 import { getServices, getSite } from '@/lib/server-api';
 
@@ -46,24 +48,7 @@ export default async function Home() {
         <div className={'hero-visual' + (settings.hero_image_data ? ' has-image' : '')} aria-hidden={settings.hero_image_data ? undefined : true}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {settings.hero_image_data && <img className="custom-hero-image" src={settings.hero_image_data.url} alt={settings.hero_image_data.alt} width={settings.hero_image_data.width} height={settings.hero_image_data.height} fetchPriority="high" />}
-          <div className="orbit orbit-one" /><div className="orbit orbit-two" />
-          <span className="visual-top">من أول خطوة، إلى تمام الإنجاز.</span>
-          <div className="visual-spark"><Sparkles size={24} /></div>
-          <div className="mail-illustration">
-            <div className="letter">
-              <div className="letter-head"><Leaf size={21} /><span>{settings.name}</span></div>
-              <div className="letter-line long" /><div className="letter-line" />
-              <div className="letter-stamp"><Check size={21} /></div>
-            </div>
-            <div className="envelope"><div className="envelope-flap" /><div className="envelope-front" /><div className="seal"><Leaf size={29} /></div></div>
-          </div>
-          <div className="floating-chip chip-one">
-            <span className="mini-icon"><Package size={20} /></span>
-            <div><b>طلبك في أيدٍ أمينة</b><small>تفاصيل واضحة، في كل خطوة</small></div>
-            <CheckCircle2 size={16} />
-          </div>
-          <div className="floating-chip chip-two"><span className="mini-icon gold"><CheckCheck size={19} /></span><b>خطوة أقرب إلى إنجازك</b></div>
-          <div className="visual-bottom"><span>ARJOON POST</span><span>نهتم بالتفاصيل الصغيرة <ArrowUpLeft size={13} /></span></div>
+          {!settings.hero_image_data && <HeroJourney icons={featured.slice(0, 3).map((x) => iconFor(x.icon_key))} />}
         </div>
       </section>
       {/* After «how it works», whose last step introduces the request code. Tracking
