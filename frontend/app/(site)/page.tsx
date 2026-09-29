@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { connection } from 'next/server';
 import { FaqList } from '@/components/site/FaqList';
 import { JsonLd } from '@/components/site/JsonLd';
+import { CarouselDots } from '@/components/site/CarouselDots';
 import { HeroJourney } from '@/components/site/HeroJourney';
 import { ServiceCard } from '@/components/site/ServiceCard';
 import { iconFor } from '@/components/icons';
@@ -68,6 +69,7 @@ export default async function Home() {
             <Link className="text-button" href="/services">جميع الخدمات <ArrowUpLeft size={18} /></Link>
           </div>
           <div className="services-grid">{featured.map((s) => <ServiceCard key={s.slug} service={s} />)}</div>
+          <CarouselDots count={featured.length} target=".services-section .services-grid" />
         </section>
       )}
       <section className="how-section" id="how" style={place('how')}>
@@ -115,6 +117,20 @@ export default async function Home() {
           }} />
         </section>
       )}
+      {/* Closing action (landing plan, phase 4): a clear next step at the bottom.
+          WhatsApp only when the platform number is set; otherwise the contact page. */}
+      <section className="container closing-cta" aria-labelledby="closing-title" style={{ order: 995 }}>
+        <div>
+          <h2 id="closing-title">جاهز لخطوتك التالية؟</h2>
+          <p>اختر الخدمة المناسبة وأرسل طلبك في دقائق، أو اسألنا قبل أن تبدأ.</p>
+        </div>
+        <div className="closing-actions">
+          <Link className="button" href="/services">استعرض الخدمات <ArrowUpLeft size={19} /></Link>
+          {settings.whatsapp_url
+            ? <a className="button secondary" href={settings.whatsapp_url} target="_blank" rel="noopener noreferrer"><MessageCircle size={18} />تحدث معنا عبر WhatsApp</a>
+            : <Link className="button secondary" href="/contact"><MessageCircle size={18} />تواصل معنا</Link>}
+        </div>
+      </section>
     </div>
   );
 }

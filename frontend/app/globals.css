@@ -1055,3 +1055,23 @@ a.contact-line:hover{background:#f2f5ec}
 .after-submit li{display:flex;align-items:flex-start;gap:10px;font-size:var(--fs-small);line-height:1.8;color:var(--ink)}
 .after-submit li svg{color:var(--green);flex-shrink:0;margin-top:4px}
 @media (max-width:760px){.after-submit ul{grid-template-columns:1fr}.after-submit{padding:16px}}
+
+/* Landing phase 4: mobile discovery and the closing action. */
+.carousel-dots{display:none}
+@media (max-width:760px){.carousel-dots{display:flex;justify-content:center;gap:6px;margin-top:2px}
+.carousel-dots span{width:7px;height:7px;border-radius:999px;background:#cfd6c4;transition:width .25s ease,background-color .25s ease}
+.carousel-dots span.on{width:20px;background:var(--green)}}
+.closing-cta{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-block:12px 72px;padding:36px 40px;border-radius:24px;background:#18382b;color:#f4f5e9}
+.closing-cta h2{color:inherit;font-size:var(--fs-h2);margin:0 0 8px}
+.closing-cta p{margin:0;color:#d6ddcc;font-size:var(--fs-body)}
+.closing-actions{display:flex;gap:12px;flex-wrap:wrap;flex-shrink:0}
+.closing-cta .button{background:#f4f5e9;color:#18382b}
+.closing-cta .button:hover{background:#fff}
+.closing-cta .button.secondary{background:transparent;color:#f4f5e9;border-color:#f4f5e980;gap:10px}
+.closing-cta .button.secondary:hover{background:#ffffff14}
+@media (max-width:760px){.closing-cta{flex-direction:column;align-items:stretch;text-align:center;padding:28px 20px;margin-bottom:40px;border-radius:20px}
+.closing-actions{flex-direction:column}
+.closing-actions .button{justify-content:center;width:100%}}
+/* With the on-screen keyboard open, fixed bars would sit on top of the field
+   being typed in: hide them while a text field has focus. */
+@media (max-width:760px){body:has(:is(input:not([type=checkbox],[type=radio],[type=file],[type=submit],[type=button]),textarea,select):focus) :is(.tab-bar,.whatsapp,.order-cta){display:none}}
