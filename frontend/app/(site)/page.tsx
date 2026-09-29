@@ -1,4 +1,4 @@
-import { ArrowUpLeft, CheckCheck, Clock3, Layers3, MessageCircle, Package, Send, ShieldCheck } from 'lucide-react';
+import { ArrowUpLeft, Bell, CheckCheck, Clock3, Layers3, MessageCircle, Package, Send, ShieldCheck, UserCheck } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { connection } from 'next/server';
@@ -39,11 +39,12 @@ export default async function Home() {
             <Link className="button" href="/services">استعرض الخدمات <ArrowUpLeft size={19} /></Link>
             <Link className="button secondary" href="/track"><Package size={18} />تابع طلبك</Link>
           </div>
-          <div className="hero-trust">
-            <span><ShieldCheck size={16} />خصوصية لبياناتك</span><i />
-            <span><MessageCircle size={16} />تواصل مباشر</span><i />
-            <span><Clock3 size={16} />متابعة واضحة</span>
-          </div>
+          {/* Facts the product guarantees, not general reassurance (landing plan, phase 3). */}
+          <ul className="hero-trust">
+            <li><UserCheck size={16} />دون حساب أو كلمة مرور</li>
+            <li><ShieldCheck size={16} /><Link href="/privacy">تفاصيلك للفريق فقط، لا لصفحة المتابعة</Link></li>
+            <li><Clock3 size={16} />السعر موضح في كل خدمة، أو يُحدد بعد المراجعة</li>
+          </ul>
         </div>
         <div className={'hero-visual' + (settings.hero_image_data ? ' has-image' : '')} aria-hidden={settings.hero_image_data ? undefined : true}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -78,14 +79,24 @@ export default async function Home() {
           </div>
           <div className="steps">
             {[
-              { n: '01', title: 'اختر ما تحتاجه', text: 'تصفح الخدمات واطلع على تفاصيلها ومتطلباتها.', icon: Layers3 },
-              { n: '02', title: 'أرسل طلبك', text: 'أضف بياناتك ورقم WhatsApp للتواصل معك.', icon: Send },
-              { n: '03', title: 'تابع حتى الإنجاز', text: 'احتفظ برقم طلبك واعرف كل جديد في أي وقت.', icon: CheckCheck },
+              { n: '01', title: 'اختر ما تحتاجه', text: 'في صفحة كل خدمة تفاصيلها ومتطلباتها وطريقة تسعيرها.', icon: Layers3 },
+              { n: '02', title: 'أرسل طلبك', text: 'املأ النموذج واكتب رقمك في WhatsApp، فيظهر لك رقم طلب يبدأ بـ ARJ-.', icon: Send },
+              { n: '03', title: 'تابع حتى الإنجاز', text: 'تابع الحالة برقم الطلب، أو باسمك ورقم هاتفك إن نسيته.', icon: CheckCheck },
             ].map((s) => (
               <div className="step" key={s.n}>
                 <span className="step-number" aria-hidden="true">{s.n}</span><s.icon size={25} strokeWidth={1.4} /><h3>{s.title}</h3><p>{s.text}</p>
               </div>
             ))}
+          </div>
+          {/* What really happens next, in place of testimonials or ratings we don't have. */}
+          <div className="after-submit">
+            <h3>بعد إرسال طلبك</h3>
+            <ul>
+              <li><Bell size={18} /><span>يصل تنبيه إلى فريق عرجون، ويُراجَع طلبك في لوحة العمل.</span></li>
+              <li><MessageCircle size={18} /><span>إن احتاج الطلب تفاصيل أو تأكيد سعر، يتواصل معك المسؤول عبر WhatsApp.</span></li>
+              <li><Package size={18} /><span>كل تغيير في الحالة يظهر في صفحة المتابعة، مع ملاحظات الفريق العامة.</span></li>
+              <li><ShieldCheck size={18} /><span>لا نطلب بريدك الإلكتروني ولا نراسلك به؛ التواصل عبر WhatsApp وصفحة المتابعة.</span></li>
+            </ul>
           </div>
         </div>
       </section>

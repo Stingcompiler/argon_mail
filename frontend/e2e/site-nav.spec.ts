@@ -124,3 +124,12 @@ test('home (phone): no default artwork before the services', async ({ page }) =>
   const services = await page.locator('.services-section').boundingBox();
   expect(services!.y - (actions!.y + actions!.height)).toBeLessThan(160);
 });
+
+/** Landing plan, phase 3: concrete facts instead of broad reassurance. */
+test('home: verifiable facts and what happens after submitting', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.hero-trust').getByRole('link', { name: /تفاصيلك للفريق فقط/ })).toHaveAttribute('href', '/privacy');
+  const after = page.getByRole('heading', { name: 'بعد إرسال طلبك' });
+  await expect(after).toBeAttached();
+  await expect(page.locator('.after-submit li')).toHaveCount(4);
+});
