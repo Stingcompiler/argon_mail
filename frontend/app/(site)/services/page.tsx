@@ -14,7 +14,7 @@ export default async function ServicesPage() {
   await connection();
   const services = await getServices();
   return (
-    <section className="container page-section">
+    <section className="container page-section services-page">
       <div className="page-intro">
         <span className="eyebrow">خدمات تتسع لاحتياجك</span>
         <h1>خطوتك القادمة تبدأ هنا.</h1>

@@ -31,7 +31,8 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
 };
 
-export const viewport: Viewport = { themeColor: '#145A46' };
+// viewport-fit=cover lets the phone tab bar sit above the home indicator (safe-area insets).
+export const viewport: Viewport = { themeColor: '#145A46', viewportFit: 'cover' };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
