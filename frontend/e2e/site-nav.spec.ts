@@ -100,3 +100,16 @@ test('public pages hydrate without errors', async ({ page }) => {
   }
   expect(errors).toEqual([]);
 });
+
+/** Landing plan, phase 1: the first screen names the next step for a new
+ * visitor (services) and, separately, for an existing customer (tracking). */
+test('home: both journeys are on the first screen, each with one destination', async ({ page }) => {
+  await page.goto('/');
+  const hero = page.locator('.hero-actions');
+  const browse = hero.getByRole('link', { name: 'استعرض الخدمات' });
+  const track = hero.getByRole('link', { name: 'تابع طلبك' });
+  await expect(browse).toBeInViewport();
+  await expect(track).toBeInViewport();
+  await expect(browse).toHaveAttribute('href', '/services');
+  await expect(track).toHaveAttribute('href', '/track');
+});

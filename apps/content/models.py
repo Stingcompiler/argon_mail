@@ -17,6 +17,13 @@ def default_home_sections():
     return [{"key": k, "visible": True} for k in HOME_SECTIONS]
 
 
+HERO_TITLE = "خدمات متنوعة،\nبطلب واحد واضح."
+HERO_TEXT = (
+    "اختر الخدمة المناسبة، أرسل تفاصيلك، واحتفظ برقم طلبك لمتابعة حالته.\n"
+    "يتواصل معك فريق عرجون عبر WhatsApp عند الحاجة."
+)
+
+
 class SiteSettings(models.Model):
     """Singleton (pk=1) holding editable identity, contact and home copy."""
 
@@ -30,11 +37,10 @@ class SiteSettings(models.Model):
     logo = models.ForeignKey("media_library.PublicAsset", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
     hero_image = models.ForeignKey("media_library.PublicAsset", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
     hero_eyebrow = models.CharField(max_length=120, default="من السودان، أقرب إليك")
-    hero_title = models.CharField(max_length=160, default="خدمات متنوعة.\nومسافات أقرب.")
-    hero_text = models.TextField(
-        max_length=600,
-        default="كل ما تحتاجه لإنجاز خطوتك القادمة، في مكان واحد.\nاختر خدمتك، أرسل طلبك، ودع التفاصيل علينا.",
-    )
+    # Default copy answers what / how / how to follow up (landing plan, phase 1);
+    # the owner edits it in the dashboard.
+    hero_title = models.CharField(max_length=160, default=HERO_TITLE)
+    hero_text = models.TextField(max_length=600, default=HERO_TEXT)
     about = models.TextField(
         max_length=2000, default="منصة تجمع خدمات متنوعة في تجربة بسيطة، وتضع وضوح الخطوات في المقدمة."
     )

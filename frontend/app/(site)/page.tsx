@@ -19,10 +19,11 @@ export default async function Home() {
   const [{ settings, faq }, services] = await Promise.all([getSite(), getServices()]);
   const featured = services.filter((s) => s.is_featured);
   const sections = settings.home_sections?.length ? settings.home_sections : [{ key: 'services', visible: true }, { key: 'how', visible: true }, { key: 'faq', visible: true }];
-  // Owner-controlled order and visibility (hero and tracking strip always come first).
+  // Owner-controlled order and visibility (the hero always comes first). Orders
+  // step by 10 so the tracking band can sit right after «how it works» (5).
   const place = (key: string) => {
     const i = sections.findIndex((x) => x.key === key);
-    return { order: i < 0 ? 99 : i, display: i >= 0 && !sections[i].visible ? 'none' : undefined } as const;
+    return { order: i < 0 ? 990 : i * 10, display: i >= 0 && !sections[i].visible ? 'none' : undefined } as const;
   };
   return (
     <div className="home-layout">
@@ -32,8 +33,9 @@ export default async function Home() {
           <h1 className="preserve-lines">{settings.hero_title}</h1>
           <p className="preserve-lines">{settings.hero_text}</p>
           <div className="hero-actions">
-            <Link className="button" href="/services">اكتشف خدماتنا <ArrowUpLeft size={19} /></Link>
-            <a className="text-button" href="#how">كيف تعمل عرجون؟ <ArrowLeft size={17} /></a>
+            {/* New visitors start by choosing a service; existing customers track. */}
+            <Link className="button" href="/services">استعرض الخدمات <ArrowUpLeft size={19} /></Link>
+            <Link className="button secondary" href="/track"><Package size={18} />تابع طلبك</Link>
           </div>
           <div className="hero-trust">
             <span><ShieldCheck size={16} />خصوصية لبياناتك</span><i />
@@ -64,10 +66,12 @@ export default async function Home() {
           <div className="visual-bottom"><span>ARJOON POST</span><span>نهتم بالتفاصيل الصغيرة <ArrowUpLeft size={13} /></span></div>
         </div>
       </section>
-      <section className="container tracking-strip" aria-labelledby="track-heading" style={{ order: -1 }}>
+      {/* After «how it works», whose last step introduces the request code. Tracking
+          also stays one tap away in the header, the hero and the phone tab bar. */}
+      <section className="container tracking-strip" aria-labelledby="track-heading" style={{ order: place('how').order + 5 }}>
         <div className="tracking-label">
-          <span className="tracking-icon"><Package size={27} /></span>
-          <div><h2 id="track-heading">طلبك، أين وصل؟</h2><p>رقم واحد يبقيك على اطلاع.</p></div>
+          <span className="tracking-icon"><Package size={24} /></span>
+          <div><h2 id="track-heading">لديك رقم طلب؟</h2><p>تابع حالته في أي وقت.</p></div>
         </div>
         <TrackForm />
       </section>
