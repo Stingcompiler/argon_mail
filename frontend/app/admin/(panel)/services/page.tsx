@@ -5,7 +5,7 @@ import { ServicesManager } from '@/components/admin/ServicesManager';
 export default function ServicesPage() {
   return (
     <>
-      <PageHeading title="خدمات تتسع لاحتياجات عملائك." text="أنشئ الخدمات ونماذجها، وانشرها أو أخفها دون تعديل الكود." />
+      <PageHeading title="الخدمات والمجالات" text="الخدمات ونماذجها ونشرها." />
       <ServicesManager />
     </>
   );

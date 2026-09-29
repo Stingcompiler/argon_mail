@@ -42,4 +42,18 @@ test.describe('dashboard navigation', () => {
     await expect(nav.getByRole('link', { name: 'الفريق والصلاحيات' })).toBeInViewport();
     await expect(page.getByRole('button', { name: 'تسجيل الخروج' })).toBeInViewport();
   });
+
+  test('phone: orders start on the first screen; filters fold behind «تصفية»', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'phone layout');
+    await adminLogin(page, '/admin/orders');
+    const firstRow = page.locator('tbody tr').first();
+    await expect(firstRow).toBeInViewport();
+    const status = page.getByLabel('الحالة', { exact: true });
+    await expect(status).toBeHidden();
+    await page.getByRole('button', { name: /تصفية/ }).click();
+    await expect(status).toBeVisible();
+    const over = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+    expect(over).toBeLessThanOrEqual(1);
+  });
 });
+

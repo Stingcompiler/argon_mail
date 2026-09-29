@@ -35,24 +35,24 @@ export function NotificationsManager() {
         {list.isLoading ? <Loading /> : list.isError ? <LoadError error={list.error} retry={() => list.refetch()} /> : (
           <>
             <div className="table-scroll">
-              <table>
+              <table className="responsive-table">
                 <thead><tr><th>التنبيه</th><th>الحالة</th><th>المحاولات</th><th>آخر خطأ</th><th>التاريخ</th><th /></tr></thead>
                 <tbody>
                   {data!.results.map((n) => (
                     <tr key={n.id}>
-                      <td>
+                      <td data-primary="true">
                         <b>{n.kind_label}</b>
                         <small className="muted" style={{ display: 'block' }}>
                           {n.order ? <Link href={`/admin/orders?open=${n.order}`} dir="ltr">{n.order_code}</Link> : n.inquiry ? <Link href={`/admin/messages?open=${n.inquiry}`}>رسالة #{n.inquiry}</Link> : null}
                           {n.recipients.length ? ` · ${n.recipients.join('، ')}` : ''}
                         </small>
                       </td>
-                      <td><span className={'badge ' + tone(n.status)}><i />{n.status_label}</span>
+                      <td data-label="الحالة"><span className={'badge ' + tone(n.status)}><i />{n.status_label}</span>
                         {n.status === 'pending' && n.attempts > 0 && <small className="muted" style={{ display: 'block' }}><Clock3 size={11} /> التالية {formatDateTime(n.next_attempt_at)}</small>}</td>
-                      <td>{n.attempts}</td>
-                      <td className="muted" title={n.last_error} style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.last_error || '—'}</td>
-                      <td className="muted">{formatDateTime(n.sent_at || n.created_at)}</td>
-                      <td>
+                      <td data-label="المحاولات">{n.attempts}</td>
+                      <td data-label="آخر خطأ" className="muted" title={n.last_error} style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.last_error || '—'}</td>
+                      <td data-label="التاريخ" className="muted">{formatDateTime(n.sent_at || n.created_at)}</td>
+                      <td data-actions="true">
                         {n.status !== 'sent' && n.status !== 'sending' && (
                           <button className="button secondary" disabled={resend.isPending} onClick={() => resend.mutate(n.id, {
                             onSuccess: (r) => notify(r.sent_now ? 'أُرسل التنبيه.' : `تعذّر الإرسال: ${r.last_error}`),

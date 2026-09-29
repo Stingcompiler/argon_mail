@@ -24,17 +24,17 @@ export function PagesManager() {
       </div>
       <section className="table-panel">
         <div className="table-scroll">
-          <table>
+          <table className="responsive-table">
             <thead><tr><th>الصفحة</th><th>الرابط</th><th>الحالة</th><th>التذييل</th><th>آخر تعديل</th><th /></tr></thead>
             <tbody>
               {pages.data!.map((p) => (
                 <tr key={p.id} onClick={() => setEditing({ ...p })}>
-                  <td><b>{p.title}</b>{p.needs_review && <small className="field-error" style={{ display: 'block' }}>نص مبدئي يحتاج مراجعتك</small>}</td>
-                  <td dir="ltr" className="muted">{publicUrl(p)}</td>
-                  <td>{p.status === 'published' ? 'منشورة' : 'مسودة'}</td>
-                  <td>{p.show_in_footer ? 'نعم' : '—'}</td>
-                  <td className="muted">{formatDateTime(p.updated_at)}</td>
-                  <td><button className="icon-button" aria-label={'تحرير ' + p.title} onClick={(e) => { e.stopPropagation(); setEditing({ ...p }); }}><FileText size={16} /></button></td>
+                  <td data-primary="true"><b>{p.title}</b>{p.needs_review && <small className="field-error" style={{ display: 'block' }}>نص مبدئي يحتاج مراجعتك</small>}</td>
+                  <td data-label="الرابط" dir="ltr" className="muted">{publicUrl(p)}</td>
+                  <td data-label="الحالة">{p.status === 'published' ? 'منشورة' : 'مسودة'}</td>
+                  <td data-label="التذييل">{p.show_in_footer ? 'نعم' : '—'}</td>
+                  <td data-label="آخر تعديل" className="muted">{formatDateTime(p.updated_at)}</td>
+                  <td data-actions="true"><button className="icon-button" aria-label={'تحرير ' + p.title} onClick={(e) => { e.stopPropagation(); setEditing({ ...p }); }}><FileText size={16} /></button></td>
                 </tr>
               ))}
             </tbody>

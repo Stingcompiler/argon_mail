@@ -1,5 +1,5 @@
 'use client';
-import { ArrowUpLeft, Search } from 'lucide-react';
+import { ArrowUpLeft, Search, SlidersHorizontal } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -32,15 +32,28 @@ export function OrdersPanel({ compact = false }: { compact?: boolean }) {
   const data = orders.data;
   const pages = data ? Math.max(1, Math.ceil(data.count / 25)) : 1;
   const filtered = Object.entries(effective).some(([k, v]) => k !== 'page' && v);
+  // On phones the filters fold behind a button (they took a whole screen); desktop always shows them.
+  const [showFilters, setShowFilters] = useState(false);
+  const activeFilters = [filters.status, filters.assignee, filters.created_after, filters.created_before].filter(Boolean).length;
 
   return (
     <section className="table-panel">
       <div className="panel-heading">
         <div><h2>{compact ? 'أحدث الطلبات' : 'إدارة الطلبات'}</h2><p>{data ? `${data.count} طلب` : 'كل المعلومات التي تحتاجها للخطوة التالية.'}</p></div>
         <div className="table-search"><Search size={17} /><input aria-label="بحث في الطلبات" placeholder="رقم الطلب أو الاسم أو الهاتف..." value={q} onChange={(e) => setQ(e.target.value)} /></div>
+        {!compact && (
+          <div className="filters-toggle">
+            <button type="button" className={'button secondary' + (activeFilters ? ' has-active' : '')} aria-expanded={showFilters} aria-controls="order-filters" onClick={() => setShowFilters(!showFilters)}>
+              <SlidersHorizontal size={16} />تصفية{activeFilters > 0 && <b>{activeFilters}</b>}
+            </button>
+            {activeFilters > 0 && (
+              <button type="button" className="text-button" onClick={() => setFilters({ page: 1 })}>مسح</button>
+            )}
+          </div>
+        )}
       </div>
       {!compact && (
-        <div className="panel-heading filters-row">
+        <div id="order-filters" className={'panel-heading filters-row' + (showFilters ? ' open' : '')}>
           <select aria-label="الحالة" className="table-select" value={filters.status || ''} onChange={(e) => set({ status: e.target.value || undefined })}>
             <option value="">كل الحالات</option>
             {(statuses.data || []).map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
@@ -60,18 +73,18 @@ export function OrdersPanel({ compact = false }: { compact?: boolean }) {
       {orders.isLoading ? <Loading /> : orders.isError ? <LoadError error={orders.error} retry={() => orders.refetch()} /> : (
         <>
           <div className="table-scroll" aria-busy={orders.isFetching}>
-            <table>
+            <table className="responsive-table">
               <thead><tr><th>رقم الطلب</th><th>العميل</th><th>الخدمة</th><th>الحالة</th><th>المسؤول</th><th>التاريخ</th><th /></tr></thead>
               <tbody>
                 {data!.results.map((o) => (
                   <tr key={o.id} onClick={() => setSelected(o.id)}>
-                    <td className="order-id" dir="ltr">{o.code}</td>
-                    <td><span className="avatar">{o.customer_name[0]}</span>{o.customer_name}</td>
-                    <td>{o.service_name}</td>
-                    <td><StatusBadge meaning={o.status.meaning} label={o.status.label} /></td>
-                    <td className="muted">{o.assignee?.full_name || '—'}</td>
-                    <td className="muted">{formatDate(o.created_at)}</td>
-                    <td><button className="icon-button" aria-label={'عرض ' + o.code} onClick={(e) => { e.stopPropagation(); setSelected(o.id); }}><ArrowUpLeft size={17} /></button></td>
+                    <td data-primary="true" className="order-id" dir="ltr">{o.code}</td>
+                    <td data-label="العميل"><span className="avatar">{o.customer_name[0]}</span>{o.customer_name}</td>
+                    <td data-label="الخدمة">{o.service_name}</td>
+                    <td data-label="الحالة"><StatusBadge meaning={o.status.meaning} label={o.status.label} /></td>
+                    <td data-label="المسؤول" className="muted">{o.assignee?.full_name || '—'}</td>
+                    <td data-label="التاريخ" className="muted">{formatDate(o.created_at)}</td>
+                    <td data-actions="true"><button className="icon-button" aria-label={'عرض ' + o.code} onClick={(e) => { e.stopPropagation(); setSelected(o.id); }}><ArrowUpLeft size={17} /></button></td>
                   </tr>
                 ))}
               </tbody>
