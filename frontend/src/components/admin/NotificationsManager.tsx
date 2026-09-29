@@ -7,6 +7,7 @@ import { useNotifications, useResendNotification } from '@/hooks/admin';
 import type { NotificationStatus } from '@/lib/api/types';
 import { formatDateTime } from '@/lib/format';
 import { LoadError, Loading } from './ui';
+import { SlidingGroup } from '@/lib/motion';
 
 const FILTERS: { v: NotificationStatus | ''; l: string }[] = [
   { v: '', l: 'الكل' }, { v: 'failed', l: 'فشل' }, { v: 'pending', l: 'بانتظار الإرسال' }, { v: 'sent', l: 'أُرسل' }, { v: 'skipped', l: 'لم يُرسل' },
@@ -24,9 +25,9 @@ export function NotificationsManager() {
   return (
     <>
       <div className="workspace-toolbar">
-        <div className="segmented">
-          {FILTERS.map((f) => <button key={f.v} className={status === f.v ? 'selected' : ''} onClick={() => { setStatus(f.v); setPage(1); }}>{f.l}</button>)}
-        </div>
+        <SlidingGroup active={status} className="segmented" role="group" aria-label="تصفية التنبيهات">
+          {FILTERS.map((f) => <button key={f.v} className={status === f.v ? 'selected' : ''} aria-pressed={status === f.v} onClick={() => { setStatus(f.v); setPage(1); }}>{f.l}</button>)}
+        </SlidingGroup>
         <Link className="button secondary" href="/admin/settings#alerts"><Settings size={16} />بريد التنبيهات</Link>
       </div>
       <div className="design-tip"><Mail size={18} /><span>التنبيه يُحفظ مع الطلب نفسه ثم يُرسل في الخلفية. فشل البريد لا يؤثر على الطلب، ويُعاد تلقائيًا حتى 6 محاولات ثم ينتظر إعادة يدوية.</span></div>

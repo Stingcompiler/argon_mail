@@ -7,6 +7,7 @@ import { useInquiries, useInquiry, useStaff, useUpdateInquiry } from '@/hooks/ad
 import type { Inquiry, InquiryStatus } from '@/lib/api/types';
 import { formatDateTime } from '@/lib/format';
 import { LoadError, Loading } from './ui';
+import { SlidingGroup } from '@/lib/motion';
 
 const STATUSES: { v: InquiryStatus | ''; l: string }[] = [{ v: '', l: 'الكل' }, { v: 'new', l: 'جديدة' }, { v: 'in_progress', l: 'قيد المتابعة' }, { v: 'done', l: 'تمت المعالجة' }];
 
@@ -30,9 +31,9 @@ export function MessagesManager() {
   return (
     <>
       <div className="workspace-toolbar">
-        <div className="segmented">
-          {STATUSES.map((s) => <button key={s.v} className={status === s.v ? 'selected' : ''} onClick={() => setStatus(s.v)}>{s.l}</button>)}
-        </div>
+        <SlidingGroup active={status} className="segmented" role="group" aria-label="تصفية الرسائل">
+          {STATUSES.map((s) => <button key={s.v} className={status === s.v ? 'selected' : ''} aria-pressed={status === s.v} onClick={() => setStatus(s.v)}>{s.l}</button>)}
+        </SlidingGroup>
         <span className="muted small-text">{list.data ? `${list.data.count} رسائل` : ''}</span>
       </div>
       <div className="inbox-layout">
