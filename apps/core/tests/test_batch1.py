@@ -62,6 +62,24 @@ class RequestSizeLimitTests(APITestCase):
         self.assertEqual(response.status_code, 413)
         self.assertEqual(stream.tell(), len(body))
 
+    def test_chunked_body_is_drained_and_refused(self):
+        """No Content-Length (chunked): 411, and the body is read to the end first."""
+        import io
+
+        from django.test import RequestFactory
+
+        from apps.core.middleware import RequestSizeLimitMiddleware
+
+        body = b"x" * (3 * 1024 * 1024)
+        stream = io.BytesIO(body)
+        request = RequestFactory().post("/api/v1/public/inquiries/", data=b"", content_type="application/json")
+        request.META.pop("CONTENT_LENGTH", None)
+        request.META["HTTP_TRANSFER_ENCODING"] = "chunked"
+        request.META["wsgi.input"] = stream
+        response = RequestSizeLimitMiddleware(lambda r: None)(request)
+        self.assertEqual(response.status_code, 411)
+        self.assertEqual(stream.tell(), len(body))
+
     def test_normal_requests_unaffected(self):
         r = self.client.post("/api/v1/public/orders/", order_payload(self.service), format="json",
                              HTTP_IDEMPOTENCY_KEY=str(uuid.uuid4()))
