@@ -88,3 +88,15 @@ test('FAQ opens and closes; a closed answer is hidden from assistive tech', asyn
   await expect(second).toHaveAttribute('aria-expanded', 'true');
   await expect(answer).toBeVisible();
 });
+
+/** A hydration mismatch makes React throw away the server HTML and redraw the
+ * page (it happened on every page with a phone field). No page error allowed. */
+test('public pages hydrate without errors', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  for (const url of ['/', '/services', '/services/' + encodeURIComponent('إرسال-الطرود-والمستندات'), '/contact', '/track', '/about']) {
+    await page.goto(url);
+    await page.waitForLoadState('networkidle');
+  }
+  expect(errors).toEqual([]);
+});
