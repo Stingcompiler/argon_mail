@@ -1,8 +1,9 @@
 /**
  * Country calling codes (ITU-T E.164), keyed by ISO 3166-1 alpha-2.
- * Arabic country names come from Intl.DisplayNames, so they are not
- * maintained by hand.
+ * Arabic country names are generated data (country-names.ts).
  */
+import { COUNTRY_NAMES_AR, OTHERS_ORDER } from './country-names';
+
 const DIAL: Record<string, string> = {
   AF: '93', AL: '355', DZ: '213', AD: '376', AO: '244', AG: '1268', AR: '54', AM: '374', AU: '61', AT: '43',
   AZ: '994', BS: '1242', BH: '973', BD: '880', BB: '1246', BY: '375', BE: '32', BZ: '501', BJ: '229', BT: '975',
@@ -37,15 +38,9 @@ let cache: { common: Country[]; others: Country[] } | null = null;
 
 export function countries() {
   if (cache) return cache;
-  const names = new Intl.DisplayNames(['ar'], { type: 'region' });
-  const all = Object.entries(DIAL).map(([iso, dial]) => ({ iso, dial, name: names.of(iso) || iso }));
-  const byIso = new Map(all.map((c) => [c.iso, c]));
-  const common = COMMON.map((iso) => byIso.get(iso)!).filter(Boolean);
-  // One collator for the whole sort: localeCompare(…, 'ar') builds a new one
-  // per comparison, which cost ~70ms of main thread on a throttled phone.
-  const { compare } = new Intl.Collator('ar');
-  const others = all.filter((c) => !COMMON.includes(c.iso)).sort((a, b) => compare(a.name, b.name));
-  cache = { common, others };
+  // Static names and order (see country-names.ts): identical on server and client.
+  const make = (iso: string): Country => ({ iso, dial: DIAL[iso], name: COUNTRY_NAMES_AR[iso] || iso });
+  cache = { common: COMMON.filter((iso) => DIAL[iso]).map(make), others: OTHERS_ORDER.map(make) };
   return cache;
 }
 
