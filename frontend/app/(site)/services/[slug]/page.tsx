@@ -54,7 +54,7 @@ export default async function ServicePage({ params, searchParams }: Props) {
         <aside className="detail-info">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {s.image ? <img className="detail-image" src={s.image.url} alt={s.image.alt} width={s.image.width} height={s.image.height} fetchPriority="high" />
-            : <span className={`detail-icon ${s.color}`}><Icon size={42} strokeWidth={1.3} /></span>}
+            : <span className={`detail-icon ${s.color}`}><Icon size={42} strokeWidth={1.5} /></span>}
           <span className="eyebrow">{s.category.name}</span>
           <h1>{s.name}</h1>
           <p className="preserve-lines">{s.description}</p>

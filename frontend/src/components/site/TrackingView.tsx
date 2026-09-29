@@ -50,7 +50,7 @@ export function TrackingView() {
       {q.isLoading && <div className="empty-state" role="status"><LoaderCircle className="spin" size={30} /><p>جارٍ البحث عن طلبك...</p></div>}
       {q.isError && (q.error instanceof ApiError && q.error.status === 404 ? (
         <div className="empty-state" role="alert">
-          <Search size={35} />
+          <Search size={35} strokeWidth={1.5} />
           <h2>لم نعثر على هذا الطلب</h2>
           <p>تحقق من رقم المتابعة وأعد المحاولة. يبدأ الرقم بـ ARJ-.</p>
           <button className="text-button" onClick={() => setMode('name')}>نسيت الرقم؟ تابع باسمك ورقم هاتفك</button>

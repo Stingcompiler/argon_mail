@@ -1,5 +1,5 @@
 'use client';
-import { ArrowUpLeft, Menu } from 'lucide-react';
+import { ArrowLeft, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -26,7 +26,7 @@ export function SiteHeader({ name, tagline, logo, nav, whatsapp }: { name: strin
             </Link>
           ))}
         </nav>
-        <Link className="button secondary header-track" href="/track">تابع طلبك <ArrowUpLeft size={17} /></Link>
+        <Link className="button secondary header-track" href="/track">تابع طلبك <ArrowLeft size={17} /></Link>
         <button type="button" className="mobile-menu icon-button" aria-label="القائمة" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)}>
           <Menu size={22} />
         </button>

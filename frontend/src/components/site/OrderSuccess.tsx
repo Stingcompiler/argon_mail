@@ -15,7 +15,7 @@ export function OrderSuccess() {
   const [copied, setCopied] = useState(false);
   return (
     <>
-      <div className="success-icon"><CheckCheck size={35} /><span className="burst" aria-hidden="true">{Array.from({ length: 12 }, (_, i) => <i key={i} />)}</span></div>
+      <div className="success-icon"><CheckCheck size={35} strokeWidth={1.5} /><span className="burst" aria-hidden="true">{Array.from({ length: 12 }, (_, i) => <i key={i} />)}</span></div>
       <span className="eyebrow">خطوة أولى مكتملة</span>
       <h1>وصل طلبك.</h1>
       <p>احتفظ برقم المتابعة لتعرف حالة طلبك في أي وقت ومن أي جهاز. من يحمل الرقم يستطيع رؤية الحالة فقط.</p>

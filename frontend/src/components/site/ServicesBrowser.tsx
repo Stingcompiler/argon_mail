@@ -38,7 +38,7 @@ export function ServicesBrowser({ services, children }: { services: PublicServic
       </div>
       {!visible.some(Boolean) && (
         <div className="empty-state">
-          <Search size={35} />
+          <Search size={35} strokeWidth={1.5} />
           <h2>لم نجد خدمة بهذا الاسم</h2>
           <p>جرّب كلمة أخرى أو اختر جميع المجالات.</p>
         </div>

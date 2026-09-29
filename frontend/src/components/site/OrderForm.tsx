@@ -158,7 +158,7 @@ function FileField({ field: f, files, maxMb, error, onAdd, onRemove }: {
       {f.help_text && <small>{f.help_text}</small>}
       {!full && (
         <label className="upload-area">
-          <UploadCloud size={27} />
+          <UploadCloud size={27} strokeWidth={1.5} />
           <b>{image ? 'اختر صورة' : 'اختر ملفًا'}{f.max_files > 1 ? ` (حتى ${f.max_files})` : ''}</b>
           <small>{image ? 'PNG أو JPG أو WebP' : 'PDF أو صورة'} · حتى {maxMb} MB للملف</small>
           <input type="file" accept={image ? IMAGE_ACCEPT : FILE_ACCEPT} multiple={f.max_files > 1}

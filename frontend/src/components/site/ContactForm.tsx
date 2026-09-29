@@ -34,7 +34,7 @@ export function ContactForm() {
 
   if (sent) return (
     <div className="empty-state" role="status">
-      <CheckCircle2 size={40} />
+      <CheckCircle2 size={40} strokeWidth={1.5} />
       <h2>وصلت رسالتك.</h2>
       <p>سيراجعها فريق عرجون ويتواصل معك عبر WhatsApp عند الحاجة.</p>
       <button className="button secondary" onClick={() => setSent(false)}>إرسال رسالة أخرى</button>
