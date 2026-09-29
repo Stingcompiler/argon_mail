@@ -431,3 +431,51 @@ footer{padding-top:28px}
 }
 @keyframes shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
 @keyframes toast-in{from{opacity:0;transform:translateY(16px)}}
+/* ── Batch D: public site and motion ──────────────────────────────────── */
+/* FAQ (M1): the answer's height animates via grid rows; closed answers are
+   invisible (so skipped by keyboard and screen readers) but stay in the HTML. */
+.faq-answer{display:grid;grid-template-rows:0fr;visibility:hidden}
+.faq-answer>div{overflow:hidden}
+.faq-answer[data-open=true]{grid-template-rows:1fr;visibility:visible}
+.faq-item button svg{transition:transform .25s ease}
+
+/* Floating «اطلب الخدمة» on phone service pages (P2). */
+.order-cta{display:none}
+@media (max-width:760px){
+.order-cta{display:flex;align-items:center;justify-content:center;gap:10px;position:fixed;z-index:45;right:16px;left:76px;bottom:calc(76px + env(safe-area-inset-bottom));min-height:52px;border-radius:14px;background:var(--green);color:#fff;font-weight:700;font-size:var(--fs-body);box-shadow:0 10px 26px #13291e40}
+.order-cta.is-hidden{opacity:0;transform:translateY(12px);pointer-events:none}
+}
+
+/* Contact (P3): the form with a card of other ways to reach the team. */
+.contact-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:24px;align-items:start}
+.contact-layout .contact-form{max-width:none;margin:0}
+.contact-card{border:1px solid var(--line);border-radius:16px;background:#fffef9;padding:18px}
+.contact-card h2{font-size:var(--fs-title);font-weight:700;margin-bottom:8px}
+.contact-line{display:flex;align-items:center;gap:12px;min-height:60px;padding:8px 6px;border-radius:12px;color:var(--ink)}
+a.contact-line:hover{background:#f2f5ec}
+.contact-line b{display:block;font-size:var(--fs-small)}
+.contact-line small{display:block;font-size:var(--fs-label);color:var(--muted)}
+.contact-icon{width:40px;height:40px;border-radius:12px;background:#eef2e7;color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.contact-card .subtle-copy{margin-top:10px}
+@media (max-width:900px){.contact-layout{grid-template-columns:1fr}}
+
+/* Large screens (P4): use more of the width, a larger hero illustration. */
+@media (min-width:1600px){.container{max-width:1320px}.hero-visual{height:480px}}
+
+@media (prefers-reduced-motion:no-preference){
+.faq-answer{transition:grid-template-rows .3s ease,visibility 0s linear .3s}
+.faq-answer[data-open=true]{transition:grid-template-rows .3s ease}
+.order-cta{transition:opacity .25s ease,transform .25s ease}
+/* M3: pages fade in on in-app navigation (never on the first page). */
+.page-enter{animation:page-in .28s ease-out}
+/* M5: the decorative hero cards float gently. */
+.floating-chip{animation:float 6s ease-in-out infinite alternate}
+.chip-two{animation-delay:-3s}
+}
+/* M2: press feedback where there is no hover (touch screens). */
+@media (hover:none) and (prefers-reduced-motion:no-preference){
+:is(.button,.service-card,.tab-bar a,.nav-sheet nav a,.filters button,.contact-line,.order-cta):active{transform:scale(.97);transition:transform .1s ease}
+}
+@keyframes page-in{from{opacity:0;transform:translateY(8px)}}
+/* `translate` (not transform) so it combines with the chips' rotate(). */
+@keyframes float{from{translate:0 0}to{translate:0 -8px}}

@@ -67,3 +67,24 @@ test('unknown pages keep the site navigation', async ({ page }) => {
   await expect(page.getByRole('navigation', { name: 'التنقل السريع' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'القائمة', exact: true })).toBeVisible();
 });
+
+test('service page: floating «اطلب الخدمة» takes you to the form', async ({ page }) => {
+  await page.goto('/services/' + encodeURIComponent('إرسال-الطرود-والمستندات'));
+  const cta = page.getByRole('button', { name: /اطلب الخدمة/ });
+  await expect(cta).toBeVisible();
+  await cta.click();
+  await expect(page.getByLabel('الاسم الكامل')).toBeFocused();
+  await expect(page.locator('.order-cta')).toHaveClass(/is-hidden/);
+});
+
+test('FAQ opens and closes; a closed answer is hidden from assistive tech', async ({ page }) => {
+  await page.goto('/');
+  const second = page.locator('.faq-item button').nth(1);
+  await second.scrollIntoViewIfNeeded();
+  await expect(second).toHaveAttribute('aria-expanded', 'false');
+  const answer = page.locator('.faq-answer').nth(1);
+  await expect(answer).toBeHidden();
+  await second.click();
+  await expect(second).toHaveAttribute('aria-expanded', 'true');
+  await expect(answer).toBeVisible();
+});
