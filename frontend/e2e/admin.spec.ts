@@ -110,4 +110,25 @@ test.describe('admin dashboard', () => {
     await page.getByRole('button', { name: /دخول/ }).click();
     await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/admin$/);
   });
+
+  test('settings: a save bar appears only with unsaved changes', async ({ page }) => {
+    await adminLogin(page, '/admin/settings');
+    const bar = page.getByRole('region', { name: 'تعديلات غير محفوظة' });
+    await expect(bar).toHaveCount(0);
+    const tagline = page.getByLabel('العبارة التعريفية');
+    const original = await tagline.inputValue();
+    await tagline.fill(original + ' تجربة');
+    await expect(bar).toBeVisible();
+    await bar.getByRole('button', { name: 'تراجع' }).click();
+    await expect(bar).toHaveCount(0);
+    await expect(tagline).toHaveValue(original);
+  });
+
+  test('overview: «needs attention» opens the orders list already filtered', async ({ page }) => {
+    await adminLogin(page);
+    await page.getByRole('link', { name: /طلبات غير مسندة/ }).click();
+    await expect(page).toHaveURL(/\/admin\/orders\?assignee=none$/);
+    await expect(page.getByLabel('المسؤول', { exact: true })).toHaveValue('none');
+  });
 });
+

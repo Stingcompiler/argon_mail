@@ -50,27 +50,27 @@ export function AppearanceManager() {
       {!canEdit && <div className="notice">تعديل المظهر متاح للمدير فقط.</div>}
       <section className="editor-panel">
         <SectionTitle icon={Navigation} title="روابط القائمة الرئيسية" text="الاسم الذي يظهر، والصفحة التي يفتحها، وترتيبه. الروابط داخلية فقط." />
-        {nav.map((n, i) => (
-          <div className="field-builder" key={i}>
-            <div className="field-builder-head">
-              <span>الرابط {i + 1}</span>
-              <div>
-                <button className="icon-button" aria-label="تحريك للأعلى" disabled={!canEdit || i === 0} onClick={() => setNav(move(nav, i, -1))}><ArrowUp size={14} /></button>
-                <button className="icon-button" aria-label="تحريك للأسفل" disabled={!canEdit || i === nav.length - 1} onClick={() => setNav(move(nav, i, 1))}><ArrowDown size={14} /></button>
-                <button className="icon-button danger" aria-label={`حذف ${n.label}`} disabled={!canEdit || nav.length === 1} onClick={() => setNav(nav.filter((_, j) => j !== i))}><Trash2 size={14} /></button>
-              </div>
-            </div>
-            <div className="form-row">
-              <label>الاسم<input value={n.label} maxLength={30} disabled={!canEdit} onChange={(e) => setNav(nav.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} /></label>
-              <label>يفتح<select value={n.href} disabled={!canEdit} onChange={(e) => setNav(nav.map((x, j) => (j === i ? { ...x, href: e.target.value } : x)))}>
+        {/* One compact row per link: number, name, target, visibility, order and delete. */}
+        <ol className="nav-rows">
+          {nav.map((n, i) => (
+            <li className="nav-row" key={i}>
+              <span className="nav-row-num" aria-hidden="true">{i + 1}</span>
+              <input aria-label={`اسم الرابط ${i + 1}`} value={n.label} maxLength={30} disabled={!canEdit}
+                onChange={(e) => setNav(nav.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} />
+              <select aria-label={`صفحة الرابط ${i + 1}`} value={n.href} disabled={!canEdit}
+                onChange={(e) => setNav(nav.map((x, j) => (j === i ? { ...x, href: e.target.value } : x)))}>
                 {!targets.some((t) => t.href === n.href) && <option value={n.href}>{n.href}</option>}
                 {targets.map((t) => <option key={t.href} value={t.href}>{t.label}</option>)}
-              </select></label>
-            </div>
-            <div className="switch-row compact"><span>ظاهر في القائمة</span>
-              <Toggle checked={n.enabled} disabled={!canEdit} label={`إظهار ${n.label}`} onChange={(v) => setNav(nav.map((x, j) => (j === i ? { ...x, enabled: v } : x)))} /></div>
-          </div>
-        ))}
+              </select>
+              <Toggle checked={n.enabled} disabled={!canEdit} label={`إظهار ${n.label}`} onChange={(v) => setNav(nav.map((x, j) => (j === i ? { ...x, enabled: v } : x)))} />
+              <div className="nav-row-actions">
+                <button className="icon-button" aria-label={`تحريك ${n.label} للأعلى`} disabled={!canEdit || i === 0} onClick={() => setNav(move(nav, i, -1))}><ArrowUp size={15} /></button>
+                <button className="icon-button" aria-label={`تحريك ${n.label} للأسفل`} disabled={!canEdit || i === nav.length - 1} onClick={() => setNav(move(nav, i, 1))}><ArrowDown size={15} /></button>
+                <button className="icon-button danger" aria-label={`حذف ${n.label}`} disabled={!canEdit || nav.length === 1} onClick={() => setNav(nav.filter((_, j) => j !== i))}><Trash2 size={15} /></button>
+              </div>
+            </li>
+          ))}
+        </ol>
         {canEdit && nav.length < 8 && (
           <button className="dashed-button" onClick={() => setNav([...nav, { label: 'رابط جديد', href: '/services', enabled: true }])}><Plus size={18} />إضافة رابط</button>
         )}

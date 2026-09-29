@@ -21,14 +21,6 @@ export function TeamManager() {
         <p className="subtle-copy">الفريق المناسب، والصلاحية المناسبة. الأعضاء يُعطّلون ولا يُحذفون حفاظًا على السجل.</p>
         <button className="button" onClick={() => setAdding(true)}><UserPlus size={17} />إضافة عضو</button>
       </div>
-      <h2 className="sr-only">الأدوار</h2>
-      <div className="role-cards">
-        {[
-          { title: 'المدير', text: 'كل الأقسام بما فيها الفريق والإعدادات.', icon: ShieldCheck },
-          { title: 'المشغّل', text: 'الطلبات والخدمات والرسائل والمحتوى، دون الفريق.', icon: SlidersHorizontal },
-          { title: 'المنفذ', text: 'الطلبات المسندة إليه فقط: الحالة والملاحظات.', icon: CheckCheck },
-        ].map((r) => <article key={r.title}><r.icon size={23} /><h3>{r.title}</h3><p>{r.text}</p></article>)}
-      </div>
       <section className="table-panel">
         <div className="panel-heading"><div><h2>أعضاء الفريق</h2><p>الصلاحيات مطبقة على الخادم.</p></div><span className="date-chip">{team.data?.length ?? '…'} أعضاء</span></div>
         {team.isLoading ? <Loading /> : team.isError ? <LoadError error={team.error} retry={() => team.refetch()} /> : (
@@ -55,6 +47,17 @@ export function TeamManager() {
           </div>
         )}
       </section>
+      {/* What each role can do: reference, so it comes after the members and folds away. */}
+      <details className="role-guide">
+        <summary>ماذا يستطيع كل دور؟</summary>
+        <div className="role-cards">
+          {[
+            { title: 'المدير', text: 'كل الأقسام بما فيها الفريق والإعدادات.', icon: ShieldCheck },
+            { title: 'المشغّل', text: 'الطلبات والخدمات والرسائل والمحتوى، دون الفريق.', icon: SlidersHorizontal },
+            { title: 'المنفذ', text: 'الطلبات المسندة إليه فقط: الحالة والملاحظات.', icon: CheckCheck },
+          ].map((r) => <article key={r.title}><r.icon size={23} /><h3>{r.title}</h3><p>{r.text}</p></article>)}
+        </div>
+      </details>
       {adding && <AddMember onClose={() => setAdding(false)} />}
     </>
   );

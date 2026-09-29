@@ -12,7 +12,9 @@ import { SlidingGroup } from '@/lib/motion';
 const STATUSES: { v: InquiryStatus | ''; l: string }[] = [{ v: '', l: 'الكل' }, { v: 'new', l: 'جديدة' }, { v: 'in_progress', l: 'قيد المتابعة' }, { v: 'done', l: 'تمت المعالجة' }];
 
 export function MessagesManager() {
-  const [status, setStatus] = useState<InquiryStatus | ''>('');
+  // The overview links here with ?status=new.
+  const statusParam = useSearchParams().get('status');
+  const [status, setStatus] = useState<InquiryStatus | ''>(STATUSES.some((x) => x.v === statusParam) ? (statusParam as InquiryStatus) : '');
   const [q, setQ] = useState('');
   const [query, setQuery] = useState('');
   useEffect(() => { const t = setTimeout(() => setQuery(q), 350); return () => clearTimeout(t); }, [q]);

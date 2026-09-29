@@ -1,5 +1,9 @@
+from datetime import timedelta
+
 from django.db.models import Count, ProtectedError
+from django.db.models.functions import TruncDate
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -304,8 +308,19 @@ class AdminOrderViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
     @action(detail=False, methods=["get"])
     def summary(self, request):
         qs = self.filter_queryset(self.get_queryset())
-        by_meaning = dict(qs.values_list("status__meaning").annotate(n=Count("id")))
-        return Response({"total": qs.count(), "by_meaning": by_meaning})
+        by_meaning = dict(qs.values_list("status__meaning").annotate(n=Count("id")).order_by())
+        # For the overview's "needs attention" and 7-day chart (local calendar days).
+        today = timezone.localdate()
+        start = today - timedelta(days=6)
+        per_day = dict(
+            qs.filter(created_at__date__gte=start).annotate(day=TruncDate("created_at"))
+            .values_list("day").annotate(n=Count("id")).order_by()
+        )
+        last_7_days = [{"date": (start + timedelta(days=i)).isoformat(), "count": per_day.get(start + timedelta(days=i), 0)}
+                       for i in range(7)]
+        unassigned_new = qs.filter(status__meaning="new", assignee__isnull=True).count()
+        return Response({"total": qs.count(), "by_meaning": by_meaning, "unassigned_new": unassigned_new,
+                         "last_7_days": last_7_days})
 
 
 class StatusViewSet(viewsets.ModelViewSet):

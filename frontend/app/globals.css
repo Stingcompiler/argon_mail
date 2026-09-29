@@ -375,3 +375,59 @@ footer{padding-top:28px}
 .filters-row.open>*{min-width:0}
 .filters-row.open :is(select,input){width:100%;min-width:0;max-width:100%}
 }
+/* ── Batch C: the dashboard as an experience ──────────────────────────── */
+/* Settings: sections and a save bar that appears only with unsaved changes. */
+.settings-sections{margin-bottom:16px}
+.save-bar{position:sticky;bottom:12px;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:16px;padding:12px 16px;border-radius:14px;background:#173e32;color:#f1f2e6;box-shadow:0 12px 32px #13291e3d}
+.save-bar>div{display:flex;gap:8px}
+.save-bar .button{margin:0;min-height:44px}
+.save-bar .button.secondary{background:transparent;color:#f1f2e6;border-color:#4d6f5c}
+@media (max-width:760px){.form-row{grid-template-columns:1fr!important}.save-bar{bottom:8px}.save-bar>div{width:100%}.save-bar .button{flex:1}}
+
+/* Overview: needs attention + last 7 days. */
+.overview-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin:18px 0}
+@media (max-width:900px){.overview-grid{grid-template-columns:1fr}}
+.attention-panel,.week-chart{border:1px solid var(--line);border-radius:14px;background:#fffef9;padding:16px 18px}
+.attention-panel h2,.week-chart h2{font-size:var(--fs-title);font-weight:700;margin-bottom:10px}
+.attention-panel ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.attention-panel a{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:12px;min-height:56px;padding:8px 10px;border-radius:12px;color:var(--ink)}
+.attention-panel a:hover{background:#f2f5ec}
+.attention-panel a b{display:block;font-size:var(--fs-small)}
+.attention-panel a small{display:block;font-size:var(--fs-label);color:var(--muted)}
+.attention-panel strong{font-size:var(--fs-h3);font-variant-numeric:tabular-nums;color:var(--muted)}
+.attention-panel strong.has-items{color:var(--green)}
+.attention-icon{width:38px;height:38px;border-radius:11px;background:#eef2e7;color:var(--green);display:flex;align-items:center;justify-content:center}
+.attention-clear{display:flex;align-items:center;gap:8px;color:var(--green);font-size:var(--fs-small)}
+.week-head{display:flex;align-items:baseline;justify-content:space-between}
+.week-head b{font-size:var(--fs-small);color:var(--muted)}
+.week-bars{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end;height:130px;margin-top:6px}
+.week-bars>div{display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.week-bars .bar{position:relative;width:100%;max-width:34px;height:var(--h);min-height:4px;border-radius:7px 7px 3px 3px;background:#cfdcc2}
+.week-bars .today .bar{background:var(--green)}
+.week-bars .bar i{position:absolute;top:-20px;left:0;right:0;text-align:center;font-style:normal;font-size:var(--fs-label);color:var(--muted)}
+.week-bars small{font-size:var(--fs-label);color:var(--muted)}
+
+/* Team: role guide folds away under the members. */
+.role-guide{margin-top:16px;border:1px solid var(--line);border-radius:14px;background:#fffef9;padding:4px 16px}
+.role-guide summary{cursor:pointer;min-height:48px;display:flex;align-items:center;font-weight:600;font-size:var(--fs-small)}
+.role-guide .role-cards{margin:4px 0 14px}
+
+/* Menu editor: one compact row per link. */
+.nav-rows{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:8px}
+.nav-row{display:grid;grid-template-columns:28px 1fr 1fr auto auto;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:#fffef9}
+.nav-row-num{width:26px;height:26px;border-radius:50%;background:#eef2e7;color:var(--green);display:flex;align-items:center;justify-content:center;font-size:var(--fs-label);font-weight:600}
+.nav-row :is(input,select){border:1px solid #dde2d7;border-radius:8px;padding:9px 11px;background:#fff;min-width:0;width:100%;font-size:var(--fs-small)}
+.nav-row-actions{display:flex;gap:2px}
+@media (max-width:760px){.nav-row{grid-template-columns:28px 1fr auto;grid-template-areas:"num name toggle" "num target actions"}.nav-row-num{grid-area:num}.nav-row input{grid-area:name}.nav-row select{grid-area:target}.nav-row .toggle{grid-area:toggle}.nav-row-actions{grid-area:actions}.nav-row :is(input,select){font-size:16px}}
+
+/* Loading skeletons (D9) and toast entrance (M4). */
+.skeleton{display:flex;flex-direction:column;gap:12px;padding:18px 4px}
+.skeleton-row{display:grid;grid-template-columns:2fr 3fr 1fr;gap:14px}
+.skeleton-row i{height:14px;border-radius:7px;background:#e9ede2}
+@media (prefers-reduced-motion:no-preference){
+.skeleton-row i{background:linear-gradient(90deg,#e9ede2 0%,#f5f7f0 50%,#e9ede2 100%);background-size:200% 100%;animation:shimmer 1.2s ease-in-out infinite}
+.toast{animation:toast-in .3s cubic-bezier(.3,.9,.3,1)}
+.save-bar{animation:toast-in .25s ease-out}
+}
+@keyframes shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
+@keyframes toast-in{from{opacity:0;transform:translateY(16px)}}

@@ -1,14 +1,29 @@
 'use client';
-import { CircleHelp, Globe, Plus, Save, Trash2 } from 'lucide-react';
+import { Bell, CircleHelp, Globe, LayoutTemplate, Plus, Save, Search, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUi } from '@/contexts/UiContext';
 import { useFaq, useFaqActions, useSaveSiteSettings, useSiteSettings } from '@/hooks/admin';
 import { fieldErrors } from '@/lib/api/client';
+import { SlidingGroup } from '@/lib/motion';
 import type { FAQItem, SiteSettings } from '@/lib/api/types';
 import { AssetPicker } from './MediaLibrary';
 import { LoadError, Loading, SectionTitle, Toggle } from './ui';
 
+const SECTIONS = [
+  { id: 'identity', name: 'الهوية والتواصل' },
+  { id: 'home', name: 'الصفحة الرئيسية' },
+  { id: 'alerts', name: 'التنبيهات والملفات' },
+  { id: 'seo', name: 'محركات البحث' },
+  { id: 'faq', name: 'الأسئلة الشائعة' },
+] as const;
+type SectionId = (typeof SECTIONS)[number]['id'];
+
+/**
+ * Site settings in sections (one shared draft, so switching sections keeps
+ * edits). A save bar appears at the bottom whenever there are unsaved
+ * changes, and the browser warns before leaving the page with them.
+ */
 export function SettingsManager() {
   const { user } = useAuth();
   const { notify } = useUi();
@@ -16,7 +31,17 @@ export function SettingsManager() {
   const save = useSaveSiteSettings();
   const [draft, setDraft] = useState<SiteSettings | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [section, setSection] = useState<SectionId>('identity');
   useEffect(() => { if (settings.data && !draft) setDraft(settings.data); }, [settings.data, draft]);
+  // The notifications page links to #alerts.
+  useEffect(() => { if (window.location.hash === '#alerts') setSection('alerts'); }, []);
+  const dirty = !!draft && !!settings.data && JSON.stringify(draft) !== JSON.stringify(settings.data);
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [dirty]);
   const canEdit = user?.role === 'admin';
   if (settings.isLoading || (!draft && !settings.isError)) return <Loading />;
   if (settings.isError) return <LoadError error={settings.error} retry={() => settings.refetch()} />;
@@ -31,46 +56,84 @@ export function SettingsManager() {
       {errors[k] && <small className="field-error">{errors[k]}</small>}
     </label>
   );
+  const submit = () => {
+    setErrors({});
+    save.mutate(d, {
+      onSuccess: (s) => { setDraft(s); notify('حُفظت الإعدادات.'); },
+      onError: (e) => {
+        const errs = fieldErrors(e); setErrors(errs); notify(e.message);
+        // Show the section holding the first invalid field.
+        const where: Record<string, SectionId> = { hero_eyebrow: 'home', hero_title: 'home', hero_text: 'home', about: 'home', hero_image: 'home',
+          notify_emails: 'alerts', max_file_mb: 'alerts', max_files_per_order: 'alerts', seo_title: 'seo', seo_description: 'seo' };
+        const first = Object.keys(errs)[0];
+        setSection(where[first] || 'identity');
+      },
+    });
+  };
   return (
     <div className="settings-layout single">
-      <section className="editor-panel">
-        <SectionTitle icon={Globe} title="الهوية والتواصل والرئيسية" text="تظهر في الموقع خلال ثوانٍ من الحفظ." />
-        {!canEdit && <div className="notice">تعديل الإعدادات متاح للمدير فقط. يمكنك تحرير الأسئلة الشائعة أدناه.</div>}
-        {canEdit && <AssetPicker label="شعار المنصة" value={d.logo} onChange={(id) => set({ logo: id })} />}
-        <div className="form-row">{input('name', 'اسم المنصة', { max: 80 })}{input('tagline', 'العبارة التعريفية', { max: 120 })}</div>
-        <div className="form-row">{input('whatsapp_phone', 'رقم WhatsApp للمنصة', { ltr: true, hint: 'مع رمز الدولة. يظهر زر WhatsApp عند ضبطه.' })}{input('email', 'البريد الإلكتروني العام', { ltr: true })}</div>
-        {input('whatsapp_text', 'نص بداية المحادثة', { area: true, max: 300 })}
-        <div className="switch-row"><div><b>إظهار زر WhatsApp</b><p>زر عائم في صفحات الموقع العامة.</p></div><Toggle checked={d.show_whatsapp} disabled={!canEdit} onChange={(v) => set({ show_whatsapp: v })} label="إظهار زر واتساب" /></div>
-        {input('address', 'العنوان', { max: 200 })}
-        {canEdit && <AssetPicker label="صورة المقدمة في الرئيسية" value={d.hero_image} onChange={(id) => set({ hero_image: id })} />}
-        {input('hero_eyebrow', 'عبارة أعلى المقدمة', { max: 120 })}
-        {input('hero_title', 'عنوان المقدمة', { area: true, max: 160, hint: 'سطر جديد لكل سطر في العنوان.' })}
-        {input('hero_text', 'نص المقدمة', { area: true, max: 600 })}
-        {input('about', 'نص صفحة عن المنصة', { area: true, max: 2000 })}
-        <h3 id="alerts">تنبيهات البريد للإدارة</h3>
-        {input('notify_emails', 'البريد المستلم للتنبيهات', { ltr: true, max: 500, hint: 'عنوان أو أكثر مفصولة بفاصلة. يصل تنبيه مختصر برابط، دون بيانات العميل.' })}
-        <div className="switch-row"><div><b>تنبيه عند طلب جديد</b></div><Toggle checked={!!d.notify_orders} disabled={!canEdit} onChange={(v) => set({ notify_orders: v })} label="تنبيه الطلبات" /></div>
-        <div className="switch-row"><div><b>تنبيه عند رسالة جديدة</b></div><Toggle checked={!!d.notify_messages} disabled={!canEdit} onChange={(v) => set({ notify_messages: v })} label="تنبيه الرسائل" /></div>
-        <h3>الملفات المرفقة</h3>
-        <div className="form-row">
-          <label>حجم الملف الأقصى (MB)<input type="number" min={1} max={20} value={d.max_file_mb} disabled={!canEdit} onChange={(e) => set({ max_file_mb: Number(e.target.value) })} />{errors.max_file_mb && <small className="field-error">{errors.max_file_mb}</small>}</label>
-          <label>عدد الملفات لكل طلب<input type="number" min={1} max={10} value={d.max_files_per_order} disabled={!canEdit} onChange={(e) => set({ max_files_per_order: Number(e.target.value) })} />{errors.max_files_per_order && <small className="field-error">{errors.max_files_per_order}</small>}</label>
-        </div>
-        <p className="subtle-copy">الأنواع المقبولة: PDF وPNG وJPG وWebP، ويُتحقق من محتوى الملف الفعلي. الحد الأعلى على الخادم 20 MB و10 ملفات.</p>
-        <h3>محركات البحث</h3>
-        {input('seo_title', 'عنوان الصفحة الرئيسية', { max: 70 })}
-        {input('seo_description', 'وصف الموقع في نتائج البحث', { area: true, max: 170 })}
-        {canEdit && (
-          <div className="save-row">
-            <span>{save.isSuccess ? 'تم الحفظ' : ''}</span>
-            <button className="button" disabled={save.isPending} onClick={() => {
-              setErrors({});
-              save.mutate(d, { onSuccess: (s) => { setDraft(s); notify('حُفظت الإعدادات.'); }, onError: (e) => { setErrors(fieldErrors(e)); notify(e.message); } });
-            }}><Save size={16} />حفظ الإعدادات</button>
+      <SlidingGroup active={section} className="segmented settings-sections" role="group" aria-label="أقسام الإعدادات">
+        {SECTIONS.map((t) => (
+          <button key={t.id} type="button" className={section === t.id ? 'selected' : ''} aria-pressed={section === t.id} onClick={() => setSection(t.id)}>{t.name}</button>
+        ))}
+      </SlidingGroup>
+      {section === 'faq' ? <FaqEditor /> : (
+        <section className="editor-panel">
+          {!canEdit && <div className="notice">تعديل الإعدادات متاح للمدير فقط. يمكنك تحرير الأسئلة الشائعة من قسمها.</div>}
+          {section === 'identity' && (
+            <>
+              <SectionTitle icon={Globe} title="الهوية والتواصل" text="تظهر في الموقع خلال ثوانٍ من الحفظ." />
+              {canEdit && <AssetPicker label="شعار المنصة" value={d.logo} onChange={(id) => set({ logo: id })} />}
+              <div className="form-row">{input('name', 'اسم المنصة', { max: 80 })}{input('tagline', 'العبارة التعريفية', { max: 120 })}</div>
+              <div className="form-row">{input('whatsapp_phone', 'رقم WhatsApp للمنصة', { ltr: true, hint: 'مع رمز الدولة. يظهر زر WhatsApp عند ضبطه.' })}{input('email', 'البريد الإلكتروني العام', { ltr: true })}</div>
+              {input('whatsapp_text', 'نص بداية المحادثة', { area: true, max: 300 })}
+              <div className="switch-row"><div><b>إظهار زر WhatsApp</b><p>زر عائم في صفحات الموقع العامة.</p></div><Toggle checked={d.show_whatsapp} disabled={!canEdit} onChange={(v) => set({ show_whatsapp: v })} label="إظهار زر واتساب" /></div>
+              {input('address', 'العنوان', { max: 200 })}
+            </>
+          )}
+          {section === 'home' && (
+            <>
+              <SectionTitle icon={LayoutTemplate} title="الصفحة الرئيسية" text="المقدمة ونص صفحة «عن المنصة»." />
+              {canEdit && <AssetPicker label="صورة المقدمة في الرئيسية" value={d.hero_image} onChange={(id) => set({ hero_image: id })} />}
+              {input('hero_eyebrow', 'عبارة أعلى المقدمة', { max: 120 })}
+              {input('hero_title', 'عنوان المقدمة', { area: true, max: 160, hint: 'سطر جديد لكل سطر في العنوان.' })}
+              {input('hero_text', 'نص المقدمة', { area: true, max: 600 })}
+              {input('about', 'نص صفحة عن المنصة', { area: true, max: 2000 })}
+            </>
+          )}
+          {section === 'alerts' && (
+            <>
+              <SectionTitle icon={Bell} title="التنبيهات والملفات" text="بريد تنبيهات الإدارة وحدود المرفقات." />
+              <h3 id="alerts">تنبيهات البريد للإدارة</h3>
+              {input('notify_emails', 'البريد المستلم للتنبيهات', { ltr: true, max: 500, hint: 'عنوان أو أكثر مفصولة بفاصلة. يصل تنبيه مختصر برابط، دون بيانات العميل.' })}
+              <div className="switch-row"><div><b>تنبيه عند طلب جديد</b></div><Toggle checked={!!d.notify_orders} disabled={!canEdit} onChange={(v) => set({ notify_orders: v })} label="تنبيه الطلبات" /></div>
+              <div className="switch-row"><div><b>تنبيه عند رسالة جديدة</b></div><Toggle checked={!!d.notify_messages} disabled={!canEdit} onChange={(v) => set({ notify_messages: v })} label="تنبيه الرسائل" /></div>
+              <h3>الملفات المرفقة</h3>
+              <div className="form-row">
+                <label>حجم الملف الأقصى (MB)<input type="number" min={1} max={20} value={d.max_file_mb} disabled={!canEdit} onChange={(e) => set({ max_file_mb: Number(e.target.value) })} />{errors.max_file_mb && <small className="field-error">{errors.max_file_mb}</small>}</label>
+                <label>عدد الملفات لكل طلب<input type="number" min={1} max={10} value={d.max_files_per_order} disabled={!canEdit} onChange={(e) => set({ max_files_per_order: Number(e.target.value) })} />{errors.max_files_per_order && <small className="field-error">{errors.max_files_per_order}</small>}</label>
+              </div>
+              <p className="subtle-copy">الأنواع المقبولة: PDF وPNG وJPG وWebP، ويُتحقق من محتوى الملف الفعلي. الحد الأعلى على الخادم 20 MB و10 ملفات.</p>
+            </>
+          )}
+          {section === 'seo' && (
+            <>
+              <SectionTitle icon={Search} title="محركات البحث" text="كيف تظهر الرئيسية في نتائج البحث وعند المشاركة." />
+              {input('seo_title', 'عنوان الصفحة الرئيسية', { max: 70 })}
+              {input('seo_description', 'وصف الموقع في نتائج البحث', { area: true, max: 170 })}
+            </>
+          )}
+        </section>
+      )}
+      {canEdit && dirty && (
+        <div className="save-bar" role="region" aria-label="تعديلات غير محفوظة">
+          <span>لديك تعديلات غير محفوظة.</span>
+          <div>
+            <button type="button" className="button secondary" disabled={save.isPending} onClick={() => { setDraft(settings.data!); setErrors({}); }}>تراجع</button>
+            <button type="button" className="button" disabled={save.isPending} aria-busy={save.isPending} onClick={submit}><Save size={16} />{save.isPending ? 'جارٍ الحفظ...' : 'حفظ الإعدادات'}</button>
           </div>
-        )}
-      </section>
-      <FaqEditor />
+        </div>
+      )}
     </div>
   );
 }

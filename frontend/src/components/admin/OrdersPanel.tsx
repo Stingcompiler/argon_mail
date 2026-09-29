@@ -17,7 +17,9 @@ function useDebounced<T>(value: T, ms = 350) {
 
 export function OrdersPanel({ compact = false }: { compact?: boolean }) {
   const { user } = useAuth();
-  const [filters, setFilters] = useState<OrderFilters>({ page: 1 });
+  // Links from the overview can preset a filter (?assignee=none).
+  const assigneeParam = useSearchParams().get('assignee') || undefined;
+  const [filters, setFilters] = useState<OrderFilters>({ page: 1, assignee: assigneeParam });
   const [q, setQ] = useState('');
   const query = useDebounced(q);
   const effective = { ...filters, q: query || undefined };
