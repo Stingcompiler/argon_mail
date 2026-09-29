@@ -43,8 +43,8 @@ export default async function Home() {
           {/* Facts the product guarantees, not general reassurance (landing plan, phase 3). */}
           <ul className="hero-trust">
             <li><UserCheck size={16} />دون حساب أو كلمة مرور</li>
-            <li><ShieldCheck size={16} /><Link href="/privacy">تفاصيلك للفريق فقط، لا لصفحة المتابعة</Link></li>
-            <li><Clock3 size={16} />السعر موضح في كل خدمة، أو يُحدد بعد المراجعة</li>
+            <li><ShieldCheck size={16} /><Link href="/privacy">تفاصيلك للفريق فقط</Link></li>
+            <li><Clock3 size={16} />السعر في صفحة كل خدمة</li>
           </ul>
         </div>
         <div className={'hero-visual' + (settings.hero_image_data ? ' has-image' : '')} aria-hidden={settings.hero_image_data ? undefined : true}>
@@ -95,7 +95,7 @@ export default async function Home() {
             <h3>بعد إرسال طلبك</h3>
             <ul>
               <li><Bell size={18} /><span>يصل تنبيه إلى فريق عرجون، ويُراجَع طلبك في لوحة العمل.</span></li>
-              <li><MessageCircle size={18} /><span>إن احتاج الطلب تفاصيل أو تأكيد سعر، يتواصل معك المسؤول عبر WhatsApp.</span></li>
+              <li><MessageCircle size={18} /><span>إن احتاج الطلب تفاصيل، أو كان سعره يُحدد بعد المراجعة، يتواصل معك المسؤول عبر WhatsApp.</span></li>
               <li><Package size={18} /><span>كل تغيير في الحالة يظهر في صفحة المتابعة، مع ملاحظات الفريق العامة.</span></li>
               <li><ShieldCheck size={18} /><span>لا نطلب بريدك الإلكتروني ولا نراسلك به؛ التواصل عبر WhatsApp وصفحة المتابعة.</span></li>
             </ul>

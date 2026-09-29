@@ -4,6 +4,7 @@
 
 - [خطة التنفيذ الكاملة](IMPLEMENTATION_PLAN.md): المتطلبات والمراحل وحالة الإنجاز.
 - [خطة تحسين الصفحة الرئيسية](docs/landing-page-enhancement-plan.md): أولويات الرسالة والتصميم وتجربة الهاتف والتحقق.
+- [فحص التصميم الحالي وخطة التحسين التالية](docs/landing-modern-design-report.md): الملاحظات المثبتة والأولويات بعد تنفيذ الخطة السابقة.
 - [البنية](docs/architecture.md)، [نموذج البيانات](docs/data-model.md)، [عقد API](docs/api-contract.md)، [سجل القرارات](docs/decisions.md).
 
 ## المتطلبات
