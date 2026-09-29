@@ -1094,3 +1094,11 @@ body:has(form:focus-within :is(input:not([type=checkbox],[type=radio],[type=file
 .services-section{padding-top:22px}
 .services-section .section-heading{margin-bottom:14px}}
 @media (max-width:359px){.hero-actions{flex-direction:column}.hero-actions .button{width:100%}}
+/* ── Design batch 3: focus never lands under the fixed bars (WCAG 2.4.11) ──
+   Keyboard focus and in-page links scroll their target clear of the sticky
+   header (below 1024px) and the phone tab bar (below 760px). */
+@media (max-width:1023px){html{scroll-padding-top:80px}}
+@media (max-width:760px){html{scroll-padding-bottom:calc(80px + env(safe-area-inset-bottom))}}
+/* An owner-uploaded hero image stays on phones, but as a short band, so the
+   services still start near the first screen (it took ~240px more before). */
+@media (max-width:560px){.hero-visual.has-image{zoom:1;height:180px;margin-top:18px;border-radius:var(--r-lg)}}
