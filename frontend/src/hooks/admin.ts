@@ -27,7 +27,7 @@ export function useOrders(filters: OrderFilters) {
 export function useOrderSummary() {
   return useQuery({
     queryKey: qk.admin.orders.summary,
-    queryFn: ({ signal }) => api<{ total: number; by_meaning: Record<string, number> }>('/admin/orders/summary/', { signal }),
+    queryFn: ({ signal }) => api<{ total: number; by_meaning: Record<string, number>; unassigned_new: number; last_7_days: { date: string; count: number }[] }>('/admin/orders/summary/', { signal }),
   });
 }
 

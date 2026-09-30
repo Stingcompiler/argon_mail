@@ -61,7 +61,14 @@ export function SectionTitle({ icon: Icon, title, text }: { icon: LucideIcon; ti
 }
 
 export function Loading({ label = 'جارٍ التحميل...' }: { label?: string }) {
-  return <div className="compact-empty" role="status"><LoaderCircle className="spin" size={28} /><p>{label}</p></div>;
+  // Skeleton rows in the shape of a list instead of a spinner: the layout doesn't
+  // jump when the data arrives, and waiting feels shorter.
+  return (
+    <div className="skeleton" role="status" aria-live="polite">
+      <span className="sr-only">{label}</span>
+      {Array.from({ length: 4 }, (_, i) => <div className="skeleton-row" key={i} aria-hidden="true"><i /><i /><i /></div>)}
+    </div>
+  );
 }
 
 export function LoadError({ error, retry }: { error: unknown; retry: () => void }) {

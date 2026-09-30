@@ -189,3 +189,21 @@ class AdminOrderPermissionTests(APITestCase):
     def test_service_with_orders_cannot_be_deleted(self):
         self.client.force_authenticate(self.admin)
         self.assertEqual(self.client.delete(f"/api/v1/admin/services/{self.service.pk}/").status_code, 409)
+
+
+class OrderSummaryTests(APITestCase):
+    def test_summary_has_attention_counts_and_seven_days(self):
+        admin = make_user()
+        service = make_service()
+        for _ in range(2):
+            self.client.post("/api/v1/public/orders/", order_payload(service), format="json", **idem())
+        self.client.force_authenticate(admin)
+        d = self.client.get("/api/v1/admin/orders/summary/").json()
+        self.assertEqual(d["total"], 2)
+        self.assertEqual(d["unassigned_new"], 2)
+        self.assertEqual(len(d["last_7_days"]), 7)
+        self.assertEqual(d["last_7_days"][-1]["count"], 2)
+        order = Order.objects.first()
+        order.assignee = admin
+        order.save(update_fields=["assignee"])
+        self.assertEqual(self.client.get("/api/v1/admin/orders/summary/").json()["unassigned_new"], 1)
