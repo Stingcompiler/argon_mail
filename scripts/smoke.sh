@@ -50,18 +50,40 @@ CH="$(curl -s -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json'
 check "chunked body refused (got $CH)" [ "$CH" = 411 ]
 
 # Upload above Next's old 10 MB proxy limit (needs a service with a file field).
-FIELD="$(curl -s "$BASE/api/v1/public/services/" | python3 -c "
-import sys,json,urllib.request
+# The 12 MB file goes to the first file field; every other required file or
+# image field gets a small valid file, so the check keeps working when the
+# owner adds fields to the service in the dashboard.
+FS="$(curl -s "$BASE/api/v1/public/services/" | T="$T" BASE="$BASE" python3 -c "
+import json, os, struct, sys, urllib.parse, urllib.request, zlib
+base, t = os.environ['BASE'], os.environ['T']
+def png(path):  # 1×1 white PNG
+    chunk = lambda k, d: struct.pack('>I', len(d)) + k + d + struct.pack('>I', zlib.crc32(k + d))
+    open(path, 'wb').write(b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', 1, 1, 8, 2, 0, 0, 0)) + chunk(b'IDAT', zlib.compress(b'\x00\xff\xff\xff')) + chunk(b'IEND', b''))
 for s in json.load(sys.stdin):
-    d=json.load(urllib.request.urlopen('$BASE/api/v1/public/services/'+__import__('urllib.parse').parse.quote(s['slug'])+'/'))
-    f=[x for x in d['fields'] if x['type']=='file']
-    if f: print(s['slug']+'|'+f[0]['key']+'|'+json.dumps({x['key']:(x['options'][:1] if x['type']=='multiselect' else (x['options'][0] if x['options'] else 'x')) for x in d['fields'] if x['type'] not in ('file','image') and x['required']}, ensure_ascii=False)); break
+    d = json.load(urllib.request.urlopen(base + '/api/v1/public/services/' + urllib.parse.quote(s['slug']) + '/'))
+    files = [x for x in d['fields'] if x['type'] == 'file']
+    if not files: continue
+    answers = {x['key']: (x['options'][:1] if x['type'] == 'multiselect' else (x['options'][0] if x['options'] else 'x'))
+               for x in d['fields'] if x['type'] not in ('file', 'image') and x['required']}
+    json.dump({'service': s['slug'], 'customer_name': 'رفع كبير', 'customer_phone': '+249911000222', 'answers': answers, 'consent': True},
+              open(t + '/payload.json', 'w'), ensure_ascii=False)
+    open(t + '/12mb.pdf', 'wb').write(b'%PDF-1.4\n' + b'0' * (12 * 1024 * 1024))
+    open(t + '/small.pdf', 'wb').write(b'%PDF-1.4\n' + b'0' * 1024)
+    png(t + '/small.png')
+    args = ['file.%s=@%s/12mb.pdf;type=application/pdf' % (files[0]['key'], t)]
+    for x in d['fields'][:]:
+        if x is files[0] or not x['required']: continue
+        if x['type'] == 'file': args.append('file.%s=@%s/small.pdf;type=application/pdf' % (x['key'], t))
+        if x['type'] == 'image': args.append('file.%s=@%s/small.png;type=image/png' % (x['key'], t))
+    open(t + '/files.txt', 'w').write('\n'.join(args) + '\n')
+    print(s['slug']); break
 ")"
-if [ -n "$FIELD" ]; then
-  FS="${FIELD%%|*}"; REST="${FIELD#*|}"; FK="${REST%%|*}"; ANS="${REST#*|}"
-  python3 -c "open('$T/12mb.pdf','wb').write(b'%PDF-1.4\n'+b'0'*(12*1024*1024))"
-  UP="{\"service\":\"$FS\",\"customer_name\":\"رفع كبير\",\"customer_phone\":\"+249911000222\",\"answers\":$ANS,\"consent\":true}"
-  check "12 MB upload through proxy" [ "$(curl -s -o /dev/null -w '%{http_code}' -H "Idempotency-Key: $(python3 -c 'import uuid;print(uuid.uuid4())')" -F "payload=$UP" -F "file.$FK=@$T/12mb.pdf;type=application/pdf" "$BASE/api/v1/public/orders/")" = 201 ]
+if [ -n "$FS" ]; then
+  UPLOAD=(-H "Idempotency-Key: $(python3 -c 'import uuid;print(uuid.uuid4())')" -F "payload=<$T/payload.json")
+  while IFS= read -r f; do UPLOAD+=(-F "$f"); done < "$T/files.txt"
+  UP_CODE="$(curl -s -o "$T/upload.json" -w '%{http_code}' "${UPLOAD[@]}" "$BASE/api/v1/public/orders/")"
+  [ "$UP_CODE" = 201 ] || echo "     $FS → $UP_CODE $(head -c 300 "$T/upload.json")"
+  check "12 MB upload through proxy" [ "$UP_CODE" = 201 ]
 else
   echo "skip 12 MB upload (no service with a file field)"
 fi
