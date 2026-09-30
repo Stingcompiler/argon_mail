@@ -1,32 +1,35 @@
 import type { Metadata } from 'next';
 import { connection } from 'next/server';
-import { ServiceCard } from '@/components/site/ServiceCard';
+import { CategoryCard } from '@/components/site/CategoryCard';
 import { ServicesBrowser } from '@/components/site/ServicesBrowser';
-import { getServices } from '@/lib/server-api';
+import { getCategories, getServices } from '@/lib/server-api';
 
 export const metadata: Metadata = {
   title: 'خدماتنا',
-  description: 'استكشف خدمات بريد عرجون في مجالات متعددة، واطلب ما يناسبك وتابع طلبك بسهولة.',
+  description: 'استكشف مجالات خدمات بريد عرجون الإلكترونية والرقمية، واطلب ما يناسبك وتابع طلبك برقمه.',
   alternates: { canonical: '/services' },
 };
 
-export default async function ServicesPage() {
+type Props = { searchParams: Promise<{ q?: string }> };
+
+/** The main service areas as cards; searching shows matching services as tiles. */
+export default async function ServicesPage({ searchParams }: Props) {
   await connection();
-  const services = await getServices();
+  const [categories, services, { q }] = await Promise.all([getCategories(), getServices(), searchParams]);
   return (
     <section className="container page-section services-page">
       <div className="page-intro">
         <span className="eyebrow">خدمات تتسع لاحتياجك</span>
         <h1>خطوتك القادمة تبدأ هنا.</h1>
-        <p>استكشف ما يناسبك، واترك لنا الاهتمام بالتفاصيل.</p>
+        <p>اختر المجال، ثم الخدمة التي تحتاجها.</p>
       </div>
       {services.length ? (
-        <>
-          <h2 className="sr-only">كل الخدمات</h2>
-          <ServicesBrowser services={services}>
-            {services.map((s) => <ServiceCard key={s.slug} service={s} cta="تفاصيل الخدمة" />)}
-          </ServicesBrowser>
-        </>
+        <ServicesBrowser services={services} initialQuery={typeof q === 'string' ? q.slice(0, 80) : ''}>
+          <h2 className="sr-only">المجالات</h2>
+          <div className="category-grid">
+            {categories.map((c) => <CategoryCard key={c.slug} category={c} />)}
+          </div>
+        </ServicesBrowser>
       ) : (
         <div className="empty-state"><h2>لا توجد خدمات منشورة حاليًا</h2><p>عد قريبًا، أو تواصل معنا لمعرفة المزيد.</p></div>
       )}

@@ -1,6 +1,7 @@
 import { ArrowRight, Clock3, FileText, MessageCircle, ShieldCheck } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { categoryHref } from '@/components/site/CategoryCard';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { connection } from 'next/server';
 import { iconFor } from '@/components/icons';
@@ -48,7 +49,7 @@ export default async function ServicePage({ params, searchParams }: Props) {
     <section className="container page-section">
       {s.preview && <PreviewBanner />}
       <nav aria-label="مسار التنقل">
-        <Link className="back-link" href="/services"><ArrowRight size={17} />العودة إلى الخدمات</Link>
+        <Link className="back-link" href={categoryHref(s.category.slug)}><ArrowRight size={17} />العودة إلى {s.category.name}</Link>
       </nav>
       <div className="detail-layout">
         <aside className="detail-info">

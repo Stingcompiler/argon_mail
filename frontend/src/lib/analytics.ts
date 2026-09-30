@@ -9,6 +9,7 @@
  */
 export type AnalyticsEvent =
   | { name: 'cta_click'; target: 'services' | 'track'; area: string }
+  | { name: 'category_select'; category: string; area: string }
   | { name: 'service_select'; service: string; area: string }
   | { name: 'contact_click'; channel: 'whatsapp' | 'email' | 'phone' | 'contact_page'; area: string }
   | { name: 'tracking_start'; method: 'code' | 'name_phone' }
@@ -50,6 +51,8 @@ export function eventForLink(a: HTMLAnchorElement): AnalyticsEvent | null {
   if (path === '/contact') return { name: 'contact_click', channel: 'contact_page', area };
   if (path === '/services') return { name: 'cta_click', target: 'services', area };
   if (path === '/track') return { name: 'cta_click', target: 'track', area };
+  const category = path.match(/^\/services\/category\/([^/]+)$/);
+  if (category) return { name: 'category_select', category: category[1], area };
   const service = path.match(/^\/services\/([^/]+)$/);
   if (service) return { name: 'service_select', service: service[1], area };
   return null;
