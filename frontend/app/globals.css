@@ -10,7 +10,7 @@
 :root{--white:#ffffff;--shadow:#000000;--brand-300:#98c3e8;--brand-400:#6eabe0;--brand-500:#398cd0;--brand-600:#1b65aa;--brand-700:#0e599d;--brand-800:#0068b7;--brand-900:#05285b;--brand-950:#02183f;--neutral-0:#ffffff;--neutral-25:#f5f9fd;--neutral-50:#f0f5fa;--neutral-100:#ebf1f7;--neutral-150:#e5edf5;--neutral-200:#dde6ef;--neutral-300:#d6e0eb;--neutral-400:#c7d2de;--neutral-500:#a6b3c1;--neutral-600:#8794a1;--neutral-700:#566577;--neutral-800:#374863;--neutral-900:#182232;--accent-100:#e6f7fe;--accent-200:#aee0f6;--accent-300:#6bc4e9;--accent-500:#15a7d7;--accent-700:#076c92;--warning-50:#fbf3e3;--warning-100:#f6efde;--warning-200:#ead7a6;--warning-600:#836e41;--danger-50:#f6edeb;--danger-100:#efcfc6;--danger-500:#c9644f;--danger-600:#a34a3c;--danger-700:#8a3325;--success-50:#e5eee0;--success-600:#4f7149;--info-50:#e8eef3;--info-500:#88a5b2;--info-600:#49698d;--tint-sage-bg:#deedfb;--tint-sage-fg:#2266a4;--tint-sand-bg:#f5ecda;--tint-sand-fg:#846230;--tint-blue-bg:#d7f2fa;--tint-blue-fg:#046f87;--tint-rose-bg:#f8e6e8;--tint-rose-fg:#8e4c57}
 :root{--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:24px;--r-pill:999px;--green:var(--brand-800);--dark:var(--brand-900);--cream:var(--neutral-25);--ink:var(--neutral-900);--muted:var(--neutral-700);--line:var(--neutral-200);--gold:var(--accent-500);--sage:var(--neutral-200)}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 body{margin:0;color:var(--ink);background:var(--cream);font-family:var(--font-arabic),var(--font-latin),'Noto Sans Arabic',Tahoma,Arial,sans-serif;font-size:var(--fs-body);line-height:1.8}
 button,input,textarea,select{font:inherit}
 button{cursor:pointer}
@@ -1180,3 +1180,22 @@ html:has(.order-dialog[open]){overflow:hidden}
 @media (prefers-reduced-motion:no-preference){.order-dialog[open]{animation:dialog-in .22s ease-out}}
 @keyframes dialog-in{from{opacity:0;transform:translateY(16px)}}
 .order-dialog .request-form{padding:20px}@media (max-width:760px){.order-dialog .request-form{padding:16px 14px}}
+/* ── Home composition (docs/brand-redesign-plan.md, phase 6) ─────────────────
+   The hero as a light sky banner with a faint wing curve (static, CSS only),
+   the search right above the main cards, and the brand centred in the phone
+   header as in the reference. */
+.hero{position:relative;isolation:isolate;margin-top:22px;padding-inline:clamp(18px,4vw,56px);border-radius:var(--r-xl);overflow:hidden;background:linear-gradient(160deg,var(--neutral-50) 0%,var(--tint-sage-bg) 70%,var(--accent-100) 100%)}
+.hero::before{content:'';position:absolute;z-index:-1;inset:-40% -20% auto auto;width:70%;aspect-ratio:1;border-radius:50%;border:28px solid color-mix(in srgb,var(--accent-500) 16%,transparent);border-left-color:transparent;border-bottom-color:transparent;transform:rotate(-12deg)}
+.hero::after{content:'';position:absolute;z-index:-1;inset:auto auto -55% -15%;width:60%;aspect-ratio:1;border-radius:50%;border:22px solid color-mix(in srgb,var(--brand-800) 9%,transparent);border-right-color:transparent;border-top-color:transparent}
+.hero-visual:not(.has-image){background:color-mix(in srgb,var(--white) 55%,transparent)}
+.home-search{max-width:640px;margin:0 0 20px;padding:6px 6px 6px 6px;padding-inline-start:14px}
+.home-search input{flex:1;font-size:var(--fs-input)}
+.home-search .button{min-height:40px;padding:8px 18px;border-radius:var(--r-sm);flex-shrink:0}
+@media (max-width:560px){.hero{margin:0 calc(50% - 50vw);width:100vw;padding-inline:16px;padding-bottom:14px;border-radius:0 0 var(--r-xl) var(--r-xl)}
+.services-section .section-heading .eyebrow{display:none}
+.services-section .section-heading{margin-bottom:10px}
+.home-search{margin-bottom:12px}}
+@media (max-width:760px){.header-inner{display:grid;grid-template-columns:44px 1fr 44px;align-items:center}
+.header-inner .logo-button{grid-column:2;justify-self:center}
+.header-inner .mobile-menu{grid-column:3;grid-row:1}
+.site-header .brand{text-align:center}}

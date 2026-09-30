@@ -1,4 +1,4 @@
-import { ArrowLeft, Bell, CheckCheck, Clock3, Layers3, MessageCircle, Package, Send, ShieldCheck, UserCheck } from 'lucide-react';
+import { ArrowLeft, Bell, CheckCheck, Clock3, Layers3, MessageCircle, Package, Search, Send, ShieldCheck, UserCheck } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { connection } from 'next/server';
@@ -69,6 +69,13 @@ export default async function Home() {
             <div><span className="eyebrow">مساحات متعددة، عناية واحدة</span><h2>كيف نقدر نساعدك؟</h2></div>
             <Link className="text-button" href="/services">جميع الخدمات <ArrowLeft size={18} /></Link>
           </div>
+          {/* Search right above the cards, as in the reference layout. A plain GET
+              form: it works before hydration and lands on /services?q=. */}
+          <form className="search-box home-search" action="/services" role="search">
+            <Search size={18} />
+            <input type="search" name="q" aria-label="ابحث عن خدمة" placeholder="ابحث عن الخدمة التي تحتاجها..." maxLength={80} />
+            <button className="button" type="submit">بحث</button>
+          </form>
           <div className="services-grid">{featured.map((c) => <CategoryCard key={c.slug} category={c} />)}</div>
           <CarouselDots count={featured.length} target=".services-section .services-grid" />
         </section>
