@@ -7,10 +7,17 @@ import { expect, test } from '@playwright/test';
  */
 for (const url of ['/', '/services', '/contact']) {
   test(`phone: focus is never hidden under the header or tab bar (${url})`, async ({ page }) => {
+    await page.addInitScript(() => {
+      addEventListener('scroll', () => { (window as unknown as { lastScroll: number }).lastScroll = performance.now(); }, { capture: true, passive: true });
+    });
     await page.goto(url);
     const hidden: string[] = [];
     for (let i = 0; i < 60; i++) {
       await page.keyboard.press('Tab');
+      // Smooth scrolling brings the element into place over several frames:
+      // measure once no scroll event (page or row) has fired for 250ms.
+      await page.waitForFunction(() => performance.now() - ((window as unknown as { lastScroll?: number }).lastScroll ?? 0) > 250,
+        undefined, { timeout: 4000, polling: 50 }).catch(() => {});
       const r = await page.evaluate(() => {
         const el = document.activeElement as HTMLElement | null;
         if (!el || el === document.body) return null;
