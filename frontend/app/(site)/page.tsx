@@ -23,6 +23,9 @@ export default async function Home() {
   const [{ settings, faq }, categories] = await Promise.all([getSite(), getCategories()]);
   // The main cards: areas the owner marked «يظهر في الرئيسية».
   const featured = categories.filter((c) => c.is_featured);
+  // Up to six areas: a two-column grid on phones, so every area is on screen at
+  // once; more than that swipe sideways with the position dots (audit plan, batch 2).
+  const compact = featured.length <= 6;
   const sections = settings.home_sections?.length ? settings.home_sections : [{ key: 'services', visible: true }, { key: 'how', visible: true }, { key: 'faq', visible: true }];
   // Owner-controlled order and visibility (the hero always comes first). Orders
   // step by 10 so the tracking band can sit right after «how it works» (5).
@@ -84,8 +87,8 @@ export default async function Home() {
             <input type="search" name="q" aria-label="ابحث عن خدمة" placeholder="ابحث عن الخدمة التي تحتاجها..." maxLength={80} />
             <button className="button" type="submit">بحث</button>
           </form>
-          <div className="services-grid">{featured.map((c) => <CategoryCard key={c.slug} category={c} />)}</div>
-          <CarouselDots count={featured.length} target=".services-section .services-grid" />
+          <div className={'services-grid' + (compact ? ' compact-cards' : '')}>{featured.map((c) => <CategoryCard key={c.slug} category={c} />)}</div>
+          {!compact && <CarouselDots count={featured.length} target=".services-section .services-grid" />}
         </section>
       )}
       <section className="how-section" id="how" style={place('how')}>

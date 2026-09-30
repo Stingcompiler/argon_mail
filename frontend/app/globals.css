@@ -1224,3 +1224,32 @@ html:has(.order-dialog[open]){overflow:hidden}
 /* The tab bar's «تتبع طلبك» opens the code field in a sheet instead of leaving the page. */
 .track-sheet .nav-sheet-body>p{font-size:var(--fs-small);color:var(--muted);margin:0 0 12px}
 .track-sheet .text-button{margin-top:10px;min-height:44px;gap:8px;width:100%;justify-content:center;text-align:center}
+/* ── Audit plan, batch 2: the area cards on phones ──
+   Without an image, the icon sits on a postage-stamp plate (the perforation
+   dots take the tint colour, so they read as holes); the rings are gone. */
+.service-art.sage{--art-bg:var(--tint-sage-bg)}
+.service-art.sand{--art-bg:var(--tint-sand-bg)}
+.service-art.blue{--art-bg:var(--tint-blue-bg)}
+.service-art.rose{--art-bg:var(--tint-rose-bg)}
+.art-stamp{position:absolute;width:104px;height:104px;top:14px;left:50%;transform:translateX(-50%) rotate(-4deg);filter:drop-shadow(0 6px 12px color-mix(in srgb,var(--brand-900) 10%,transparent))}
+.category-card .service-art>svg:not(.art-arrow):not(.art-stamp){margin-bottom:26px}
+.category-card .service-art:has(.service-custom-image) .art-stamp{display:none}
+/* Up to six areas on the phone home: the same card, compact, in two columns, so
+   every area is on the first screens without a swipe. The card follows its
+   container (a container query), so the dashboard can preview both shapes. */
+.services-section,.preview-phone{container-type:inline-size}
+@container (max-width:720px){
+.services-grid.compact-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;overflow:visible;margin-inline:0;padding:0;scroll-snap-type:none}
+.compact-cards .category-card{flex:none;display:flex;flex-direction:column}
+.compact-cards .category-card .service-art{height:104px}
+.compact-cards .category-card .art-stamp{width:72px;height:72px;top:16px}
+.compact-cards .category-card .service-art>svg:not(.art-arrow):not(.art-stamp){width:28px;height:28px;margin-bottom:0}
+.compact-cards .category-card .service-art>span,.compact-cards .category-card .art-arrow{display:none}
+.compact-cards .category-card .service-body{padding:10px 10px 12px}
+.compact-cards .category-card .service-body :is(h2,h3){font-size:var(--fs-title);margin:2px 0 4px;line-height:1.35}
+.compact-cards .category-card .service-body>small{font-size:var(--fs-label)}
+.compact-cards .category-card .service-body p{-webkit-line-clamp:2;font-size:var(--fs-label);line-height:1.6}
+.compact-cards .category-card .service-body .text-button{display:none}
+.compact-cards .category-card .service-body h3 a::after{content:'';position:absolute;inset:0;border-radius:var(--r-lg)}
+.compact-cards .category-card{position:relative}}
+.preview-phone{width:180px}

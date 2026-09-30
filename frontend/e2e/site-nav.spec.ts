@@ -27,12 +27,25 @@ test.describe('site navigation (phone)', () => {
     await expect(tabs.getByRole('link', { name: 'الخدمات' })).toHaveAttribute('aria-current', 'page');
   });
 
-  test('home services scroll sideways without widening the page', async ({ page }) => {
+  test('home areas: a two-column grid up to six, a sideways row beyond, never a wider page', async ({ page }) => {
     await page.goto('/');
     const row = page.locator('.services-section .services-grid');
-    const m = await row.evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth, page: document.documentElement.scrollWidth - innerWidth }));
-    expect(m.scroll, 'cards overflow the row, so it scrolls').toBeGreaterThan(m.client);
+    const m = await row.evaluate((el) => ({
+      compact: el.classList.contains('compact-cards'), cards: el.children.length,
+      scroll: el.scrollWidth, client: el.clientWidth, page: document.documentElement.scrollWidth - innerWidth,
+      columns: getComputedStyle(el).gridTemplateColumns.split(' ').length,
+      rights: Array.from(el.children).map((c) => Math.round(c.getBoundingClientRect().right)),
+    }));
     expect(m.page, 'the page itself does not scroll sideways').toBeLessThanOrEqual(1);
+    if (m.cards <= 6) {
+      // Audit plan, batch 2: every area on screen, two per row, no swipe.
+      expect(m.compact).toBe(true);
+      expect(m.columns).toBe(2);
+      expect(m.scroll, 'nothing to scroll').toBeLessThanOrEqual(m.client);
+      for (const r of m.rights) expect(r).toBeLessThanOrEqual(await page.evaluate(() => innerWidth));
+    } else {
+      expect(m.scroll, 'cards overflow the row, so it scrolls').toBeGreaterThan(m.client);
+    }
   });
 });
 
@@ -165,6 +178,7 @@ test('home (phone): services row shows its position', async ({ page }) => {
   const dots = page.locator('.carousel-dots span');
   const cards = await page.locator('.services-section .services-grid > *').count();
   test.skip(cards < 2, 'needs two featured areas');
+  test.skip(cards <= 6, 'up to six areas show as a grid, with no row to swipe (audit plan, batch 2)');
   await expect(dots).toHaveCount(cards);
   await expect(dots.nth(0)).toHaveClass('on');
   const row = page.locator('.services-section .services-grid');
@@ -208,6 +222,29 @@ test('phone: fixed bars step aside while typing, without stealing the submit tap
   await expect(page).toHaveURL(/\/track\?code=ARJ-NOTREAL1/);
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await expect(bar).toBeVisible();
+});
+
+/** Audit plan, batch 2: the compact card keeps what identifies the area (a stamp
+ * plate with the icon when there is no image, the centred title, the count and
+ * two lines of description) and drops the long-card extras; the whole card is
+ * one link. The card's title still says which area it is. */
+test('home (phone): compact area cards are whole links with a stamp, title, count and description', async ({ page }) => {
+  await page.goto('/');
+  const card = page.locator('.services-section .compact-cards .category-card').first();
+  test.skip(!(await card.count()), 'needs the compact grid (six areas or fewer)');
+  await expect(card.locator('.art-stamp, .service-custom-image').first()).toBeVisible();
+  await expect(card.locator('.service-body small')).toBeVisible();
+  await expect(card.locator('.service-body p')).toBeVisible();
+  await expect(card.getByRole('link', { name: 'استعرض الخدمات' })).toBeHidden();
+  const title = card.locator('h3');
+  expect(await title.evaluate((h) => getComputedStyle(h).textAlign)).toBe('center');
+  const box = (await card.boundingBox())!;
+  expect(box.height, 'a compact card').toBeLessThan(260);
+  // Tapping the description area (not just the title) opens the area: the
+  // title's link covers the whole card.
+  const p = (await card.locator('.service-body p').boundingBox())!;
+  await card.click({ position: { x: p.x - box.x + p.width / 2, y: p.y - box.y + p.height / 2 } });
+  await expect(page).toHaveURL(/\/services\/category\//);
 });
 
 /** Design batch 1: on a common phone the first main card shows above the tab

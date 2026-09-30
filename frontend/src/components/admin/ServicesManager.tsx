@@ -189,8 +189,12 @@ function CategoryEditor({ category, onDone }: { category: Category; onDone: () =
         <AssetPicker label="صورة خلفية أعلى البطاقة (اختيارية)" value={d.image} onChange={(image) => set({ image })} />
       </div>
       <div className="category-editor-preview">
-        <span className="preview-label">معاينة البطاقة</span>
+        <span className="preview-label">معاينة البطاقة (صفحة الخدمات وسطح المكتب)</span>
         <div inert>
+          <CategoryCard category={{ ...d, slug: category.slug, image, services_count: category.services_count ?? 0 }} />
+        </div>
+        <span className="preview-label">على الهاتف، في الرئيسية</span>
+        <div inert className="compact-cards preview-phone">
           <CategoryCard category={{ ...d, slug: category.slug, image, services_count: category.services_count ?? 0 }} />
         </div>
       </div>
