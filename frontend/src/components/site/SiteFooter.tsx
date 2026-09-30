@@ -20,7 +20,6 @@ export function SiteFooter({ settings, pages }: { settings: SiteSettings; pages:
         <div>
           <h2>نرافق خطوتك</h2>
           <Link href="/track">متابعة الطلب</Link>
-          <Link href="/admin/login" rel="nofollow">دخول الإدارة</Link>
           {pages.map((p) => (
             <Link key={p.slug} href={p.slug === 'privacy' || p.slug === 'terms' ? `/${p.slug}` : `/p/${encodeURIComponent(p.slug)}`}>{p.title}</Link>
           ))}

@@ -35,3 +35,27 @@ test.describe('site navigation (phone)', () => {
     expect(m.page, 'the page itself does not scroll sideways').toBeLessThanOrEqual(1);
   });
 });
+
+/** Type floor on phones: fields ≥16px (else iOS zooms on focus), text ≥12px. */
+test.describe('readable on phones', () => {
+  for (const url of ['/', '/services', '/track', '/contact']) {
+    test(`type sizes: ${url}`, async ({ page }) => {
+      await page.goto(url);
+      const r = await page.evaluate(() => {
+        const bad: string[] = [];
+        document.querySelectorAll<HTMLElement>('input:not([type=checkbox]):not([type=hidden]),select,textarea').forEach((el) => {
+          if (el.getBoundingClientRect().width && parseFloat(getComputedStyle(el).fontSize) < 16) bad.push('field ' + (el.getAttribute('aria-label') || el.getAttribute('name')));
+        });
+        const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        let n: Node | null;
+        while ((n = w.nextNode())) {
+          const el = n.parentElement!;
+          if (!n.textContent!.trim() || el.closest('[aria-hidden="true"],.sr-only,dialog:not([open]),script,style') || !el.getBoundingClientRect().width) continue;
+          if (parseFloat(getComputedStyle(el).fontSize) < 12) bad.push('text «' + n.textContent!.trim().slice(0, 20) + '»');
+        }
+        return bad;
+      });
+      expect(r).toEqual([]);
+    });
+  }
+});
