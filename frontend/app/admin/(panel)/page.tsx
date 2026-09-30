@@ -15,7 +15,7 @@ export default function Overview() {
   const inProgress = (m.in_review || 0) + (m.in_progress || 0) + (m.waiting_customer || 0) + (m.ready || 0);
   return (
     <>
-      <PageHeading title="أهلًا بك، يوم جديد للإنجاز." text="تابع العمل، واهتم بالتفاصيل التي تصنع تجربة أفضل." />
+      <PageHeading title="نظرة عامة" text="ملخص العمل وأحدث الطلبات." />
       {alerts.data && <AlertsBanner failed={alerts.data.failed} skipped={alerts.data.skipped} />}
       <div className="stats-grid">
         {[

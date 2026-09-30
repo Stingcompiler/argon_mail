@@ -33,21 +33,21 @@ export function TeamManager() {
         <div className="panel-heading"><div><h2>أعضاء الفريق</h2><p>الصلاحيات مطبقة على الخادم.</p></div><span className="date-chip">{team.data?.length ?? '…'} أعضاء</span></div>
         {team.isLoading ? <Loading /> : team.isError ? <LoadError error={team.error} retry={() => team.refetch()} /> : (
           <div className="table-scroll">
-            <table>
+            <table className="responsive-table">
               <thead><tr><th>العضو</th><th>البريد</th><th>اسم المستخدم</th><th>الدور</th><th>مفعّل</th></tr></thead>
               <tbody>
                 {team.data!.map((m) => (
                   <tr key={m.id}>
-                    <td><span className="avatar">{m.full_name[0]}</span>{m.full_name}</td>
-                    <td dir="ltr">{m.email}</td>
-                    <td dir="ltr">
+                    <td data-primary="true"><span className="avatar">{m.full_name[0]}</span>{m.full_name}</td>
+                    <td data-label="البريد" dir="ltr">{m.email}</td>
+                    <td data-label="اسم المستخدم" dir="ltr">
                       <input className="table-select" aria-label={'اسم مستخدم ' + m.full_name} defaultValue={m.username || ''} placeholder="—" maxLength={30}
                         onBlur={(e) => { const v = e.target.value.trim().toLowerCase(); if (v !== (m.username || '')) save.mutate({ id: m.id, username: v || null }, { onSuccess: () => notify('تم تحديث اسم المستخدم.'), onError: (er) => { notify(fieldErrors(er).username || er.message); e.target.value = m.username || ''; } }); }} />
                     </td>
-                    <td><select className="table-select" aria-label={'دور ' + m.full_name} value={m.role} disabled={m.id === user?.id} onChange={(e) => update(m.id, { role: e.target.value as Role })}>
+                    <td data-label="الدور"><select className="table-select" aria-label={'دور ' + m.full_name} value={m.role} disabled={m.id === user?.id} onChange={(e) => update(m.id, { role: e.target.value as Role })}>
                       {(Object.keys(roleLabel) as Role[]).map((r) => <option key={r} value={r}>{roleLabel[r]}</option>)}
                     </select></td>
-                    <td><Toggle label={'تفعيل ' + m.full_name} checked={m.is_active} disabled={m.id === user?.id} onChange={(v) => update(m.id, { is_active: v })} /></td>
+                    <td data-label="مفعّل"><Toggle label={'تفعيل ' + m.full_name} checked={m.is_active} disabled={m.id === user?.id} onChange={(v) => update(m.id, { is_active: v })} /></td>
                   </tr>
                 ))}
               </tbody>

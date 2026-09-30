@@ -48,7 +48,7 @@ export function StatusesManager() {
         <SectionTitle icon={Clock3} title="حالات الطلب كما تسميها" text="الاسم يظهر للعميل في صفحة المتابعة. المعنى الداخلي ثابت ويُستخدم في الإحصاءات والألوان." />
         {!canEdit && <div className="notice">تعديل الحالات متاح للمدير فقط.</div>}
         <div className="table-scroll">
-          <table>
+          <table className="responsive-table">
             <thead><tr><th>الترتيب</th><th>الاسم</th><th>المعنى الداخلي</th><th>الطلبات</th><th>مفعّلة</th><th /></tr></thead>
             <tbody>
               {list.map((s: OrderStatus, i) => {
@@ -56,13 +56,13 @@ export function StatusesManager() {
                 const dirty = label.trim() !== s.label;
                 return (
                   <tr key={s.id}>
-                    <td>
+                    <td data-label="الترتيب" data-order-cell="true">
                       <div className="inline-actions">
                         <button className="icon-button" aria-label={`تحريك ${s.label} للأعلى`} disabled={!canEdit || i === 0 || update.isPending} onClick={() => move(i, -1)}><ArrowUp size={14} /></button>
                         <button className="icon-button" aria-label={`تحريك ${s.label} للأسفل`} disabled={!canEdit || i === list.length - 1 || update.isPending} onClick={() => move(i, 1)}><ArrowDown size={14} /></button>
                       </div>
                     </td>
-                    <td>
+                    <td data-primary="true">
                       <div className="inline-actions">
                         <input className="table-select" aria-label={`اسم الحالة ${s.label}`} value={label} maxLength={60} disabled={!canEdit}
                           onChange={(e) => setLabels({ ...labels, [s.id]: e.target.value })} />
@@ -74,11 +74,11 @@ export function StatusesManager() {
                       </div>
                       {s.is_initial && <small className="muted">الحالة الأولى لكل طلب جديد</small>}
                     </td>
-                    <td><StatusBadge meaning={s.meaning} label={MEANINGS.find((m) => m.v === s.meaning)?.l || s.meaning} /></td>
-                    <td>{s.orders_count}</td>
-                    <td><Toggle checked={s.is_active} disabled={!canEdit || s.is_initial} label={`تفعيل ${s.label}`}
+                    <td data-label="المعنى الداخلي"><StatusBadge meaning={s.meaning} label={MEANINGS.find((m) => m.v === s.meaning)?.l || s.meaning} /></td>
+                    <td data-label="الطلبات">{s.orders_count}</td>
+                    <td data-label="مفعّلة"><Toggle checked={s.is_active} disabled={!canEdit || s.is_initial} label={`تفعيل ${s.label}`}
                       onChange={(v) => update.mutate({ id: s.id, is_active: v }, { onSuccess: () => notify(v ? 'فُعّلت الحالة.' : 'عُطّلت الحالة؛ تبقى في الطلبات السابقة.'), onError: fail })} /></td>
-                    <td>
+                    <td data-actions="true">
                       <button className="icon-button danger" aria-label={`حذف ${s.label}`} disabled={!canEdit || s.is_initial || s.orders_count > 0 || remove.isPending}
                         title={s.orders_count > 0 ? 'مستخدمة في طلبات؛ عطّلها بدل الحذف' : 'حذف'}
                         onClick={() => confirm(`حذف الحالة «${s.label}»؟`) && remove.mutate(s.id, { onSuccess: () => notify('حُذفت الحالة.'), onError: fail })}>

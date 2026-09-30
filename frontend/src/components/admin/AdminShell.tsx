@@ -21,7 +21,7 @@ const GROUPS: { key: NavGroup; label: string }[] = [
 ];
 
 const NAV: { href: string; name: string; icon: typeof Inbox; roles: Role[]; group: NavGroup }[] = [
-  { href: '/admin', name: 'نظرة عامة', icon: LayoutDashboard, roles: ['admin', 'operator', 'executor'], group: 'daily' },
+  { href: '/admin', name: 'نظرة عامة', icon: LayoutDashboard, roles: ['admin', 'operator'], group: 'daily' },
   { href: '/admin/orders', name: 'الطلبات', icon: Inbox, roles: ['admin', 'operator', 'executor'], group: 'daily' },
   { href: '/admin/messages', name: 'الرسائل', icon: MessageCircle, roles: ['admin', 'operator'], group: 'daily' },
   { href: '/admin/services', name: 'الخدمات والمجالات', icon: Layers3, roles: ['admin', 'operator'], group: 'catalog' },
@@ -42,6 +42,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (status === 'anonymous') router.replace(`/admin/login?next=${encodeURIComponent(pathname)}`);
   }, [status, router, pathname]);
+  useEffect(() => {
+    if (user?.role === 'executor' && pathname === '/admin') router.replace('/admin/orders');
+  }, [user?.role, pathname, router]);
   useDialogFocus(status === 'expired', () => {}, '.relogin-dialog');
   // Phones and tablets: the sidebar is a drawer opened from the top bar.
   // On desktop the toggle is hidden, so this stays false.
@@ -65,9 +68,12 @@ export function AdminShell({ children }: { children: ReactNode }) {
   if (!user || status === 'unknown' || status === 'loading' || status === 'anonymous') {
     return <div className="admin-boot" role="status"><LoaderCircle className="spin" size={30} /><span>جارٍ التحقق من الجلسة...</span></div>;
   }
-  const nav = NAV.filter((n) => n.roles.includes(user.role));
+  // Executors only have their assigned orders: that list is their home («طلباتي»).
+  const nav = NAV.filter((n) => n.roles.includes(user.role))
+    .map((n) => (user.role === 'executor' && n.href === '/admin/orders' ? { ...n, name: 'طلباتي' } : n));
   const current = [...nav].reverse().find((n) => (n.href === '/admin' ? pathname === '/admin' : pathname.startsWith(n.href)));
   const allowed = nav.some((n) => n === current);
+  const redirecting = user.role === 'executor' && pathname === '/admin';
 
   return (
     <div className={'admin-layout' + (menuOpen ? ' menu-open' : '')}>
@@ -130,7 +136,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </span>
         </header>
         <div className="admin-content">
-          {allowed ? <Suspense fallback={<div className="compact-empty" role="status"><LoaderCircle className="spin" size={28} /></div>}>{children}</Suspense> : <div className="compact-empty" role="alert"><h3>ليست لديك صلاحية لهذا القسم.</h3></div>}
+          {redirecting ? <div className="compact-empty" role="status"><LoaderCircle className="spin" size={28} /></div> : allowed ? <Suspense fallback={<div className="compact-empty" role="status"><LoaderCircle className="spin" size={28} /></div>}>{children}</Suspense> : <div className="compact-empty" role="alert"><h3>ليست لديك صلاحية لهذا القسم.</h3></div>}
         </div>
       </main>
       {status === 'expired' && (
@@ -144,10 +150,12 @@ export function AdminShell({ children }: { children: ReactNode }) {
   );
 }
 
-export function PageHeading({ title, text, eyebrow = 'لوحة تحكم بريد عرجون', children }: { title: string; text?: string; eyebrow?: string; children?: ReactNode }) {
+/** Compact page header: the section's name (as in the menu), a one-line hint
+ * (hidden on phones) and the page's main action. */
+export function PageHeading({ title, text, children }: { title: string; text?: string; children?: ReactNode }) {
   return (
     <div className="heading-row">
-      <div><span className="eyebrow">{eyebrow}</span><h1>{title}</h1>{text && <p>{text}</p>}</div>
+      <div><h1>{title}</h1>{text && <p>{text}</p>}</div>
       {children}
     </div>
   );
