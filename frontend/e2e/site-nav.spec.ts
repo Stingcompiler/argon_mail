@@ -184,3 +184,16 @@ test('phone: fixed bars step aside while typing, without stealing the submit tap
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await expect(bar).toBeVisible();
 });
+
+/** Design batch 1: on a common phone the first service shows above the tab
+ * bar on the first screen, under the hero's two actions. */
+test('home (phone): the first service card starts on the first screen', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  const bar = await page.locator('.tab-bar').boundingBox();
+  const card = await page.locator('.services-section .service-card').first().boundingBox();
+  expect(bar!.y - card!.y, 'at least 150px of the first card above the tab bar').toBeGreaterThanOrEqual(150);
+  const actions = page.locator('.hero-actions .button');
+  const [a, b] = [await actions.nth(0).boundingBox(), await actions.nth(1).boundingBox()];
+  expect(Math.abs(a!.y - b!.y), 'actions side by side').toBeLessThan(2);
+});
