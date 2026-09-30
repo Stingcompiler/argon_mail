@@ -8,7 +8,7 @@ class SiteTests(APITestCase):
     def test_public_site_and_admin_only_edit(self):
         r = self.client.get("/api/v1/public/site/")
         self.assertEqual(r.json()["settings"]["name"], "بريد عرجون")
-        self.assertEqual(len(r.json()["faq"]), 3)
+        self.assertEqual(len(r.json()["faq"]), 8)  # 3 general + 5 postal (migration 0012)
         self.client.force_authenticate(make_user("op@example.com", Role.OPERATOR, "مشغل"))
         self.assertEqual(self.client.patch("/api/v1/admin/settings/", {"name": "x"}, format="json").status_code, 403)
         self.client.force_authenticate(make_user())
