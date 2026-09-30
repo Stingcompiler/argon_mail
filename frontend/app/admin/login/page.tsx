@@ -1,5 +1,6 @@
 'use client';
-import { ArrowRight, Leaf, ShieldCheck } from 'lucide-react';
+import { ArrowRight, ShieldCheck } from 'lucide-react';
+import { BrandMark } from '@/components/site/BrandMark';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -18,7 +19,7 @@ export default function LoginPage() {
   return (
     <main className="login-page">
       <div className="login-story">
-        <Leaf size={40} />
+        <span className="login-mark"><BrandMark size={44} /></span>
         <span className="eyebrow">مساحة العمل · بريد عرجون</span>
         <h1>وراء كل إنجاز،<br />اهتمام بالتفاصيل.</h1>
         <p>خدماتك وطلبات عملائك وفريقك،<br />في مساحة واحدة تمنحك رؤية أوضح.</p>

@@ -11,12 +11,38 @@ from .models import Category, Service, ServiceField
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """Dashboard: the category card's fields; image by id, image_data to show it."""
+
     services_count = serializers.IntegerField(read_only=True, required=False)
+    image = serializers.PrimaryKeyRelatedField(queryset=PublicAsset.objects.all(), allow_null=True, required=False)
+    image_data = PublicImageSerializer(source="image", read_only=True)
 
     class Meta:
         model = Category
-        fields = ["id", "name", "slug", "sort_order", "services_count"]
+        fields = ["id", "name", "slug", "description", "icon_key", "image", "image_data", "is_featured",
+                  "sort_order", "services_count"]
         read_only_fields = ["id", "slug"]
+
+    def validate_icon_key(self, value):
+        if value not in Service.ICON_KEYS:
+            raise serializers.ValidationError("أيقونة غير مدعومة.")
+        return value
+
+    def validate_name(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("هذا الحقل مطلوب.")
+        return value.strip()
+
+
+class PublicCategorySerializer(serializers.ModelSerializer):
+    """Public card: only categories with published services are listed."""
+
+    services_count = serializers.IntegerField(read_only=True)
+    image = PublicImageSerializer(read_only=True)
+
+    class Meta:
+        model = Category
+        fields = ["name", "slug", "description", "icon_key", "image", "is_featured", "services_count"]
 
 
 class CategoryBriefSerializer(serializers.ModelSerializer):

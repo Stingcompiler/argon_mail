@@ -11,7 +11,15 @@ export type HomeSection = { key: 'services' | 'how' | 'faq'; visible: boolean };
 export type PublicImage = { url: string; alt: string; width: number; height: number };
 export type Asset = { id: string; url: string; alt_text: string; original_name: string; content_type: string; size: number; width: number; height: number; usage: string[]; created_at: string };
 export type CategoryBrief = { name: string; slug: string };
-export type Category = { id: number; name: string; slug: string; sort_order: number; services_count?: number };
+export type Category = {
+  id: number; name: string; slug: string; description: string; icon_key: string; image: string | null;
+  image_data: PublicImage | null; is_featured: boolean; sort_order: number; services_count?: number;
+};
+/** A main service area as the public site shows it (card with image and title). */
+export type PublicCategory = {
+  name: string; slug: string; description: string; icon_key: string; image: PublicImage | null;
+  is_featured: boolean; services_count: number;
+};
 
 export type PublicService = {
   slug: string; name: string; category: CategoryBrief; description: string; tagline: string;

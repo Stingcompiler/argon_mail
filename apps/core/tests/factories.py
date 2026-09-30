@@ -11,8 +11,8 @@ def make_user(email="admin@example.com", role=Role.ADMIN, name="مدير"):
     return User.objects.create_user(email=email, password=PASSWORD, full_name=name, role=role)
 
 
-def make_service(name="خدمة تجريبية", status="published", fields=None):
-    cat, _ = Category.objects.get_or_create(name="مجال")
+def make_service(name="خدمة تجريبية", status="published", fields=None, category=None):
+    cat = category or Category.objects.get_or_create(name="مجال")[0]
     s = Service.objects.create(category=cat, name=name, description="وصف", status=status)
     for i, f in enumerate(fields or [{"key": "dest", "label": "الوجهة", "type": "text", "required": True}]):
         ServiceField.objects.create(service=s, sort_order=i, **f)

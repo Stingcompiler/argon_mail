@@ -1119,3 +1119,5 @@ footer :focus-visible,footer a:focus-visible,footer button:focus-visible{outline
 footer .brand-symbol{background:var(--white)}
 @media (max-width:1023px){.site-header .brand-symbol{width:38px;height:38px;border-radius:var(--r-md)}}
 .hero h1{font-weight:800}
+.login-mark{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:var(--r-lg);background:var(--white)}
+.footer-message svg{color:var(--accent-500)}

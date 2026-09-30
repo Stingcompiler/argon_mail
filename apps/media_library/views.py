@@ -99,7 +99,7 @@ class AssetViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.Update
     pagination_class = None
 
     def get_queryset(self):
-        return PublicAsset.objects.prefetch_related("services")
+        return PublicAsset.objects.prefetch_related("services", "categories")
 
     def create(self, request, *args, **kwargs):
         s = AssetSerializer(data=request.data)

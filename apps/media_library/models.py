@@ -64,6 +64,7 @@ class PublicAsset(models.Model):
         from apps.content.models import SiteSettings
 
         used = [f"صورة الخدمة: {s.name}" for s in self.services.all()]
+        used += [f"صورة المجال: {c.name}" for c in self.categories.all()]
         site = SiteSettings.objects.filter(pk=1).first()
         if site and site.logo_id == self.pk:
             used.append("شعار الموقع")

@@ -1,5 +1,6 @@
 'use client';
-import { Bell, Clock3, FileText, Image as ImageIcon, LayoutTemplate, Menu, RotateCw, WifiOff, ExternalLink, Inbox, LayoutDashboard, Layers3, LoaderCircle, LogOut, MessageCircle, Settings, ShieldCheck, Users, X } from 'lucide-react';
+import { Bell, Clock3, FileText, Image as ImageIcon, LayoutTemplate, Menu, RotateCw, WifiOff, ExternalLink, Inbox, LayoutDashboard, Layers3, LoaderCircle, LogOut, MessageCircle, Settings, Users, X } from 'lucide-react';
+import { BrandMark } from '@/components/site/BrandMark';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Suspense, useEffect, useState, type ReactNode } from 'react';
@@ -81,7 +82,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         {...(menuOpen ? { role: 'dialog', 'aria-modal': true } : {})}>
         <div className="sidebar-head">
           <Link className="logo-button" href="/admin">
-            <span className="brand"><span className="brand-symbol"><ShieldCheck size={22} /></span><span>بريد عرجون<small>مساحة العمل</small></span></span>
+            <span className="brand"><span className="brand-symbol"><BrandMark size={26} /></span><span>بريد عرجون<small>مساحة العمل</small></span></span>
           </Link>
           <button type="button" className="icon-button menu-close" aria-label="إغلاق القائمة" onClick={() => setMenuOpen(false)}><X size={20} /></button>
         </div>

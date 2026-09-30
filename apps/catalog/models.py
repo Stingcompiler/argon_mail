@@ -17,9 +17,26 @@ def unique_slug(model, value, instance_pk=None, field="slug", max_length=140):
     return slug
 
 
+# Icons the dashboard offers for services and categories (keys map to Lucide
+# icons in frontend/src/components/icons.ts; keep the two lists in sync).
+ICON_KEYS = [
+    "package", "education", "travel", "document", "government", "digital", "mail", "id", "money",
+    "health", "car", "home", "work", "legal", "translate", "print", "certificate", "payment",
+    "shopping", "phone", "globe", "camera", "calendar", "location", "tools", "laptop", "stamp",
+    "company", "delivery", "other",
+]
+
+
 class Category(models.Model):
+    """A main service area (المجال): shown as a card with an image and a large
+    title; its services are the tiles inside it (docs/brand-redesign-plan.md)."""
+
     name = models.CharField("الاسم", max_length=80, unique=True)
     slug = models.SlugField(max_length=100, unique=True, allow_unicode=True, blank=True)
+    description = models.CharField("سطر تعريفي", max_length=160, blank=True)
+    icon_key = models.CharField(max_length=20, default="other")
+    image = models.ForeignKey("media_library.PublicAsset", null=True, blank=True, on_delete=models.PROTECT, related_name="categories")
+    is_featured = models.BooleanField("يظهر في الرئيسية", default=True)
     sort_order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -46,7 +63,7 @@ class Service(models.Model):
         FIXED = "fixed", "سعر ثابت"
         STARTING_FROM = "starting_from", "يبدأ من"
 
-    ICON_KEYS = ["package", "education", "travel", "document"]
+    ICON_KEYS = ICON_KEYS
     COLORS = ["sage", "sand", "blue", "rose"]
 
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="services")

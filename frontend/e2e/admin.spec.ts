@@ -130,5 +130,27 @@ test.describe('admin dashboard', () => {
     await expect(page).toHaveURL(/\/admin\/orders\?assignee=none$/);
     await expect(page.getByLabel('المسؤول', { exact: true })).toHaveValue('none');
   });
-});
 
+  /** Brand redesign, phase 3: a category is a main card the owner describes. */
+  test('categories: the card line, icon and home visibility are editable', async ({ page }) => {
+    await adminLogin(page, '/admin/services');
+    await page.getByRole('button', { name: /المجالات/ }).click();
+    await page.getByRole('button', { name: 'تحرير خدمات بريدية' }).click();
+    const editor = page.locator('.category-editor');
+    const line = editor.getByLabel('سطر تعريفي (اختياري)');
+    const original = await line.inputValue();
+    await line.fill('طرود ومستندات إلى أي وجهة');
+    await editor.getByRole('button', { name: 'بريد', exact: true }).click();
+    await editor.getByRole('button', { name: 'حفظ المجال' }).click();
+    await expect(editor).toHaveCount(0);
+    const card = (await (await page.request.get('/api/v1/public/categories/')).json())
+      .find((c: { name: string }) => c.name === 'خدمات بريدية');
+    expect(card).toMatchObject({ description: 'طرود ومستندات إلى أي وجهة', icon_key: 'mail' });
+    // Put it back for the other tests.
+    await page.getByRole('button', { name: 'تحرير خدمات بريدية' }).click();
+    await editor.getByLabel('سطر تعريفي (اختياري)').fill(original);
+    await editor.getByRole('button', { name: 'طرود', exact: true }).click();
+    await editor.getByRole('button', { name: 'حفظ المجال' }).click();
+    await expect(editor).toHaveCount(0);
+  });
+});
