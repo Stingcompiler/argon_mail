@@ -162,3 +162,130 @@ a{color:inherit;text-decoration:none}a:focus-visible{outline:3px solid #d9a441;o
    painted against the viewport in Chrome, so the dot ran ahead of the line. */
 @keyframes dot-run{from{right:0;opacity:0}15%{opacity:1}85%{opacity:1}to{right:calc(100% - 14px);opacity:0}}
 @keyframes unveil{from{clip-path:inset(0 0 100% 0);transform:scale(1.06)}}
+/* ── Mobile layout (phones ≤760px, tablets ≤1023px) ─────────────────────────
+   App-like: slim sticky header, bottom tab bar, navigation in a bottom sheet,
+   swipeable services on the home page, compact rows on /services and a
+   vertical "three steps". Appended last so it overrides the older rules. */
+
+/* Navigation sheet (native <dialog>). */
+.nav-sheet{position:fixed;inset:auto 0 0 0;margin:0 auto;width:100%;max-width:520px;max-height:88dvh;padding:0;border:0;border-radius:22px 22px 0 0;background:#fcfbf6;color:var(--ink);box-shadow:0 -12px 40px #13291e33;overflow:auto}
+.nav-sheet::backdrop{background:#13291e73;backdrop-filter:blur(2px)}
+.nav-sheet-body{padding:10px 18px calc(18px + env(safe-area-inset-bottom))}
+.sheet-handle{display:block;width:42px;height:5px;border-radius:3px;background:#d6dccd;margin:0 auto 8px}
+.nav-sheet-head{display:flex;align-items:center;justify-content:space-between;padding:4px 2px 10px}
+.nav-sheet-head b{font-size:17px;color:var(--dark)}
+.nav-sheet-head .icon-button{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:#eef1e8}
+.nav-sheet nav{display:flex;flex-direction:column;gap:4px}
+.nav-sheet nav a{display:flex;align-items:center;gap:14px;min-height:56px;padding:6px 10px;border-radius:14px;font-size:15px;font-weight:550;color:var(--ink)}
+.nav-sheet nav a .chev{margin-right:auto;color:#8a9580}
+.nav-sheet nav a.active{background:#e9efdf;color:var(--green)}
+.nav-sheet-icon{width:40px;height:40px;border-radius:12px;background:#eef2e7;color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-sheet nav a.active .nav-sheet-icon{background:var(--green);color:#fff}
+.nav-sheet-actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px}
+.nav-sheet-actions:has(> :nth-child(2)){grid-template-columns:1fr 1fr}
+.nav-sheet-actions .button{margin:0;width:100%;gap:10px;min-height:50px;border-radius:12px}
+.nav-sheet-legal{display:flex;justify-content:center;gap:10px;margin-top:16px;font-size:12px;color:var(--muted)}
+.nav-sheet-legal a{min-height:32px;display:inline-flex;align-items:center}
+body:has(.nav-sheet[open]){overflow:hidden}
+
+/* Bottom tab bar: phones only. */
+.tab-bar{display:none}
+@media (max-width:760px){
+.tab-bar{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;inset:auto 0 0 0;z-index:50;background:rgba(252,251,246,.94);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-top:1px solid #e3e6da;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.tab-bar a{display:flex;flex-direction:column;align-items:center;gap:3px;min-height:52px;justify-content:center;color:#65705f;font-size:11px;font-weight:550}
+.tab-icon{width:56px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.tab-bar a.active{color:var(--green);font-weight:700}
+.tab-bar a.active .tab-icon{background:#e3ecd8}
+footer{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+.whatsapp{bottom:calc(80px + env(safe-area-inset-bottom));left:14px;width:48px;height:48px}
+.toast{bottom:calc(84px + env(safe-area-inset-bottom))}
+}
+
+/* Header: slim and sticky below 1024px; links move to the sheet. */
+@media (max-width:1023px){
+.site-header{position:sticky;top:0;z-index:40;background:rgba(250,248,242,.92);backdrop-filter:saturate(1.3) blur(12px);-webkit-backdrop-filter:saturate(1.3) blur(12px)}
+.header-inner{height:70px;gap:12px}
+.header-inner nav,.header-inner nav.open{display:none}
+.header-track{margin-right:auto}
+.mobile-menu{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;border:1px solid #e0e4d8;background:#fffef9;padding:0}
+}
+@media (max-width:760px){
+.header-inner{height:60px}
+.header-track{display:none}
+.mobile-menu{margin-right:auto}
+.site-header .brand{font-size:19px;gap:9px}
+.site-header .brand small{font-size:10px;margin-top:1px}
+.site-header .brand-symbol{width:32px;height:37px;border-radius:15px 15px 5px 5px}
+.site-header .brand-symbol svg{width:18px}
+}
+
+/* Hero on phones: the main action fits on the first screen. */
+@media (max-width:560px){
+.hero{padding-top:26px;padding-bottom:22px;gap:22px}
+.hero h1{font-size:38px;line-height:1.45;letter-spacing:-1px;margin-bottom:12px}
+.hero-copy>p{font-size:13px;line-height:2}
+.hero-actions{flex-direction:column;align-items:stretch;gap:6px;margin-top:20px}
+.hero-actions .button{width:100%;min-height:50px;border-radius:12px;font-size:14px}
+.hero-actions .text-button{justify-content:center;min-height:44px}
+.hero-trust{margin-top:14px;gap:6px 12px}
+.hero-visual{zoom:.8;max-width:420px}
+.tracking-strip{border-radius:16px}
+}
+
+/* Home services: a swipeable row that bleeds to the screen edges. */
+@media (max-width:760px){
+.services-section .services-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;margin-inline:calc(50% - 50vw);padding:4px calc(50vw - 50%) 14px;scroll-padding-inline:calc(50vw - 50%)}
+.services-section .services-grid::-webkit-scrollbar{display:none}
+.services-section .service-card{flex:0 0 min(76%,300px);scroll-snap-align:start;border-radius:16px}
+.services-section .service-art{height:132px}
+.services-section .service-body{padding:16px}
+.services-section .service-body h3{font-size:16px;min-height:0;margin:4px 0 6px}
+.services-section .service-body p{font-size:13px;line-height:1.9;min-height:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.services-section .service-body .text-button{font-size:13px}
+.section-heading{align-items:flex-end}
+}
+
+/* /services on phones: compact rows, the whole row is the link. */
+@media (max-width:760px){
+.services-page .services-grid{display:flex;flex-direction:column;gap:10px}
+.services-page .service-card{display:grid;grid-template-columns:84px 1fr;position:relative;border-radius:16px}
+.services-page .service-art{height:auto;min-height:100%}
+.services-page .service-art>svg:not(.art-arrow){width:30px;margin:0}
+.services-page .service-art>span,.services-page .art-ring,.services-page .art-arrow{display:none}
+.services-page .service-body{padding:14px 14px 14px 36px;position:relative}
+.services-page .service-body h3{font-size:15px;min-height:0;margin:3px 0 4px}
+.services-page .service-body h3 a::after{content:'';position:absolute;inset:0;border-radius:16px}
+.services-page .service-body p{font-size:12px;line-height:1.8;min-height:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.services-page .service-body .text-button{display:none}
+.services-page .service-body::after{content:'';position:absolute;left:14px;top:50%;width:8px;height:8px;border-left:2px solid #8a9580;border-bottom:2px solid #8a9580;transform:translateY(-50%) rotate(45deg)}
+.service-toolbar{flex-direction:column;align-items:stretch;gap:12px}
+.filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:calc(50% - 50vw);padding:2px calc(50vw - 50%);gap:8px}
+.filters::-webkit-scrollbar{display:none}
+.filters button{flex-shrink:0;white-space:nowrap;border:1px solid #dfe4d6;border-radius:999px;background:#fffef9;padding:8px 16px;font-size:13px;min-height:40px}
+.filters button.active{border-color:var(--green)}
+.filters[data-pill]::before{border-radius:999px}
+.search-box{width:100%}
+}
+
+/* Three steps on phones: a vertical path, numbers in circles on the line. */
+@media (max-width:560px){
+.steps{grid-template-columns:1fr;gap:26px;margin-top:22px;position:relative}
+.steps::before{content:'';position:absolute;top:10px;bottom:10px;right:22px;left:auto;width:3px;height:auto;border-radius:2px;background:repeating-linear-gradient(to bottom,#9fb58c 0 9px,transparent 9px 16px);transform-origin:top;animation-name:line-draw-y}
+.steps::after{right:16px;top:0;animation-name:dot-run-y;z-index:0}
+/* Steps above the travelling dot, so it passes behind the numbered circles. */
+.step{z-index:1}
+.step{padding:0 64px 0 0;min-height:48px}
+.step-number{top:0;right:0;left:auto;width:46px;height:46px;border-radius:50%;background:#fffef8;border:1px solid #cfdac3;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:var(--green);z-index:1}
+.step>svg{display:none}
+.step h3{font-size:16px;margin:10px 0 6px}
+.step p{font-size:13px;line-height:1.9}
+}
+@keyframes line-draw-y{from{transform:scaleY(0)}}
+@keyframes dot-run-y{from{top:0;opacity:0}15%{opacity:1}85%{opacity:1}to{top:calc(100% - 14px);opacity:0}}
+
+@media (prefers-reduced-motion:no-preference){
+.nav-sheet[open]{animation:sheet-up .32s cubic-bezier(.3,.9,.3,1)}
+.nav-sheet[open]::backdrop{animation:fade-in .25s ease-out}
+}
+@keyframes sheet-up{from{transform:translateY(100%)}}
+@keyframes fade-in{from{opacity:0}}
