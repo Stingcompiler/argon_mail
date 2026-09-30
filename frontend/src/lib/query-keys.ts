@@ -35,5 +35,6 @@ export const qk = {
   },
   public: {
     track: (code: string) => ['public', 'track', code] as const,
+    service: (slug: string) => ['public', 'service', slug] as const,
   },
 };

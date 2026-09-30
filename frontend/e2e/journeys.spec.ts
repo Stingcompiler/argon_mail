@@ -18,16 +18,19 @@ async function recordEvents(page: Page) {
 }
 const events = (page: Page) => page.evaluate(() => JSON.parse(sessionStorage.getItem('e2e-events') || '[]') as Record<string, string>[]);
 
-test('home → area → service → request submitted, with events that carry no personal data', async ({ page }) => {
+test('home → area → tile → request submitted in the dialog, with events that carry no personal data', async ({ page }) => {
   await recordEvents(page);
   const name = `رحلة الرئيسية ${Date.now()}`;
   await page.goto('/');
   // The main card (the area) leads to its services as tiles.
   await page.locator('.services-section').getByRole('link', { name: /خدمات بريدية/ }).first().click();
   await expect(page.getByRole('heading', { level: 1, name: 'خدمات بريدية' })).toBeVisible();
+  // A tile opens the request form in a dialog, on the same page.
   await page.locator('.service-tiles').getByRole('link', { name: 'إرسال الطرود والمستندات' }).click();
-  await expect(page).toHaveURL(new RegExp(encodeURIComponent(SERVICE)));
-  await page.getByLabel('الاسم الكامل').fill(name);
+  const dialog = page.getByRole('dialog', { name: 'إرسال الطرود والمستندات' });
+  await expect(dialog).toBeVisible();
+  await expect(page).toHaveURL(/\/services\/category\/.+\?service=/);
+  await dialog.getByLabel('الاسم الكامل').fill(name);
   await page.getByRole('combobox', { name: 'الدولة' }).first().selectOption('SA');
   await page.getByLabel('رقم الهاتف بدون مفتاح الدولة').fill('0501234567');
   await page.getByLabel('وجهة الإرسال').fill('جدة');
@@ -149,3 +152,46 @@ test('area page: its services as tiles, a tracking tile, and a way back', async 
   await expect(page.getByRole('link', { name: 'كل المجالات' })).toHaveAttribute('href', '/services');
   expect((await page.request.get('/services/category/' + encodeURIComponent('لا-يوجد'))).status()).toBe(404);
 });
+
+/** Brand redesign, phase 5: the order dialog behaves like a page of its own. */
+test.describe('order dialog', () => {
+  const AREA = '/services/category/' + encodeURIComponent('خدمات-بريدية');
+  const tile = (page: Page) => page.locator('.service-tiles').getByRole('link', { name: 'إرسال الطرود والمستندات' });
+
+  test('opens from a tile, closes with Escape and the back button, focus returns', async ({ page }) => {
+    await page.goto(AREA);
+    await tile(page).click();
+    const dialog = page.getByRole('dialog', { name: 'إرسال الطرود والمستندات' });
+    await expect(dialog.getByLabel('الاسم الكامل')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect.poll(() => new URL(page.url()).search).toBe('');
+    await expect(tile(page)).toBeFocused();
+    // Keyboard: Enter on the focused tile opens it again; Back closes it.
+    await page.keyboard.press('Enter');
+    await expect(dialog).toBeVisible();
+    await page.goBack();
+    await expect(dialog).toBeHidden();
+  });
+
+  test('a shared link opens the form directly; typed details are not dropped silently', async ({ page }) => {
+    await page.goto(AREA + '?service=' + encodeURIComponent(SERVICE));
+    const dialog = page.getByRole('dialog', { name: 'إرسال الطرود والمستندات' });
+    await dialog.getByLabel('الاسم الكامل').fill('اسم لم يُرسل');
+    let asked = '';
+    page.once('dialog', async (d) => { asked = d.message(); await d.dismiss(); });
+    await dialog.getByRole('button', { name: 'إغلاق نموذج الطلب' }).click();
+    expect(asked).toContain('لم تُرسل');
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByLabel('الاسم الكامل')).toHaveValue('اسم لم يُرسل');
+    page.once('dialog', (d) => d.accept());
+    await dialog.getByRole('button', { name: 'إغلاق نموذج الطلب' }).click();
+    await expect(dialog).toBeHidden();
+  });
+
+  test('the tile is still a link: a new tab reaches the service page', async ({ page }) => {
+    await page.goto(AREA);
+    await expect(tile(page)).toHaveAttribute('href', '/services/' + encodeURIComponent(SERVICE));
+  });
+});
+
