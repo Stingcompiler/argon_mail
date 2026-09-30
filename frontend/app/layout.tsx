@@ -3,19 +3,23 @@ import localFont from 'next/font/local';
 import { UiProvider } from '@/contexts/UiContext';
 import './globals.css';
 
-// Self-hosted variable font: no request to Google at runtime. Only the Arabic
-// subset is preloaded (headings need it for LCP); the Latin subset (digits,
-// codes, emails) loads on first use instead of competing for bandwidth.
+// Self-hosted variable font: no request to Google at runtime. Both files are
+// cut to the weights the site uses (400–700), and the Arabic one to the basic
+// Arabic and Arabic Supplement blocks (scripts/subset-arabic-font.sh): 166 KB →
+// 40 KB for the file the hero heading waits for. Only the Arabic file is
+// preloaded; the Latin one (digits, codes, emails) loads on first use.
 const arabic = localFont({
-  src: '../node_modules/@fontsource-variable/noto-sans-arabic/files/noto-sans-arabic-arabic-wght-normal.woff2',
-  weight: '100 900',
+  src: '../src/fonts/noto-sans-arabic-subset.woff2',
+  weight: '400 700',
   variable: '--font-arabic',
   display: 'swap',
   fallback: ['Tahoma', 'Arial', 'sans-serif'],
+  // Keep in sync with UNICODES in scripts/subset-arabic-font.sh.
+  declarations: [{ prop: 'unicode-range', value: 'U+0600-06FF, U+0750-077F, U+200C-200F, U+2010-2011, U+204F, U+25CC, U+FD3E-FD3F' }],
 });
 const latin = localFont({
-  src: '../node_modules/@fontsource-variable/noto-sans-arabic/files/noto-sans-arabic-latin-wght-normal.woff2',
-  weight: '100 900',
+  src: '../src/fonts/noto-sans-arabic-latin.woff2',
+  weight: '400 700',
   variable: '--font-latin',
   display: 'swap',
   preload: false,

@@ -60,9 +60,37 @@ export function NavSheet({ open, onClose, nav, whatsapp }: { open: boolean; onCl
   );
 }
 
+/**
+ * WCAG 2.4.11: browsers only scroll a focused element into view when it is
+ * outside the viewport, not when it sits under a sticky header or the tab bar.
+ * Nudge the page just enough to bring it clear of whichever bar is showing.
+ */
+function useFocusClearOfBars() {
+  useEffect(() => {
+    const onFocus = (e: FocusEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (!el?.getBoundingClientRect || el.closest('header, .tab-bar, dialog')) return;
+      const shown = (sel: string) => {
+        const bar = document.querySelector<HTMLElement>(sel);
+        if (!bar || !bar.getClientRects().length || getComputedStyle(bar).visibility === 'hidden') return null;
+        return bar.getBoundingClientRect();
+      };
+      const box = el.getBoundingClientRect();
+      const header = getComputedStyle(document.querySelector('header') || document.body).position === 'sticky' ? shown('header') : null;
+      const tabs = shown('.tab-bar');
+      const gap = 12;
+      if (tabs && box.bottom > tabs.top) window.scrollBy({ top: box.bottom - tabs.top + gap, behavior: 'instant' });
+      else if (header && box.top < header.bottom) window.scrollBy({ top: box.top - header.bottom - gap, behavior: 'instant' });
+    };
+    document.addEventListener('focusin', onFocus);
+    return () => document.removeEventListener('focusin', onFocus);
+  }, []);
+}
+
 /** App-style bottom bar on phones: the four places customers go most. */
 export function TabBar() {
   const active = useIsActive();
+  useFocusClearOfBars();
   const tabs = [
     { href: '/', label: 'الرئيسية', icon: Home },
     { href: '/services', label: 'الخدمات', icon: Layers3 },
