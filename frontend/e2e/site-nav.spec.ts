@@ -169,6 +169,35 @@ test('home: verifiable facts and what happens after submitting', async ({ page }
   const after = page.getByRole('heading', { name: 'بعد إرسال طلبك' });
   await expect(after).toBeAttached();
   await expect(page.locator('.after-submit li')).toHaveCount(4);
+  // Audit plan, batch 3: folded on phones, and a tap on the heading opens it.
+  const panel = page.locator('details.after-submit');
+  await expect(panel).not.toHaveAttribute('open', '');
+  await after.click();
+  await expect(panel).toHaveAttribute('open', '');
+  await expect(page.locator('.after-submit li').first()).toBeVisible();
+});
+
+/** Audit plan, batch 3: the phone polish, measured. */
+test('home (phone): short «how it works» and footer, tap targets, a legible mark, and a 320px first screen', async ({ page }) => {
+  await page.goto('/');
+  const h = async (sel: string) => (await page.locator(sel).boundingBox())!.height;
+  expect(await h('.how-section'), '«how it works» under 650px with the panel folded').toBeLessThan(650);
+  expect(await h('footer'), 'footer under 420px').toBeLessThan(420);
+  expect(await h('.site-header .brand-mark'), 'the mark is drawn large enough to read').toBeGreaterThanOrEqual(28);
+  // Tap targets on the first screen: the search button and the privacy chip.
+  expect(await h('.home-search .button')).toBeGreaterThanOrEqual(44);
+  expect(await h('.hero-trust a')).toBeGreaterThanOrEqual(40);
+  // The section heading and its link never break mid-word on a narrow phone:
+  // the link stacks under the heading below 400px, and goes below 360px.
+  await page.setViewportSize({ width: 360, height: 640 });
+  await page.goto('/');
+  const link = await page.locator('.services-section .section-heading .text-button').boundingBox();
+  expect(link!.height, 'link on one line').toBeLessThan(40);
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto('/');
+  await expect(page.locator('.services-section .section-heading .text-button')).toBeHidden();
+  const card = await page.locator('.services-section .category-card').first().boundingBox();
+  expect(card!.y, 'the first area card starts within the first screen height at 320×568').toBeLessThan(568);
 });
 
 /** Landing plan, phase 4: a visible cue that the services row swipes, and a
