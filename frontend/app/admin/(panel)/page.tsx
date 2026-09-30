@@ -5,6 +5,7 @@ import { OrdersPanel } from '@/components/admin/OrdersPanel';
 import { AlertsBanner } from '@/components/admin/NotificationsManager';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotificationSummary, useOrderSummary } from '@/hooks/admin';
+import { CountUp } from '@/lib/motion';
 
 export default function Overview() {
   const summary = useOrderSummary();
@@ -25,7 +26,7 @@ export default function Overview() {
         ].map((s) => (
           <div className="stat" key={s.name}>
             <div><span>{s.name}</span><s.icon size={19} /></div>
-            <strong>{summary.isLoading ? '…' : String(s.value ?? 0).padStart(2, '0')}</strong>
+            <strong><CountUp value={summary.isLoading ? null : s.value ?? 0} /></strong>
             <small>{summary.isError ? 'تعذّر التحميل' : 'بيانات حية'}</small>
           </div>
         ))}

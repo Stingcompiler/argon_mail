@@ -4,10 +4,32 @@ import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useTracking } from '@/hooks/public';
 import { ApiError } from '@/lib/api/client';
+import type { StatusMeaning } from '@/lib/api/types';
 import { formatDate, formatDateTime, statusTone } from '@/lib/format';
 import { NameLookup } from './NameLookup';
 import { RememberCode } from './RememberCode';
 import { TrackForm } from './TrackForm';
+import { SlidingGroup } from '@/lib/motion';
+
+/** Where each status meaning sits on the customer's journey (cancelled and failed have no place). */
+const STAGES = ['الاستلام', 'المراجعة', 'التنفيذ', 'الجاهزية', 'الإنجاز'];
+const STAGE_OF: Partial<Record<StatusMeaning, number>> = { new: 1, in_review: 2, waiting_customer: 2, in_progress: 3, ready: 4, completed: 5 };
+
+/** Ring that fills to the current stage (SVG stroke, animated in CSS). */
+function ProgressRing({ stage }: { stage: number }) {
+  const r = 34, c = 2 * Math.PI * r;
+  const done = stage === STAGES.length;
+  return (
+    <div className={'progress-ring' + (done ? ' done' : '')} role="img" aria-label={`المرحلة ${stage} من ${STAGES.length}: ${STAGES[stage - 1]}`}>
+      <svg viewBox="0 0 84 84" width="84" height="84" aria-hidden="true">
+        <circle cx="42" cy="42" r={r} className="ring-track" />
+        <circle cx="42" cy="42" r={r} className="ring-fill" style={{ ['--c' as string]: c, ['--off' as string]: c * (1 - stage / STAGES.length) }} />
+      </svg>
+      <span aria-hidden="true">{done ? <Check size={20} /> : <><b>{stage}</b>/{STAGES.length}</>}</span>
+      <small aria-hidden="true">{STAGES[stage - 1]}</small>
+    </div>
+  );
+}
 
 export function TrackingView() {
   const code = (useSearchParams().get('code') || '').trim().toUpperCase();
@@ -15,10 +37,10 @@ export function TrackingView() {
   const t = q.data;
   const [mode, setMode] = useState<'code' | 'name'>('code');
   const tabs = (
-    <div className="segmented track-modes" role="group" aria-label="طريقة المتابعة">
+    <SlidingGroup active={mode} className="segmented track-modes" role="group" aria-label="طريقة المتابعة">
       <button type="button" className={mode === 'code' ? 'selected' : ''} aria-pressed={mode === 'code'} onClick={() => setMode('code')}>برقم الطلب</button>
       <button type="button" className={mode === 'name' ? 'selected' : ''} aria-pressed={mode === 'name'} onClick={() => setMode('name')}>بالاسم ورقم الهاتف</button>
-    </div>
+    </SlidingGroup>
   );
   if (mode === 'name') return <>{tabs}<NameLookup /></>;
   return (
@@ -48,7 +70,10 @@ export function TrackingView() {
               <h2>{t.service_name}</h2>
               <span className="order-id" dir="ltr">{t.code}</span>
             </div>
-            <span className={`badge ${statusTone(t.status.meaning)}`}><i />{t.status.label}</span>
+            <div className="result-status">
+              {STAGE_OF[t.status.meaning] && <ProgressRing stage={STAGE_OF[t.status.meaning]!} />}
+              <span className={`badge ${statusTone(t.status.meaning)}`}><i />{t.status.label}</span>
+            </div>
           </div>
           <p className="subtle-copy">آخر تحديث: {formatDateTime(t.updated_at)}</p>
           <div className="timeline">

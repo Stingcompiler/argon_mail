@@ -8,6 +8,7 @@ import type { AdminService, AdminServiceInput, FieldType, ServiceField } from '@
 import { iconFor, serviceIcons } from '../icons';
 import { AssetPicker } from './MediaLibrary';
 import { LoadError, Loading, SectionTitle, Toggle, useDialogFocus } from './ui';
+import { SlidingGroup } from '@/lib/motion';
 
 const FIELD_TYPES: { v: FieldType; l: string }[] = [
   { v: 'text', l: 'نص قصير' }, { v: 'textarea', l: 'نص طويل' }, { v: 'number', l: 'رقم' }, { v: 'date', l: 'تاريخ' },
@@ -46,10 +47,10 @@ export function ServicesManager() {
   return (
     <>
       <div className="workspace-toolbar">
-        <div className="segmented">
-          <button className={tab === 'services' ? 'selected' : ''} onClick={() => setTab('services')}>الخدمات <b>{services.data?.length ?? '…'}</b></button>
-          <button className={tab === 'categories' ? 'selected' : ''} onClick={() => setTab('categories')}>المجالات <b>{categories.data?.length ?? '…'}</b></button>
-        </div>
+        <SlidingGroup active={tab} className="segmented" role="group" aria-label="عرض">
+          <button className={tab === 'services' ? 'selected' : ''} aria-pressed={tab === 'services'} onClick={() => setTab('services')}>الخدمات <b>{services.data?.length ?? '…'}</b></button>
+          <button className={tab === 'categories' ? 'selected' : ''} aria-pressed={tab === 'categories'} onClick={() => setTab('categories')}>المجالات <b>{categories.data?.length ?? '…'}</b></button>
+        </SlidingGroup>
         <button className="button" onClick={openNew}><Plus size={17} />إضافة خدمة</button>
       </div>
       {tab === 'services' ? (

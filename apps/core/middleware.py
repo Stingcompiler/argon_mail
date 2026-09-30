@@ -32,6 +32,12 @@ class RequestSizeLimitMiddleware:
         from django.http import JsonResponse
 
         if request.method in ("POST", "PUT", "PATCH") and request.path_info.startswith("/api/"):
+            # A chunked body has no Content-Length, so Django would read nothing and
+            # answer while the proxy is still sending: EPIPE, and a 500 instead of
+            # this 411. Drain it first, the same way as an oversized body.
+            if "chunked" in request.META.get("HTTP_TRANSFER_ENCODING", "").lower():
+                self._drain(request, None)
+                return JsonResponse({"detail": "حدد حجم الطلب (Content-Length).", "code": "length_required"}, status=411)
             try:
                 length = int(request.META.get("CONTENT_LENGTH") or 0)
             except ValueError:
@@ -47,13 +53,17 @@ class RequestSizeLimitMiddleware:
     DRAIN_MAX = 64 * 1024 * 1024
     CHUNK = 64 * 1024
 
-    def _drain(self, request, length):
+    def _drain(self, request, length: int | None):
         """Read and discard the body before answering. If the socket is closed
         with unread data, the Next.js proxy is still writing and fails with
         EPIPE, turning the 413 into a 500. Nothing is kept in memory; the
         proxy already caps bodies (22 MB), and DRAIN_MAX bounds the work."""
         stream = request.META.get("wsgi.input")
-        if stream is None or length <= 0 or length > self.DRAIN_MAX:
+        if length is None:  # chunked: read to the end of the body, bounded by DRAIN_MAX
+            length = self.DRAIN_MAX
+        elif length <= 0 or length > self.DRAIN_MAX:
+            return
+        if stream is None:
             return
         remaining = length
         try:

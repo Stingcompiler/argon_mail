@@ -7,6 +7,7 @@ import { useOrder, useOrderActions, useStaff, useStatuses } from '@/hooks/admin'
 import { formatDate, formatDateTime } from '@/lib/format';
 import { AttachmentList, OrderMoney } from './OrderMoney';
 import { LoadError, Loading, StatusBadge, useDialogFocus } from './ui';
+import { SlidingGroup } from '@/lib/motion';
 
 const MAX_MB = 20; // the server enforces the owner's lower limit
 
@@ -112,10 +113,10 @@ export function OrderDrawer({ id, onClose }: { id: number; onClose: () => void }
               <div className={'note-block ' + note.visibility}>
                 <span>{note.visibility === 'internal' ? <><LockKeyhole size={17} />ملاحظة داخلية</> : <><Eye size={17} />ملاحظة للعميل</>}</span>
                 <p>{note.visibility === 'internal' ? 'لفريق العمل فقط. لا تظهر في صفحة المتابعة.' : 'تظهر لمن يحمل رقم المتابعة.'}</p>
-                <div className="segmented">
-                  <button className={note.visibility === 'internal' ? 'selected' : ''} onClick={() => setNote({ ...note, visibility: 'internal' })}>داخلية</button>
-                  <button className={note.visibility === 'public' ? 'selected' : ''} onClick={() => setNote({ ...note, visibility: 'public' })}>للعميل</button>
-                </div>
+                <SlidingGroup active={note.visibility} className="segmented" role="group" aria-label="نوع الملاحظة">
+                  <button type="button" className={note.visibility === 'internal' ? 'selected' : ''} aria-pressed={note.visibility === 'internal'} onClick={() => setNote({ ...note, visibility: 'internal' })}>داخلية</button>
+                  <button type="button" className={note.visibility === 'public' ? 'selected' : ''} aria-pressed={note.visibility === 'public'} onClick={() => setNote({ ...note, visibility: 'public' })}>للعميل</button>
+                </SlidingGroup>
                 <textarea aria-label="نص الملاحظة" rows={4} maxLength={2000} value={note.body} onChange={(e) => setNote({ ...note, body: e.target.value })} />
                 <button className="button" disabled={!note.body.trim() || actions.addNote.isPending} onClick={saveNote}><Save size={16} />إضافة الملاحظة</button>
               </div>

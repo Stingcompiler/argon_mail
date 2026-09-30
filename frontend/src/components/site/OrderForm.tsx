@@ -9,6 +9,7 @@ import type { PublicServiceDetail, ServiceField } from '@/lib/api/types';
 import { FILE_ACCEPT, IMAGE_ACCEPT, checkFile, formatSize } from '@/lib/files';
 import { phoneProblem } from '@/lib/countries';
 import { FieldError, describedBy, errorId, useFocusInvalid } from '@/lib/forms';
+import { reducedMotion } from '@/lib/motion';
 import { PhoneField } from './PhoneField';
 
 type Limits = { maxFileMb: number; maxFiles: number; maxTotalMb: number };
@@ -24,6 +25,7 @@ export function OrderForm({ service, limits }: { service: PublicServiceDetail; l
   const key = useRef<string>('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formRef, focusInvalid] = useFocusInvalid();
+  const [done, setDone] = useState(false);
   // Selected files are kept in state so they survive a failed submission.
   const [files, setFiles] = useState<Record<string, File[]>>({});
   const totalFiles = Object.values(files).reduce((n, l) => n + l.length, 0);
@@ -50,7 +52,7 @@ export function OrderForm({ service, limits }: { service: PublicServiceDetail; l
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (create.isPending) return;
+    if (create.isPending || done) return;
     const data = new FormData(e.currentTarget);
     const answers: Record<string, string | string[]> = {};
     const phoneErr = phoneProblem(String(data.get('customer_phone') || ''));
@@ -79,7 +81,14 @@ export function OrderForm({ service, limits }: { service: PublicServiceDetail; l
         files,
       },
       {
-        onSuccess: (order) => router.push(`/order-success?code=${encodeURIComponent(order.code)}`),
+        onSuccess: (order) => {
+          const next = `/order-success?code=${encodeURIComponent(order.code)}`;
+          // Let the check mark draw before leaving; skip the pause for reduced motion.
+          if (reducedMotion()) return router.push(next);
+          router.prefetch(next);
+          setDone(true);
+          setTimeout(() => router.push(next), 1000);
+        },
         onError: (err) => {
           // A validation error means nothing was created: the next attempt is a new submission.
           if (err instanceof ApiError && err.status === 400) key.current = '';
@@ -124,9 +133,11 @@ export function OrderForm({ service, limits }: { service: PublicServiceDetail; l
         <span>أوافق على <Link href="/terms" target="_blank">شروط الاستخدام</Link> و<Link href="/privacy" target="_blank">سياسة الخصوصية</Link>.</span>
       </label>
       <FieldError name="consent" error={errors.consent} />
-      <button className="button wide" disabled={create.isPending} aria-busy={create.isPending}>
-        {create.isPending ? <>جارٍ الإرسال <LoaderCircle className="spin" size={18} /></> : <>إرسال الطلب <ArrowLeft size={18} /></>}
+      <button className={'button wide' + (done ? ' is-done' : '')} disabled={create.isPending || done} aria-busy={create.isPending}>
+        {done ? <>تم الإرسال <DrawnCheck /></>
+          : create.isPending ? <>جارٍ الإرسال <LoaderCircle className="spin" size={18} /></> : <>إرسال الطلب <ArrowLeft size={18} /></>}
       </button>
+      {done && <span className="sr-only" role="status">تم إرسال طلبك.</span>}
     </form>
   );
 }
@@ -193,5 +204,15 @@ function DynamicField({ field: f, error }: { field: ServiceField; error?: string
       {f.help_text && <small id={`${name}-help`}>{f.help_text}</small>}
       <FieldError name={errName} error={error} />
     </label>
+  );
+}
+
+/** A check mark whose stroke is drawn in CSS (.drawn-check). */
+function DrawnCheck() {
+  return (
+    <svg className="drawn-check" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M7 12.5l3.2 3.2L17 9" />
+    </svg>
   );
 }

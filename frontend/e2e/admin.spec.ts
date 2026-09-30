@@ -31,6 +31,7 @@ test.describe('admin dashboard', () => {
     await customer.goto(`/track?code=${code}`);
     await expect(customer.getByText('بدأنا تجهيز طلبك.')).toBeVisible();
     await expect(customer.locator('.tracking-result .badge')).toContainText('قيد التنفيذ');
+    await expect(customer.getByRole('img', { name: 'المرحلة 3 من 5: التنفيذ' })).toBeVisible();
   });
 
   test('expired access token is refreshed silently and the request retried', async ({ page }) => {
