@@ -11,6 +11,14 @@ for (const url of ['/', '/services', '/contact']) {
     const hidden: string[] = [];
     for (let i = 0; i < 60; i++) {
       await page.keyboard.press('Tab');
+      // Smooth scrolling brings the element into place over a few frames;
+      // measure where it settles, as the user sees it.
+      await page.waitForFunction(() => new Promise((done) => {
+        const el = document.activeElement as HTMLElement | null;
+        const at = () => `${scrollX},${scrollY},${el?.getBoundingClientRect().left},${el?.getBoundingClientRect().top}`;
+        const a = at();
+        setTimeout(() => done(at() === a), 150);
+      }), undefined, { timeout: 4000, polling: 50 }).catch(() => {});
       const r = await page.evaluate(() => {
         const el = document.activeElement as HTMLElement | null;
         if (!el || el === document.body) return null;
