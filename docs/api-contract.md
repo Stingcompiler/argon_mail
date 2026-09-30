@@ -28,7 +28,8 @@
 | --- | --- | --- |
 | GET `health/` | حالة الخدمة وقاعدة البيانات | — |
 | GET `public/site/` | `{settings, faq}` | public_read |
-| GET `public/categories/` | المجالات التي فيها خدمات منشورة | public_read |
+| GET `public/categories/` | المجالات التي فيها خدمات منشورة: الاسم، slug، السطر، الأيقونة، الصورة، يظهر في الرئيسية، عدد الخدمات المنشورة | public_read |
+| GET `public/categories/{slug}/` | مجال واحد بالحقول نفسها؛ 404 إن لم تكن فيه خدمة منشورة | public_read |
 | GET `public/services/` | الخدمات المنشورة. تصفية: `category__slug`, `is_featured` | public_read |
 | GET `public/services/<slug>/` | تفاصيل خدمة منشورة مع الحقول | public_read |
 | GET `public/service-redirects/<slug>/` | `{slug}` الجديد لرابط قديم | — |

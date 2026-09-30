@@ -1,14 +1,21 @@
 import { expect, test } from '@playwright/test';
 import { audit } from './axe';
-import { serviceUrl } from './helpers';
+import { SERVICE, serviceUrl } from './helpers';
 
 test.describe('accessibility (axe, WCAG AA)', () => {
-  for (const [name, url] of [['home', '/'], ['services', '/services'], ['service', serviceUrl], ['track', '/track'], ['contact', '/contact'], ['privacy', '/privacy']]) {
+  for (const [name, url] of [['home', '/'], ['services', '/services'], ['service', serviceUrl], ['track', '/track'], ['contact', '/contact'], ['privacy', '/privacy'],
+    ['area', '/services/category/' + encodeURIComponent('خدمات-بريدية')], ['search results', '/services?q=' + encodeURIComponent('خدمات')]]) {
     test(`public: ${name}`, async ({ page }) => {
       await page.goto(url);
       await audit(page);
     });
   }
+
+  test('public: order dialog open', async ({ page }) => {
+    await page.goto('/services/category/' + encodeURIComponent('خدمات-بريدية') + '?service=' + encodeURIComponent(SERVICE));
+    await expect(page.getByRole('dialog').getByLabel('الاسم الكامل')).toBeVisible();
+    await audit(page);
+  });
 
   test('order form errors are tied to their fields and focused', async ({ page }) => {
     await page.goto(serviceUrl);
