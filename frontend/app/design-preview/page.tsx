@@ -1,3 +1,4 @@
+import '../admin/workspace.css';
 import './legacy-illustration.css';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';

@@ -15,24 +15,38 @@ export function useIsActive() {
 }
 
 /**
+ * A bottom sheet's <dialog>, opened with showModal() when `open` turns true.
+ * Its contents render only from the first opening on: closed sheets are on
+ * every page, and their ~70 elements were parsed and hydrated on each load
+ * without ever being seen (home page performance). `onShown` runs once the
+ * dialog is open, for example to focus a field.
+ */
+function useSheet(open: boolean, onShown?: (d: HTMLDialogElement) => void) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const [mounted, setMounted] = useState(false);
+  if (open && !mounted) setMounted(true);
+  useEffect(() => {
+    const d = ref.current;
+    if (!d) return;
+    if (open && mounted && !d.open) { d.showModal(); onShown?.(d); }
+    if (!open && d.open) d.close();
+  }, [open, mounted]); // eslint-disable-line react-hooks/exhaustive-deps
+  return { ref, mounted };
+}
+
+/**
  * Full navigation as a bottom sheet (phones and tablets). A native <dialog>
  * opened with showModal(): the page behind is inert, focus stays inside,
  * Escape closes it, and focus returns to the menu button.
  */
 export function NavSheet({ open, onClose, nav, whatsapp }: { open: boolean; onClose: () => void; nav: NavItem[]; whatsapp?: string }) {
-  const ref = useRef<HTMLDialogElement>(null);
+  const { ref, mounted } = useSheet(open);
   const active = useIsActive();
-  useEffect(() => {
-    const d = ref.current;
-    if (!d) return;
-    if (open && !d.open) d.showModal();
-    if (!open && d.open) d.close();
-  }, [open]);
   return (
     // A click on the dialog itself (not its content) is a click on the backdrop;
     // keyboard users close it with Escape or the close button.
     <dialog ref={ref} className="nav-sheet" aria-label="القائمة" onClose={onClose} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="nav-sheet-body">
+      {mounted && <div className="nav-sheet-body">
         <span className="sheet-handle" aria-hidden="true" />
         <div className="nav-sheet-head">
           <b>القائمة</b>
@@ -56,7 +70,7 @@ export function NavSheet({ open, onClose, nav, whatsapp }: { open: boolean; onCl
         <div className="nav-sheet-legal">
           <Link href="/privacy" onClick={onClose}>سياسة الخصوصية</Link><span aria-hidden="true">·</span><Link href="/terms" onClick={onClose}>شروط الاستخدام</Link>
         </div>
-      </div>
+      </div>}
     </dialog>
   );
 }
@@ -95,25 +109,20 @@ function useFocusClearOfBars() {
  * /track?code=… on submit, and the name-and-phone lookup stays a link.
  */
 function TrackSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const d = ref.current;
-    if (!d) return;
-    if (open && !d.open) { d.showModal(); d.querySelector('input')?.focus(); } // the field, not the close button
-    if (!open && d.open) d.close();
-  }, [open]);
+  // Focus the field, not the close button.
+  const { ref, mounted } = useSheet(open, (d) => d.querySelector('input')?.focus());
   return (
-    <dialog ref={ref} className="nav-sheet track-sheet" aria-labelledby="track-sheet-title" onClose={onClose} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="nav-sheet-body">
+    <dialog ref={ref} className="nav-sheet track-sheet" aria-label="تتبع طلبك" onClose={onClose} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      {mounted && <div className="nav-sheet-body">
         <span className="sheet-handle" aria-hidden="true" />
         <div className="nav-sheet-head">
-          <b id="track-sheet-title">تتبع طلبك</b>
+          <b>تتبع طلبك</b>
           <button type="button" className="icon-button" aria-label="إغلاق" onClick={onClose}><X size={20} /></button>
         </div>
         <p>أدخل رقم الطلب الذي يبدأ بـ ARJ-.</p>
         <TrackForm compact />
         <Link className="text-button" href="/track" onClick={onClose}>نسيت الرقم؟ ابحث باسمك ورقم هاتفك <ArrowLeft size={16} /></Link>
-      </div>
+      </div>}
     </dialog>
   );
 }
