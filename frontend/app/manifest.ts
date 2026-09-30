@@ -4,13 +4,13 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'بريد عرجون',
     short_name: 'عرجون',
-    description: 'خدمات متنوعة، وطلب تتابعه بسهولة.',
+    description: 'بريد عرجون للخدمات الإلكترونية والرقمية.',
     lang: 'ar',
     dir: 'rtl',
     start_url: '/',
     display: 'standalone',
-    background_color: '#FAF8F2',
-    theme_color: '#145A46',
+    background_color: '#F5F9FD',
+    theme_color: '#05285B',
     icons: [
       { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml' },
       { src: '/apple-icon', sizes: '180x180', type: 'image/png' },

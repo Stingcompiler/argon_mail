@@ -36,7 +36,7 @@ export function NotificationsManager() {
           <>
             <div className="table-scroll">
               <table className="responsive-table">
-                <thead><tr><th>التنبيه</th><th>الحالة</th><th>المحاولات</th><th>آخر خطأ</th><th>التاريخ</th><th /></tr></thead>
+                <thead><tr><th>التنبيه</th><th>الحالة</th><th>المحاولات</th><th>آخر خطأ</th><th>التاريخ</th><th><span className="sr-only">إجراءات</span></th></tr></thead>
                 <tbody>
                   {data!.results.map((n) => (
                     <tr key={n.id}>

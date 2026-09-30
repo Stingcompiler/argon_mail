@@ -49,7 +49,7 @@ export function StatusesManager() {
         {!canEdit && <div className="notice">تعديل الحالات متاح للمدير فقط.</div>}
         <div className="table-scroll">
           <table className="responsive-table">
-            <thead><tr><th>الترتيب</th><th>الاسم</th><th>المعنى الداخلي</th><th>الطلبات</th><th>مفعّلة</th><th /></tr></thead>
+            <thead><tr><th>الترتيب</th><th>الاسم</th><th>المعنى الداخلي</th><th>الطلبات</th><th>مفعّلة</th><th><span className="sr-only">إجراءات</span></th></tr></thead>
             <tbody>
               {list.map((s: OrderStatus, i) => {
                 const label = labels[s.id] ?? s.label;

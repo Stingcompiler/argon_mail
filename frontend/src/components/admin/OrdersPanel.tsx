@@ -76,7 +76,7 @@ export function OrdersPanel({ compact = false }: { compact?: boolean }) {
         <>
           <div className="table-scroll" aria-busy={orders.isFetching}>
             <table className="responsive-table">
-              <thead><tr><th>رقم الطلب</th><th>العميل</th><th>الخدمة</th><th>الحالة</th><th>المسؤول</th><th>التاريخ</th><th /></tr></thead>
+              <thead><tr><th>رقم الطلب</th><th>العميل</th><th>الخدمة</th><th>الحالة</th><th>المسؤول</th><th>التاريخ</th><th><span className="sr-only">إجراءات</span></th></tr></thead>
               <tbody>
                 {data!.results.map((o) => (
                   <tr key={o.id} onClick={() => setSelected(o.id)}>

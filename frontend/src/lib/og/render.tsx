@@ -7,7 +7,8 @@ import { join } from 'node:path';
  * right-to-left text, so each word is its own box in a row-reverse flex row.
  * Cairo is used here because satori cannot read Noto Sans Arabic's GSUB tables.
  */
-export const BRAND = { green: '#145A46', cream: '#FAF8F2', sage: '#DDEBE3', gold: '#D9A441', ink: '#202923' };
+// Identity «بريد عرجون للخدمات الإلكترونية والرقمية» (docs/brand-redesign-plan.md).
+export const BRAND = { navy: '#05285B', royal: '#0771C1', cyan: '#15A7D7', sky: '#DEEDFB', surface: '#F5F9FD' };
 
 export async function cairo(weight: 400 | 700) {
   const file = join(process.cwd(), `node_modules/@fontsource/cairo/files/cairo-arabic-${weight}-normal.woff`);
