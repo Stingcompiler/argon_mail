@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useRef, useState, type FormEvent } from 'react';
 import { useCreateOrder } from '@/hooks/public';
+import { track } from '@/lib/analytics';
 import { ApiError, fieldErrors, newIdempotencyKey } from '@/lib/api/client';
 import type { PublicServiceDetail, ServiceField } from '@/lib/api/types';
 import { FILE_ACCEPT, IMAGE_ACCEPT, checkFile, formatSize } from '@/lib/files';
@@ -26,6 +27,9 @@ export function OrderForm({ service, limits }: { service: PublicServiceDetail; l
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formRef, focusInvalid] = useFocusInvalid();
   const [done, setDone] = useState(false);
+  // «request started» fires once, on the first thing the customer types or picks.
+  const started = useRef(false);
+  const startOnce = () => { if (!started.current) { started.current = true; track({ name: 'request_start', service: service.slug }); } };
   // Selected files are kept in state so they survive a failed submission.
   const [files, setFiles] = useState<Record<string, File[]>>({});
   const totalFiles = Object.values(files).reduce((n, l) => n + l.length, 0);
@@ -82,6 +86,7 @@ export function OrderForm({ service, limits }: { service: PublicServiceDetail; l
       },
       {
         onSuccess: (order) => {
+          track({ name: 'request_complete', service: service.slug });
           const next = `/order-success?code=${encodeURIComponent(order.code)}`;
           // Let the check mark draw before leaving; skip the pause for reduced motion.
           if (reducedMotion()) return router.push(next);
@@ -102,7 +107,7 @@ export function OrderForm({ service, limits }: { service: PublicServiceDetail; l
   const general = create.error && !Object.keys(errors).length ? create.error.message : '';
 
   return (
-    <form ref={formRef} id="order-form" className="request-form" onSubmit={submit} noValidate={false}>
+    <form ref={formRef} id="order-form" className="request-form" onSubmit={submit} noValidate={false} onInputCapture={startOnce}>
       <span className="eyebrow">لنبدأ الخطوة الأولى</span>
       <h2>أخبرنا عن طلبك</h2>
       <p>املأ التفاصيل التالية، وسيتمكن المسؤول من مراجعة طلبك والتواصل معك.</p>

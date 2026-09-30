@@ -1,5 +1,6 @@
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteHeader } from '@/components/site/SiteHeader';
+import { AnalyticsClicks } from '@/components/site/AnalyticsClicks';
 import { TabBar } from '@/components/site/MobileNav';
 import { WhatsAppButton } from '@/components/site/WhatsAppButton';
 import { JsonLd } from '@/components/site/JsonLd';
@@ -19,6 +20,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <SiteFooter settings={settings} pages={pages || []} />
       <WhatsAppButton url={settings.whatsapp_url} />
       <TabBar />
+      <AnalyticsClicks />
       <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'Organization', name: settings.name, url: siteUrl(),
         logo: settings.logo_data ? `${siteUrl()}${settings.logo_data.url}` : `${siteUrl()}/brand/arjoon-mark.svg`, description: settings.seo_description,
