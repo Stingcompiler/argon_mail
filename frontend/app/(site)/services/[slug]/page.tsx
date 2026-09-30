@@ -7,6 +7,7 @@ import { iconFor } from '@/components/icons';
 import { JsonLd } from '@/components/site/JsonLd';
 import { OrderForm } from '@/components/site/OrderForm';
 import { PreviewBanner } from '@/components/site/PreviewBanner';
+import { OrderCta } from '@/components/site/OrderCta';
 import { QueryProvider } from '@/contexts/QueryProvider';
 import { getService, getServiceRedirect, getSite, ogBase, siteUrl } from '@/lib/server-api';
 
@@ -72,6 +73,7 @@ export default async function ServicePage({ params, searchParams }: Props) {
           </div>
         </aside>
         <QueryProvider><OrderForm service={s} limits={{ maxFileMb: settings.max_file_mb, maxFiles: settings.max_files_per_order, maxTotalMb: settings.max_order_upload_mb ?? 20 }} /></QueryProvider>
+        <OrderCta />
       </div>
       <JsonLd data={[
         {

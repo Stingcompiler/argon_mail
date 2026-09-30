@@ -102,7 +102,7 @@ export function OrderForm({ service, limits }: { service: PublicServiceDetail; l
   const general = create.error && !Object.keys(errors).length ? create.error.message : '';
 
   return (
-    <form ref={formRef} className="request-form" onSubmit={submit} noValidate={false}>
+    <form ref={formRef} id="order-form" className="request-form" onSubmit={submit} noValidate={false}>
       <span className="eyebrow">لنبدأ الخطوة الأولى</span>
       <h2>أخبرنا عن طلبك</h2>
       <p>املأ التفاصيل التالية، وسيتمكن المسؤول من مراجعة طلبك والتواصل معك.</p>

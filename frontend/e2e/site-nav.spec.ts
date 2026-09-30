@@ -67,3 +67,36 @@ test('unknown pages keep the site navigation', async ({ page }) => {
   await expect(page.getByRole('navigation', { name: 'التنقل السريع' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'القائمة', exact: true })).toBeVisible();
 });
+
+test('service page: floating «اطلب الخدمة» takes you to the form', async ({ page }) => {
+  await page.goto('/services/' + encodeURIComponent('إرسال-الطرود-والمستندات'));
+  const cta = page.getByRole('button', { name: /اطلب الخدمة/ });
+  await expect(cta).toBeVisible();
+  await cta.click();
+  await expect(page.getByLabel('الاسم الكامل')).toBeFocused();
+  await expect(page.locator('.order-cta')).toHaveClass(/is-hidden/);
+});
+
+test('FAQ opens and closes; a closed answer is hidden from assistive tech', async ({ page }) => {
+  await page.goto('/');
+  const second = page.locator('.faq-item button').nth(1);
+  await second.scrollIntoViewIfNeeded();
+  await expect(second).toHaveAttribute('aria-expanded', 'false');
+  const answer = page.locator('.faq-answer').nth(1);
+  await expect(answer).toBeHidden();
+  await second.click();
+  await expect(second).toHaveAttribute('aria-expanded', 'true');
+  await expect(answer).toBeVisible();
+});
+
+/** A hydration mismatch makes React throw away the server HTML and redraw the
+ * page (it happened on every page with a phone field). No page error allowed. */
+test('public pages hydrate without errors', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  for (const url of ['/', '/services', '/services/' + encodeURIComponent('إرسال-الطرود-والمستندات'), '/contact', '/track', '/about']) {
+    await page.goto(url);
+    await page.waitForLoadState('networkidle');
+  }
+  expect(errors).toEqual([]);
+});
