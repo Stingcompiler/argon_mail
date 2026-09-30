@@ -7,6 +7,7 @@ import { JsonLd } from '@/components/site/JsonLd';
 import { CarouselDots } from '@/components/site/CarouselDots';
 import { HeroJourney } from '@/components/site/HeroJourney';
 import { HeroStamp } from '@/components/site/HeroStamp';
+import { AfterSubmit } from '@/components/site/AfterSubmit';
 import { CategoryCard } from '@/components/site/CategoryCard';
 import { iconFor } from '@/components/icons';
 import { TrackForm } from '@/components/site/TrackForm';
@@ -109,16 +110,16 @@ export default async function Home() {
               </div>
             ))}
           </div>
-          {/* What really happens next, in place of testimonials or ratings we don't have. */}
-          <div className="after-submit">
-            <h3>بعد إرسال طلبك</h3>
+          {/* What really happens next, in place of testimonials or ratings we don't have.
+              Folded on phones so the section stays short there (audit plan, batch 3). */}
+          <AfterSubmit>
             <ul>
               <li><Bell size={18} /><span>يصل تنبيه إلى فريق عرجون، ويُراجَع طلبك في لوحة العمل.</span></li>
               <li><MessageCircle size={18} /><span>إن احتاج الطلب تفاصيل، أو كان سعره يُحدد بعد المراجعة، يراسلك المسؤول عبر WhatsApp.</span></li>
               <li><Package size={18} /><span>كل تغيير في الحالة يظهر في صفحة التتبع، مع ملاحظات الفريق العامة.</span></li>
               <li><ShieldCheck size={18} /><span>لا نطلب عنوان بريد إلكتروني ولا نراسلك به؛ التواصل عبر WhatsApp وصفحة التتبع.</span></li>
             </ul>
-          </div>
+          </AfterSubmit>
         </div>
       </section>
       {faq.length > 0 && (
