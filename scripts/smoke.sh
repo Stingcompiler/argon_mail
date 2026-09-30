@@ -13,7 +13,9 @@ enc() { python3 -c "import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1]
 SLUG="إرسال-الطرود-والمستندات"; S="$(enc "$SLUG")"
 if [ "$(code "$BASE/api/v1/health/")" != 200 ]; then echo "FAIL health: $(curl -s "$BASE/api/v1/health/")"; exit 1; fi
 echo "ok   health"; pass=$((pass+1))
-check "home renders services (SSR)" grep -q "إرسال الطرود والمستندات" <(curl -s "$BASE/")
+# Home shows the service areas as main cards; each area page lists its services.
+check "home renders the areas (SSR)" grep -q "خدمات بريدية" <(curl -s "$BASE/")
+check "area page renders its services (SSR)" grep -q "إرسال الطرود والمستندات" <(curl -s "$BASE/services/category/$(enc "خدمات-بريدية")")
 curl -s "$BASE/services/$S" > "$T/svc.html"
 check "service page title"          grep -q "<title>إرسال الطرود والمستندات" "$T/svc.html"
 check "service canonical"           grep -q 'rel="canonical"' "$T/svc.html"
