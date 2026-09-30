@@ -1068,3 +1068,7 @@ a.contact-line:hover{background:#f2f5ec}
 /* M2: press feedback where there is no hover (touch screens). */
 @media (hover:none) and (prefers-reduced-motion:no-preference){:is(.button,.service-card,.tab-bar a,.nav-sheet nav a,.filters button,.contact-line,.order-cta):active{transform:scale(.97);transition:transform .1s ease}}
 @keyframes page-in{from{opacity:0;transform:translateY(8px)}}
+/* ── Landing plan, phase 1 ─────────────────────────────────────────────── */
+/* The tracking band now follows «how it works»: space it from its neighbours. */
+.tracking-strip{margin-block:36px}
+.hero-actions .button.secondary{gap:10px}

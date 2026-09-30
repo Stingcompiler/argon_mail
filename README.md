@@ -3,6 +3,7 @@
 منصة خدمات عربية بنظام أحادي: Django وDRF على PostgreSQL، وNext.js داخل المشروع نفسه في `frontend/`. الخادم الأمامي هو المنفذ العام ويمرّر `/api` إلى Django الداخلي.
 
 - [خطة التنفيذ الكاملة](IMPLEMENTATION_PLAN.md): المتطلبات والمراحل وحالة الإنجاز.
+- [خطة تحسين الصفحة الرئيسية](docs/landing-page-enhancement-plan.md): أولويات الرسالة والتصميم وتجربة الهاتف والتحقق.
 - [البنية](docs/architecture.md)، [نموذج البيانات](docs/data-model.md)، [عقد API](docs/api-contract.md)، [سجل القرارات](docs/decisions.md).
 
 ## المتطلبات
