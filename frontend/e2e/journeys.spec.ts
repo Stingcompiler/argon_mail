@@ -195,3 +195,13 @@ test.describe('order dialog', () => {
   });
 });
 
+
+/** Brand redesign, phase 6: the home search sits above the main cards. */
+test('home search lands on the matching service tiles', async ({ page }) => {
+  await page.goto('/');
+  const search = page.locator('.services-section').getByRole('searchbox', { name: 'ابحث عن خدمة' });
+  await search.fill('المستندات');
+  await search.press('Enter');
+  await expect(page).toHaveURL(/\/services\?q=/);
+  await expect(page.locator('.service-tiles').getByRole('link', { name: 'تجهيز ومراجعة المستندات' })).toBeVisible();
+});
