@@ -4,13 +4,13 @@ import { UiProvider } from '@/contexts/UiContext';
 import './globals.css';
 
 // Self-hosted variable font: no request to Google at runtime. Both files are
-// cut to the weights the site uses (400–700), and the Arabic one to the basic
+// cut to the weights the site uses (400–800), and the Arabic one to the basic
 // Arabic and Arabic Supplement blocks (scripts/subset-arabic-font.sh): 166 KB →
-// 40 KB for the file the hero heading waits for. Only the Arabic file is
+// 56 KB for the file the hero heading waits for. Only the Arabic file is
 // preloaded; the Latin one (digits, codes, emails) loads on first use.
 const arabic = localFont({
   src: '../src/fonts/noto-sans-arabic-subset.woff2',
-  weight: '400 700',
+  weight: '400 800',
   variable: '--font-arabic',
   display: 'swap',
   fallback: ['Tahoma', 'Arial', 'sans-serif'],
@@ -19,7 +19,7 @@ const arabic = localFont({
 });
 const latin = localFont({
   src: '../src/fonts/noto-sans-arabic-latin.woff2',
-  weight: '400 700',
+  weight: '400 800',
   variable: '--font-latin',
   display: 'swap',
   preload: false,
@@ -28,15 +28,15 @@ const latin = localFont({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.SITE_URL || 'http://127.0.0.1:3000'),
-  title: { default: 'بريد عرجون | خدمات تقرّب المسافات', template: '%s | بريد عرجون' },
-  description: 'خدمات متنوعة، وطلب تتابعه بسهولة.',
+  title: { default: 'بريد عرجون | للخدمات الإلكترونية والرقمية', template: '%s | بريد عرجون' },
+  description: 'خدمات إلكترونية ورقمية متنوعة بطلب واحد واضح، ومتابعة برقم الطلب.',
   openGraph: { locale: 'ar_SD', type: 'website', siteName: 'بريد عرجون' },
   twitter: { card: 'summary_large_image' },
   formatDetection: { telephone: false },
 };
 
 // viewport-fit=cover lets the phone tab bar sit above the home indicator (safe-area insets).
-export const viewport: Viewport = { themeColor: '#145A46', viewportFit: 'cover' };
+export const viewport: Viewport = { themeColor: '#05285B', viewportFit: 'cover' };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (

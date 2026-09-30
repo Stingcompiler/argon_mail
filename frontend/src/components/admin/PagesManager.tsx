@@ -25,7 +25,7 @@ export function PagesManager() {
       <section className="table-panel">
         <div className="table-scroll">
           <table className="responsive-table">
-            <thead><tr><th>الصفحة</th><th>الرابط</th><th>الحالة</th><th>التذييل</th><th>آخر تعديل</th><th /></tr></thead>
+            <thead><tr><th>الصفحة</th><th>الرابط</th><th>الحالة</th><th>التذييل</th><th>آخر تعديل</th><th><span className="sr-only">إجراءات</span></th></tr></thead>
             <tbody>
               {pages.data!.map((p) => (
                 <tr key={p.id} onClick={() => setEditing({ ...p })}>

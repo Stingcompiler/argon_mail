@@ -17,6 +17,11 @@ def default_home_sections():
     return [{"key": k, "visible": True} for k in HOME_SECTIONS]
 
 
+# Identity «بريد عرجون للخدمات الإلكترونية والرقمية» (docs/brand-redesign-plan.md).
+TAGLINE = "للخدمات الإلكترونية والرقمية"
+HERO_EYEBROW = "تواصلٌ أذكى… لمستقبل رقمي أفضل"
+SEO_TITLE = "بريد عرجون | للخدمات الإلكترونية والرقمية"
+SEO_DESCRIPTION = "خدمات إلكترونية ورقمية متنوعة بطلب واحد واضح، ومتابعة برقم الطلب."
 HERO_TITLE = "خدمات متنوعة،\nبطلب واحد واضح."
 HERO_TEXT = (
     "اختر الخدمة المناسبة، أرسل تفاصيلك، واحتفظ برقم طلبك لمتابعة حالته.\n"
@@ -28,7 +33,7 @@ class SiteSettings(models.Model):
     """Singleton (pk=1) holding editable identity, contact and home copy."""
 
     name = models.CharField(max_length=80, default="بريد عرجون")
-    tagline = models.CharField(max_length=120, default="نقرّب لك المسافات")
+    tagline = models.CharField(max_length=120, default=TAGLINE)
     whatsapp_phone = models.CharField(max_length=20, blank=True)
     whatsapp_text = models.CharField(max_length=300, default="مرحبًا، أود الاستفسار عن خدمات بريد عرجون.")
     show_whatsapp = models.BooleanField(default=True)
@@ -36,7 +41,7 @@ class SiteSettings(models.Model):
     address = models.CharField(max_length=200, blank=True)
     logo = models.ForeignKey("media_library.PublicAsset", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
     hero_image = models.ForeignKey("media_library.PublicAsset", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
-    hero_eyebrow = models.CharField(max_length=120, default="من السودان، أقرب إليك")
+    hero_eyebrow = models.CharField(max_length=120, default=HERO_EYEBROW)
     # Default copy answers what / how / how to follow up (landing plan, phase 1);
     # the owner edits it in the dashboard.
     hero_title = models.CharField(max_length=160, default=HERO_TITLE)
@@ -52,8 +57,8 @@ class SiteSettings(models.Model):
     home_sections = models.JSONField(default=default_home_sections)
     max_file_mb = models.PositiveSmallIntegerField("حجم الملف الأقصى MB", default=5)
     max_files_per_order = models.PositiveSmallIntegerField("عدد الملفات لكل طلب", default=5)
-    seo_title = models.CharField(max_length=70, default="بريد عرجون | خدمات تقرّب المسافات")
-    seo_description = models.CharField(max_length=170, default="خدمات متنوعة، وطلب تتابعه بسهولة.")
+    seo_title = models.CharField(max_length=70, default=SEO_TITLE)
+    seo_description = models.CharField(max_length=170, default=SEO_DESCRIPTION)
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):

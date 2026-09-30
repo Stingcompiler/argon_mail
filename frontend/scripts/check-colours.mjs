@@ -7,7 +7,9 @@ const FILES = ['app/globals.css', 'app/admin/admin.css'];
 const COLOUR = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})\b|\brgba?\(|\bhsla?\(|\boklch\(/g;
 let bad = 0;
 for (const file of FILES) {
-  fs.readFileSync(file, 'utf8').split('\n').forEach((line, i) => {
+  // Comments may name colours; blank them out but keep the line numbers.
+  const css = fs.readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, ' '));
+  css.split('\n').forEach((line, i) => {
     if (line.startsWith(':root{--white:')) return; // the token definitions
     for (const m of line.matchAll(COLOUR)) {
       bad++;

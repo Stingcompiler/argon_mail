@@ -9,7 +9,7 @@ export function SiteFooter({ settings, pages }: { settings: SiteSettings; pages:
       <div className="container footer-main">
         <div>
           <Brand name={settings.name} tagline={settings.tagline} logo={settings.logo_data} />
-          <p>خدمات متنوعة، وخطوات واضحة.<br />نقرّب لك المسافات، ونهتم بالتفاصيل.</p>
+          <p>خدمات إلكترونية ورقمية متنوعة، بطلب واحد واضح.<br />تواصلٌ أذكى… لمستقبل رقمي أفضل.</p>
         </div>
         <div>
           <h2>اكتشف عرجون</h2>
