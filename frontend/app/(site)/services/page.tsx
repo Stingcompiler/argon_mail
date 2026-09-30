@@ -8,7 +8,7 @@ import { ServicesBrowser } from '@/components/site/ServicesBrowser';
 import { getCategories, getServices, getSite } from '@/lib/server-api';
 
 export const metadata: Metadata = {
-  title: 'خدماتنا',
+  title: 'الخدمات',
   description: 'استكشف مجالات خدمات بريد عرجون الإلكترونية والرقمية، واطلب ما يناسبك وتابع طلبك برقمه.',
   alternates: { canonical: '/services' },
 };

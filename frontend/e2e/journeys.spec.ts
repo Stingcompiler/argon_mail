@@ -52,17 +52,18 @@ test('home → area → tile → request submitted in the dialog, with events th
 test('home → tracking with an unknown code, then a real one', async ({ page }) => {
   await recordEvents(page);
   await page.goto('/');
-  const strip = page.locator('.tracking-strip');
-  await strip.getByLabel('رقم الطلب').fill('ARJ-NOTREAL1');
-  await strip.getByRole('button', { name: /تتبع الطلب/ }).click();
+  // On phones the code field sits in the hero (audit plan, batch 1).
+  const form = page.locator('.hero-track');
+  await form.getByLabel('رقم الطلب').fill('ARJ-NOTREAL1');
+  await form.getByRole('button', { name: /تتبع طلبك/ }).click();
   await expect(page).toHaveURL(/\/track\?code=ARJ-NOTREAL1/);
   await expect(page.getByRole('heading', { name: 'لم نعثر على هذا الطلب' })).toBeVisible();
 
   // A real code, from an order placed through the form.
   const code = await placeOrder(page, `عميل متابعة ${Date.now()}`);
   await page.goto('/');
-  await strip.getByLabel('رقم الطلب').fill(code.toLowerCase()); // codes are case-insensitive
-  await strip.getByRole('button', { name: /تتبع الطلب/ }).click();
+  await form.getByLabel('رقم الطلب').fill(code.toLowerCase()); // codes are case-insensitive
+  await form.getByRole('button', { name: /تتبع طلبك/ }).click();
   await expect(page.getByText('تم استلام الطلب')).toBeVisible();
 
   const got = await events(page);

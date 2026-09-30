@@ -12,7 +12,7 @@ test.describe('site navigation (phone)', () => {
     await menu.click();
     const sheet = page.getByRole('dialog', { name: 'القائمة' });
     await expect(sheet).toBeVisible();
-    await expect(sheet.getByRole('link', { name: 'تابع طلبك' })).toBeVisible();
+    await expect(sheet.getByRole('link', { name: 'تتبع طلبك' })).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(sheet).toBeHidden();
     await expect(menu).toBeFocused();
@@ -102,16 +102,40 @@ test('public pages hydrate without errors', async ({ page }) => {
 });
 
 /** Landing plan, phase 1: the first screen names the next step for a new
- * visitor (services) and, separately, for an existing customer (tracking). */
+ * visitor (services) and, separately, for an existing customer (tracking).
+ * Audit plan, batch 1: on phones the tracking step is the code field itself. */
 test('home: both journeys are on the first screen, each with one destination', async ({ page }) => {
   await page.goto('/');
-  const hero = page.locator('.hero-actions');
-  const browse = hero.getByRole('link', { name: 'استعرض الخدمات' });
-  const track = hero.getByRole('link', { name: 'تابع طلبك' });
+  const browse = page.locator('.hero-actions').getByRole('link', { name: 'استعرض الخدمات' });
   await expect(browse).toBeInViewport();
-  await expect(track).toBeInViewport();
   await expect(browse).toHaveAttribute('href', '/services');
-  await expect(track).toHaveAttribute('href', '/track');
+  const form = page.locator('.hero-track form');
+  await expect(form).toBeInViewport();
+  await expect(form).toHaveAttribute('action', '/track');
+  await expect(form.getByLabel('رقم الطلب')).toBeVisible();
+  // The link and the band serve larger screens only.
+  await expect(page.locator('.hero-actions .hero-track-link')).toBeHidden();
+  await expect(page.locator('.tracking-strip')).toBeHidden();
+});
+
+/** Audit plan, batch 1: from any page, the tab bar's «تتبع طلبك» opens the code
+ * field in a sheet; the name-and-phone lookup stays one link away. */
+test('tab bar: «تتبع طلبك» opens the code field in a sheet', async ({ page }) => {
+  await page.goto('/services');
+  const tab = page.getByRole('navigation', { name: 'التنقل السريع' }).getByRole('link', { name: 'تتبع طلبك' });
+  await tab.click();
+  const sheet = page.getByRole('dialog', { name: 'تتبع طلبك' });
+  await expect(sheet).toBeVisible();
+  await expect(page).toHaveURL(/\/services$/);
+  await expect(sheet.getByRole('link', { name: /باسمك ورقم هاتفك/ })).toHaveAttribute('href', '/track');
+  await page.keyboard.press('Escape');
+  await expect(sheet).toBeHidden();
+  await expect(tab).toBeFocused();
+  await tab.click();
+  await sheet.getByLabel('رقم الطلب').fill('ARJ-NOTREAL1');
+  await sheet.getByRole('button', { name: /تتبع طلبك/ }).click();
+  await expect(page).toHaveURL(/\/track\?code=ARJ-NOTREAL1/);
+  await expect(sheet).toBeHidden();
 });
 
 /** Landing plan, phase 2: on phones the default artwork gives way, so the
@@ -151,14 +175,14 @@ test('home (phone): services row shows its position', async ({ page }) => {
   const last = page.locator('.services-section .services-grid > *').last().locator('h3 a');
   await last.focus();
   await expect(last).toBeInViewport();
-  await expect(page.locator('.services-section').getByRole('link', { name: /جميع الخدمات/ })).toBeVisible();
+  await expect(page.locator('.services-section').getByRole('link', { name: /كل الخدمات/ })).toBeVisible();
 });
 
 test('home: closing action leads to services and a contact route', async ({ page }) => {
   await page.goto('/');
   const closing = page.locator('.closing-cta');
   await closing.scrollIntoViewIfNeeded();
-  await expect(closing.getByRole('link', { name: /استعرض الخدمات/ })).toHaveAttribute('href', '/services');
+  await expect(closing.getByRole('link', { name: /ابدأ طلبك/ })).toHaveAttribute('href', '/services');
   const contact = closing.getByRole('link', { name: /WhatsApp|تواصل معنا/ });
   await expect(contact).toHaveAttribute('href', /^(https:\/\/wa\.me\/|\/contact$)/);
   // Nothing fixed hides the end of the page: at the bottom, the last footer
@@ -176,25 +200,26 @@ test('phone: fixed bars step aside while typing, without stealing the submit tap
   await page.goto('/');
   const bar = page.locator('.tab-bar');
   await expect(bar).toBeVisible();
-  const strip = page.locator('.tracking-strip');
-  await strip.getByLabel('رقم الطلب').fill('ARJ-NOTREAL1');
+  const form = page.locator('.hero-track');
+  await form.getByLabel('رقم الطلب').fill('ARJ-NOTREAL1');
   await expect(bar).toBeHidden();
   // The button may sit where the bar returns; the tap must still submit.
-  await strip.getByRole('button', { name: /تتبع الطلب/ }).click();
+  await form.getByRole('button', { name: /تتبع طلبك/ }).click();
   await expect(page).toHaveURL(/\/track\?code=ARJ-NOTREAL1/);
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await expect(bar).toBeVisible();
 });
 
 /** Design batch 1: on a common phone the first main card shows above the tab
- * bar on the first screen, under the hero's two actions. */
+ * bar on the first screen, under the hero's action and its tracking field. */
 test('home (phone): the first main card starts on the first screen', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   const bar = await page.locator('.tab-bar').boundingBox();
   const card = await page.locator('.services-section .category-card').first().boundingBox();
   expect(bar!.y - card!.y, 'at least 150px of the first card above the tab bar').toBeGreaterThanOrEqual(150);
-  const actions = page.locator('.hero-actions .button');
-  const [a, b] = [await actions.nth(0).boundingBox(), await actions.nth(1).boundingBox()];
-  expect(Math.abs(a!.y - b!.y), 'actions side by side').toBeLessThan(2);
+  const browse = await page.locator('.hero-actions .button').first().boundingBox();
+  const track = await page.locator('.hero-track').boundingBox();
+  expect(track!.y, 'the code field right under the services action').toBeGreaterThan(browse!.y + browse!.height - 1);
+  expect(track!.y - (browse!.y + browse!.height)).toBeLessThan(24);
 });

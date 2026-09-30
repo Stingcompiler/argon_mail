@@ -1074,7 +1074,7 @@ a.contact-line:hover{background:var(--neutral-50)}
    come back 0.3s after focus leaves, so they never slide under a finger that
    is mid-tap on the form's own submit button. */
 @media (max-width:760px){:is(.tab-bar,.whatsapp,.order-cta){transition:visibility 0s .3s}
-body:has(form:focus-within :is(input:not([type=checkbox],[type=radio],[type=file],[type=submit],[type=button]),textarea,select)) :is(.tab-bar,.whatsapp,.order-cta){visibility:hidden;transition-delay:0s}}
+body:has(main form:focus-within :is(input:not([type=checkbox],[type=radio],[type=file],[type=submit],[type=button]),textarea,select)):not(:has(dialog[open])) :is(.tab-bar,.whatsapp,.order-cta){visibility:hidden;transition-delay:0s}}
 @media (max-width:760px) and (prefers-reduced-motion:no-preference){.order-cta{transition:opacity .25s ease,transform .25s ease,visibility 0s .3s}}
 /* ── Design batch 1: a shorter first screen on phones ─────────────────────
    The first service card should show above the tab bar on a 390×844 phone
@@ -1192,3 +1192,35 @@ html:has(.order-dialog[open]){overflow:hidden}
 .header-inner .logo-button{grid-column:2;justify-self:center}
 .header-inner .mobile-menu{grid-column:3;grid-row:1}
 .site-header .brand{text-align:center}}
+/* ── Audit plan, batch 1 (docs/landing-mobile-audit-plan.md): the message and the path ──
+   Phones get the tracking code field in the hero, since tracking is the first
+   thing a returning postal customer does; larger screens keep the link in the
+   hero and the band after «how it works». */
+.hero-track,.hero-stamp{display:none}
+@media (max-width:760px){.hero-track{display:block;margin-top:8px}
+.hero-actions .hero-track-link,.tracking-strip{display:none}
+.hero-track .track-form{gap:8px;max-width:none}
+.hero-track .track-form>div{background:var(--white);min-height:48px;padding:0 12px}
+.hero-track .track-form input{padding:10px 0}
+.hero-track .track-form .button{min-height:48px;padding:10px 14px;font-size:var(--fs-small);gap:8px}}
+@media (max-width:560px){.hero-stamp{display:block;position:absolute;z-index:-1;top:10px;left:10px;width:56px;height:auto;color:var(--brand-800);opacity:.4}
+/* The chip row must not widen the copy column (grid items default to min-width:auto). */
+.hero-copy{min-width:0}
+/* A tighter first screen, so the first area card still starts on it with the field added. */
+.hero{padding-top:12px;padding-bottom:12px}
+.hero .eyebrow{margin-bottom:6px}
+.hero h1{line-height:1.35;margin-bottom:8px}
+.hero-copy>p{line-height:1.7}
+.hero-actions{margin-top:12px}
+.hero-track{margin-top:6px}
+.services-section{padding-top:16px}
+.services-section .section-heading{margin-bottom:8px}
+.home-search{margin-bottom:10px}
+/* The three facts as chips in one row; it scrolls sideways when the row is tight. */
+.hero-trust{flex-wrap:nowrap;justify-content:flex-start;justify-content:safe center;gap:8px;margin:10px -16px 0;padding:0 16px 2px;overflow-x:auto;scrollbar-width:none}
+.hero-trust::-webkit-scrollbar{display:none}
+.hero-trust li{flex:0 0 auto;min-height:36px;padding:0 12px;border:1px solid var(--neutral-300);border-radius:var(--r-pill);background:color-mix(in srgb,var(--white) 72%,transparent);white-space:nowrap}
+.hero-trust li a{min-height:36px;display:inline-flex;align-items:center}}
+/* The tab bar's «تتبع طلبك» opens the code field in a sheet instead of leaving the page. */
+.track-sheet .nav-sheet-body>p{font-size:var(--fs-small);color:var(--muted);margin:0 0 12px}
+.track-sheet .text-button{margin-top:10px;min-height:44px;gap:8px;width:100%;justify-content:center;text-align:center}

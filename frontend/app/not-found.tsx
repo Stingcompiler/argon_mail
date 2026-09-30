@@ -15,7 +15,7 @@ function Body() {
       <h1>لم نجد هذه الصفحة.</h1>
       <p>ربما تغيّر الرابط أو لم تعد الخدمة متاحة.</p>
       <Link className="button" href="/services">تصفح الخدمات</Link>
-      <Link className="text-button" href="/track"><Package size={17} /> تابع طلبك</Link>
+      <Link className="text-button" href="/track"><Package size={17} /> تتبع طلبك</Link>
       <Link className="back-link" href="/">العودة إلى الرئيسية</Link>
     </main>
   );

@@ -11,7 +11,7 @@ import { LoadError, Loading, SectionTitle, Toggle } from './ui';
 const SECTION_LABEL: Record<HomeSection['key'], string> = { services: 'الخدمات المختارة', how: 'خطوات الاستخدام', faq: 'الأسئلة الشائعة' };
 const FIXED_LINKS = [
   { href: '/', label: 'الرئيسية' }, { href: '/services', label: 'الخدمات' }, { href: '/about', label: 'عن المنصة' },
-  { href: '/contact', label: 'تواصل معنا' }, { href: '/track', label: 'متابعة الطلب' },
+  { href: '/contact', label: 'تواصل معنا' }, { href: '/track', label: 'تتبع طلبك' },
 ];
 
 function move<T>(list: T[], i: number, d: -1 | 1) {
