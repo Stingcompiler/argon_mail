@@ -517,3 +517,12 @@
 .skeleton-row i{height:14px;border-radius:7px;background:var(--neutral-150)}
 @media (prefers-reduced-motion:no-preference){.skeleton-row i{background:linear-gradient(90deg,var(--neutral-150) 0%,var(--neutral-50) 50%,var(--neutral-150) 100%);background-size:200% 100%;animation:shimmer 1.2s ease-in-out infinite}
 .save-bar{animation:toast-in .25s ease-out}}
+/* The icon picker holds 30 icons: a wrapping grid. */
+.icon-picker{flex-wrap:wrap;max-width:560px}
+/* Category card editor (inside the category row). */
+.category-list>div{flex-wrap:wrap}
+.category-list>div>div{flex:1;min-width:0}
+.category-editor{flex-basis:100%;display:grid;gap:12px;padding:16px;margin-top:4px;border:1px solid var(--neutral-200);border-radius:var(--r-lg);background:var(--neutral-25)}
+.category-editor label{display:grid;gap:6px;font-size:var(--fs-small);font-weight:600}
+.category-editor .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:var(--fs-small);font-weight:600}
+.category-editor .editor-actions{display:flex;gap:10px;flex-wrap:wrap}

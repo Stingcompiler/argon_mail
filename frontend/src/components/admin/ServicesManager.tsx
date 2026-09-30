@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { useUi } from '@/contexts/UiContext';
 import { useCategories, useCategoryActions, useDeleteService, usePreviewLink, useSaveService, useServices, useSetServiceStatus } from '@/hooks/admin';
 import { ApiError, fieldErrors } from '@/lib/api/client';
-import type { AdminService, AdminServiceInput, FieldType, ServiceField } from '@/lib/api/types';
-import { iconFor, serviceIcons } from '../icons';
+import type { AdminService, AdminServiceInput, Category, FieldType, ServiceField } from '@/lib/api/types';
+import { iconFor } from '../icons';
+import { IconPicker } from './IconPicker';
 import { AssetPicker } from './MediaLibrary';
 import { LoadError, Loading, SectionTitle, Toggle, useDialogFocus } from './ui';
 import { SlidingGroup } from '@/lib/motion';
@@ -109,11 +110,12 @@ function CategoriesPanel() {
   const categories = useCategories();
   const { create, remove } = useCategoryActions();
   const [name, setName] = useState('');
+  const [editing, setEditing] = useState<number | null>(null);
   if (categories.isLoading) return <Loading />;
   if (categories.isError) return <LoadError error={categories.error} retry={() => categories.refetch()} />;
   return (
     <section className="editor-panel">
-      <SectionTitle icon={Layers3} title="مجالاتك، كما تحتاجها" text="نظّم الخدمات في مجالات مرنة. لا يُحذف مجال يحتوي خدمات." />
+      <SectionTitle icon={Layers3} title="مجالاتك، كما تحتاجها" text="كل مجال بطاقة رئيسية في الموقع: صورة وعنوان كبير، وخدماته بداخله. لا يُحذف مجال يحتوي خدمات." />
       <form className="inline-create" onSubmit={(e) => {
         e.preventDefault();
         if (!name.trim()) return;
@@ -124,18 +126,54 @@ function CategoriesPanel() {
       </form>
       <div className="category-list">
         {categories.data!.map((c, i) => (
-          <div key={c.id}>
+          <div key={c.id} className={editing === c.id ? 'editing' : undefined}>
             <span className="category-index">{String(i + 1).padStart(2, '0')}</span>
-            <div><b>{c.name}</b><small>{c.services_count} خدمات</small></div>
+            <div><b>{c.name}</b><small>{c.services_count} خدمات{c.is_featured ? ' · في الرئيسية' : ''}</small></div>
+            <button className="icon-button" aria-label={'تحرير ' + c.name} aria-expanded={editing === c.id}
+              onClick={() => setEditing(editing === c.id ? null : c.id)}><Pencil size={16} /></button>
             <button className="icon-button danger" aria-label={'حذف ' + c.name} disabled={!!c.services_count || remove.isPending}
               title={c.services_count ? 'انقل الخدمات أولًا' : 'حذف المجال'}
               onClick={() => remove.mutate(c.id, { onSuccess: () => notify('حُذف المجال.'), onError: (e) => notify(e.message) })}>
               <Trash2 size={16} />
             </button>
+            {editing === c.id && <CategoryEditor category={c} onDone={() => setEditing(null)} />}
           </div>
         ))}
       </div>
     </section>
+  );
+}
+
+/** The category card as the public site shows it: name, line, icon, image. */
+function CategoryEditor({ category, onDone }: { category: Category; onDone: () => void }) {
+  const { notify } = useUi();
+  const { update } = useCategoryActions();
+  const [d, setD] = useState({
+    name: category.name, description: category.description, icon_key: category.icon_key,
+    image: category.image, is_featured: category.is_featured,
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const set = (patch: Partial<typeof d>) => setD({ ...d, ...patch });
+  return (
+    <form className="category-editor" onSubmit={(e) => {
+      e.preventDefault();
+      update.mutate({ id: category.id, ...d }, {
+        onSuccess: () => { notify('حُفظ المجال.'); onDone(); },
+        onError: (err) => { setErrors(fieldErrors(err)); notify(err.message); },
+      });
+    }}>
+      <label>اسم المجال<input value={d.name} onChange={(e) => set({ name: e.target.value })} required maxLength={80} /></label>
+      {errors.name && <small className="field-error">{errors.name}</small>}
+      <label>سطر تعريفي (اختياري)<input value={d.description} onChange={(e) => set({ description: e.target.value })} maxLength={160} placeholder="مثال: استخراج وتوثيق المستندات الرسمية" /></label>
+      <div className="toggle-row"><span>يظهر في الرئيسية</span><Toggle checked={d.is_featured} onChange={(is_featured) => set({ is_featured })} label="يظهر في الرئيسية" /></div>
+      <label>الأيقونة (تظهر حين لا توجد صورة)</label>
+      <IconPicker value={d.icon_key} onChange={(icon_key) => set({ icon_key })} />
+      <AssetPicker label="صورة البطاقة (اختيارية، أفقية 16:10)" value={d.image} onChange={(image) => set({ image })} />
+      <div className="editor-actions">
+        <button className="button" disabled={update.isPending}><Save size={16} />حفظ المجال</button>
+        <button type="button" className="button secondary" onClick={onDone}>إلغاء</button>
+      </div>
+    </form>
   );
 }
 
@@ -267,15 +305,11 @@ function ServiceEditor({ draft, setDraft, onClose }: { draft: Draft; setDraft: (
             <AssetPicker label="صورة الخدمة (اختيارية)" value={draft.image} onChange={(id) => change({ image: id })} />
             <h3>مظهر البطاقة</h3>
             <label>الأيقونة</label>
-            <div className="icon-picker">
-              {Object.entries(serviceIcons).map(([key, Icon]) => (
-                <button key={key} className={draft.icon_key === key ? 'selected' : ''} aria-label={key} aria-pressed={draft.icon_key === key} onClick={() => change({ icon_key: key })}><Icon size={26} /></button>
-              ))}
-            </div>
+            <IconPicker value={draft.icon_key} onChange={(icon_key) => change({ icon_key })} />
             <label>خلفية البطاقة</label>
             <div className="color-picker">
-              {['sage', 'sand', 'blue', 'rose'].map((c) => (
-                <button key={c} aria-label={c} aria-pressed={draft.color === c} className={c + ' ' + (draft.color === c ? 'selected' : '')} onClick={() => change({ color: c })}>{draft.color === c && <Check size={18} />}</button>
+              {([['sage', 'سماوي'], ['sand', 'رملي'], ['blue', 'فيروزي'], ['rose', 'وردي']] as const).map(([c, label]) => (
+                <button key={c} aria-label={label} title={label} aria-pressed={draft.color === c} className={c + ' ' + (draft.color === c ? 'selected' : '')} onClick={() => change({ color: c })}>{draft.color === c && <Check size={18} />}</button>
               ))}
             </div>
             <label>حالة النشر<select value={draft.status} onChange={(e) => change({ status: e.target.value as Draft['status'] })}>

@@ -17,6 +17,7 @@ from .models import Category, Service, ServiceSlugRedirect
 from .serializers import (
     AdminServiceSerializer,
     CategorySerializer,
+    PublicCategorySerializer,
     PublicServiceDetailSerializer,
     PublicServiceListSerializer,
 )
@@ -29,14 +30,17 @@ class PublicMixin:
     throttle_scope = "public_read"
 
 
-class PublicCategoryViewSet(PublicMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
-    serializer_class = CategorySerializer
+class PublicCategoryViewSet(PublicMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    serializer_class = PublicCategorySerializer
     pagination_class = None
+    lookup_field = "slug"
+    lookup_value_regex = r"[^/]+"
 
     def get_queryset(self):
         return (
             Category.objects.annotate(services_count=Count("services", filter=Q(services__status="published")))
             .filter(services_count__gt=0)
+            .select_related("image")
             .order_by("sort_order", "id")
         )
 
@@ -85,7 +89,7 @@ class AdminCategoryViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
     def get_queryset(self):
-        return Category.objects.annotate(services_count=Count("services")).order_by("sort_order", "id")
+        return Category.objects.annotate(services_count=Count("services")).select_related("image").order_by("sort_order", "id")
 
     def destroy(self, request, *args, **kwargs):
         try:

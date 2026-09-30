@@ -89,3 +89,35 @@ class CatalogTests(APITestCase):
         names = [c["name"] for c in self.client.get("/api/v1/public/categories/").json()]
         self.assertEqual(names, ["مجال"])
         self.assertTrue(Service.objects.exists())
+
+    def test_category_card_fields_and_public_detail(self):
+        """A category is a main card: description, icon, image, «يظهر في الرئيسية»."""
+        self.client.force_authenticate(self.admin)
+        r = self.client.patch(f"/api/v1/admin/categories/{self.cat.pk}/",
+                              {"description": "طرود ومستندات", "icon_key": "mail", "is_featured": False}, format="json")
+        self.assertEqual(r.status_code, 200, r.content)
+        self.assertEqual(r.json()["icon_key"], "mail")
+        bad = self.client.patch(f"/api/v1/admin/categories/{self.cat.pk}/", {"icon_key": "rocket"}, format="json")
+        self.assertEqual(bad.status_code, 400)
+        blank = self.client.patch(f"/api/v1/admin/categories/{self.cat.pk}/", {"name": "  "}, format="json")
+        self.assertEqual(blank.status_code, 400)
+        self.client.force_authenticate(None)
+        make_service(name="منشورة", category=self.cat)
+        listed = self.client.get("/api/v1/public/categories/").json()
+        self.assertEqual(listed[0]["description"], "طرود ومستندات")
+        self.assertEqual(listed[0]["services_count"], 1)
+        self.assertIs(listed[0]["is_featured"], False)
+        self.assertIsNone(listed[0]["image"])
+        self.assertNotIn("id", listed[0])
+        d = self.client.get(f"/api/v1/public/categories/{self.cat.slug}/")
+        self.assertEqual(d.status_code, 200)
+        self.assertEqual(d.json()["name"], "خدمات بريدية")
+        # A category without published services has no public page.
+        empty = Category.objects.create(name="فارغ")
+        self.assertEqual(self.client.get(f"/api/v1/public/categories/{empty.slug}/").status_code, 404)
+
+    def test_services_accept_the_wider_icon_set(self):
+        self.client.force_authenticate(self.admin)
+        r = self.client.post("/api/v1/admin/services/", self.payload(icon_key="government"), format="json")
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertEqual(self.client.post("/api/v1/admin/services/", self.payload(icon_key="rocket"), format="json").status_code, 400)

@@ -1,5 +1,5 @@
 import 'server-only';
-import type { Category, PublicPage, PublicService, PublicServiceDetail, PublicSite } from './api/types';
+import type { PublicCategory, PublicPage, PublicService, PublicServiceDetail, PublicSite } from './api/types';
 
 /**
  * Server Components fetch Django directly on its internal address. Results
@@ -25,7 +25,8 @@ async function get<T>(path: string, tags: string[], preview?: string): Promise<T
 
 export const getSite = async () => (await get<PublicSite>('/public/site/', [TAGS.site]))!;
 export const getServices = async () => (await get<PublicService[]>('/public/services/', [TAGS.services])) || [];
-export const getCategories = async () => (await get<Category[]>('/public/categories/', [TAGS.services])) || [];
+export const getCategories = async () => (await get<PublicCategory[]>('/public/categories/', [TAGS.services])) || [];
+export const getCategory = (slug: string) => get<PublicCategory>(`/public/categories/${encodeURIComponent(slug)}/`, [TAGS.services]);
 export const getService = (slug: string, preview?: string) =>
   get<PublicServiceDetail>(`/public/services/${encodeURIComponent(slug)}/`, [TAGS.service(slug)], preview);
 export const getServiceRedirect = (slug: string) =>
@@ -41,5 +42,5 @@ export const ogBase = {
   type: 'website' as const,
   siteName: 'بريد عرجون',
   // A page that sets its own openGraph replaces the inherited file-based image, so repeat it.
-  images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'بريد عرجون — خدمات متنوعة ومسافات أقرب' }],
+  images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'بريد عرجون — للخدمات الإلكترونية والرقمية' }],
 };

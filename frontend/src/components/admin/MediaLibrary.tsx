@@ -1,5 +1,5 @@
 'use client';
-import { Check, Copy, Eye, Image as ImageIcon, Leaf, LoaderCircle, Save, Search, ShieldCheck, Trash2, UploadCloud, X } from 'lucide-react';
+import { Check, Copy, Eye, Image as ImageIcon, ImageOff, LoaderCircle, Save, Search, ShieldCheck, Trash2, UploadCloud, X } from 'lucide-react';
 import { useState } from 'react';
 import { useUi } from '@/contexts/UiContext';
 import { useAssetActions, useAssets } from '@/hooks/admin';
@@ -154,7 +154,7 @@ export function AssetPicker({ value, onChange, label }: { value: string | null; 
       <label>{label}</label>
       <div className="asset-options">
         <button type="button" className={!value ? 'selected' : ''} onClick={() => onChange(null)} aria-pressed={!value}>
-          <span className="default-asset"><Leaf size={22} /></span><small>بدون صورة</small>{!value && <Check size={13} />}
+          <span className="default-asset"><ImageOff size={22} /></span><small>بدون صورة</small>{!value && <Check size={13} />}
         </button>
         {(assets.data || []).map((a) => (
           <button type="button" key={a.id} className={value === a.id ? 'selected' : ''} onClick={() => onChange(a.id)} aria-pressed={value === a.id} title={a.alt_text}>

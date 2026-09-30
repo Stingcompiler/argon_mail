@@ -1,4 +1,4 @@
-import { Leaf } from 'lucide-react';
+import { Send } from 'lucide-react';
 import Link from 'next/link';
 import type { PageLink, SiteSettings } from '@/lib/api/types';
 import { Brand } from './Brand';
@@ -26,7 +26,7 @@ export function SiteFooter({ settings, pages }: { settings: SiteSettings; pages:
           <span className="footer-note">{settings.address || 'من السودان، بكل عناية.'}</span>
         </div>
         <div className="footer-message">
-          <Leaf size={27} />
+          <Send size={27} strokeWidth={1.5} />
           <p>لكل طلب وجهة.<br /><b>ولكل تفصيل عناية.</b></p>
         </div>
       </div>

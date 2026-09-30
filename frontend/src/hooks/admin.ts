@@ -174,6 +174,10 @@ export function useCategoryActions() {
   return {
     create: useMutation({ mutationFn: (name: string) => api<Category>('/admin/categories/', { method: 'POST', body: { name } }), onSuccess: done }),
     remove: useMutation({ mutationFn: (id: number) => api<void>(`/admin/categories/${id}/`, { method: 'DELETE' }), onSuccess: done }),
+    update: useMutation({
+      mutationFn: ({ id, ...body }: Partial<Category> & { id: number }) => api<Category>(`/admin/categories/${id}/`, { method: 'PATCH', body }),
+      onSuccess: done,
+    }),
   };
 }
 
