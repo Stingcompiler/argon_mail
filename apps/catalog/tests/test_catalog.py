@@ -91,12 +91,16 @@ class CatalogTests(APITestCase):
         self.assertTrue(Service.objects.exists())
 
     def test_category_card_fields_and_public_detail(self):
-        """A category is a main card: description, icon, image, «يظهر في الرئيسية»."""
+        """An area is the large card: short and long description, colour, icon, image, «يظهر في الرئيسية»."""
         self.client.force_authenticate(self.admin)
+        long_text = ("إرسال الطرود والمستندات وتنسيق وصولها. " * 10).strip()
         r = self.client.patch(f"/api/v1/admin/categories/{self.cat.pk}/",
-                              {"description": "طرود ومستندات", "icon_key": "mail", "is_featured": False}, format="json")
+                              {"tagline": "من مكانك إلى وجهتك", "description": long_text, "color": "sand",
+                               "icon_key": "mail", "is_featured": False}, format="json")
         self.assertEqual(r.status_code, 200, r.content)
         self.assertEqual(r.json()["icon_key"], "mail")
+        self.assertEqual(r.json()["description"], long_text)  # the long description is not cut at 160
+        self.assertEqual(self.client.patch(f"/api/v1/admin/categories/{self.cat.pk}/", {"color": "neon"}, format="json").status_code, 400)
         bad = self.client.patch(f"/api/v1/admin/categories/{self.cat.pk}/", {"icon_key": "rocket"}, format="json")
         self.assertEqual(bad.status_code, 400)
         blank = self.client.patch(f"/api/v1/admin/categories/{self.cat.pk}/", {"name": "  "}, format="json")
@@ -104,7 +108,9 @@ class CatalogTests(APITestCase):
         self.client.force_authenticate(None)
         make_service(name="منشورة", category=self.cat)
         listed = self.client.get("/api/v1/public/categories/").json()
-        self.assertEqual(listed[0]["description"], "طرود ومستندات")
+        self.assertEqual(listed[0]["tagline"], "من مكانك إلى وجهتك")
+        self.assertEqual(listed[0]["description"], long_text)
+        self.assertEqual(listed[0]["color"], "sand")
         self.assertEqual(listed[0]["services_count"], 1)
         self.assertIs(listed[0]["is_featured"], False)
         self.assertIsNone(listed[0]["image"])
