@@ -133,3 +133,54 @@ test('home: verifiable facts and what happens after submitting', async ({ page }
   await expect(after).toBeAttached();
   await expect(page.locator('.after-submit li')).toHaveCount(4);
 });
+
+/** Landing plan, phase 4: a visible cue that the services row swipes, and a
+ * closing action after the FAQ. */
+test('home (phone): services row shows its position', async ({ page }) => {
+  await page.goto('/');
+  const dots = page.locator('.carousel-dots span');
+  const cards = await page.locator('.services-section .services-grid > *').count();
+  test.skip(cards < 2, 'needs two featured services');
+  await expect(dots).toHaveCount(cards);
+  await expect(dots.nth(0)).toHaveClass('on');
+  const row = page.locator('.services-section .services-grid');
+  await row.evaluate((el) => el.scrollTo({ left: -el.scrollWidth, behavior: 'instant' }));
+  await expect(dots.nth(cards - 1)).toHaveClass('on');
+  // Keyboard users reach every card, and focus brings it into view.
+  const last = page.locator('.services-section .services-grid > *').last().locator('a').first();
+  await last.focus();
+  await expect(last).toBeInViewport();
+  await expect(page.locator('.services-section').getByRole('link', { name: /جميع الخدمات/ })).toBeVisible();
+});
+
+test('home: closing action leads to services and a contact route', async ({ page }) => {
+  await page.goto('/');
+  const closing = page.locator('.closing-cta');
+  await closing.scrollIntoViewIfNeeded();
+  await expect(closing.getByRole('link', { name: /استعرض الخدمات/ })).toHaveAttribute('href', '/services');
+  const contact = closing.getByRole('link', { name: /WhatsApp|تواصل معنا/ });
+  await expect(contact).toHaveAttribute('href', /^(https:\/\/wa\.me\/|\/contact$)/);
+  // Nothing fixed hides the end of the page: at the bottom, the last footer
+  // content sits above the tab bar and the WhatsApp button.
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  const bar = await page.locator('.tab-bar').boundingBox();
+  const end = await page.locator('footer').evaluate((f) => {
+    const kids = Array.from(f.querySelectorAll('a, p, span')).filter((e) => e.getClientRects().length);
+    return Math.max(...kids.map((e) => e.getBoundingClientRect().bottom));
+  });
+  expect(end).toBeLessThanOrEqual(bar!.y);
+});
+
+test('phone: fixed bars step aside while typing, without stealing the submit tap', async ({ page }) => {
+  await page.goto('/');
+  const bar = page.locator('.tab-bar');
+  await expect(bar).toBeVisible();
+  const strip = page.locator('.tracking-strip');
+  await strip.getByLabel('رقم الطلب').fill('ARJ-NOTREAL1');
+  await expect(bar).toBeHidden();
+  // The button may sit where the bar returns; the tap must still submit.
+  await strip.getByRole('button', { name: /تتبع الطلب/ }).click();
+  await expect(page).toHaveURL(/\/track\?code=ARJ-NOTREAL1/);
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await expect(bar).toBeVisible();
+});
