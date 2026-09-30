@@ -13,13 +13,13 @@ export function SiteFooter({ settings, pages }: { settings: SiteSettings; pages:
         </div>
         <div>
           <h2>اكتشف عرجون</h2>
-          <Link href="/services">خدماتنا</Link>
+          <Link href="/services">الخدمات</Link>
           <Link href="/about">عن المنصة</Link>
           <Link href="/contact">تواصل معنا</Link>
         </div>
         <div>
           <h2>نرافق خطوتك</h2>
-          <Link href="/track">متابعة الطلب</Link>
+          <Link href="/track">تتبع طلبك</Link>
           {pages.map((p) => (
             <Link key={p.slug} href={p.slug === 'privacy' || p.slug === 'terms' ? `/${p.slug}` : `/p/${encodeURIComponent(p.slug)}`}>{p.title}</Link>
           ))}

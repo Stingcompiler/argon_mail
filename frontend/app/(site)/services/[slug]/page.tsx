@@ -90,7 +90,7 @@ export default async function ServicePage({ params, searchParams }: Props) {
           '@context': 'https://schema.org', '@type': 'BreadcrumbList',
           itemListElement: [
             { '@type': 'ListItem', position: 1, name: 'الرئيسية', item: siteUrl() },
-            { '@type': 'ListItem', position: 2, name: 'خدماتنا', item: `${siteUrl()}/services` },
+            { '@type': 'ListItem', position: 2, name: 'الخدمات', item: `${siteUrl()}/services` },
             { '@type': 'ListItem', position: 3, name: s.name, item: url },
           ],
         },

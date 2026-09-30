@@ -6,6 +6,7 @@ import { FaqList } from '@/components/site/FaqList';
 import { JsonLd } from '@/components/site/JsonLd';
 import { CarouselDots } from '@/components/site/CarouselDots';
 import { HeroJourney } from '@/components/site/HeroJourney';
+import { HeroStamp } from '@/components/site/HeroStamp';
 import { CategoryCard } from '@/components/site/CategoryCard';
 import { iconFor } from '@/components/icons';
 import { TrackForm } from '@/components/site/TrackForm';
@@ -37,10 +38,16 @@ export default async function Home() {
           <h1 className="preserve-lines">{settings.hero_title}</h1>
           <p className="preserve-lines">{settings.hero_text}</p>
           <div className="hero-actions" data-area="hero">
-            {/* New visitors start by choosing a service; existing customers track. */}
+            {/* New visitors start by choosing a service; existing customers track.
+                On phones the tracking link gives way to the code field below. */}
             <Link className="button" href="/services">استعرض الخدمات <ArrowLeft size={19} /></Link>
-            <Link className="button secondary" href="/track"><Package size={18} />تابع طلبك</Link>
+            <Link className="button secondary hero-track-link" href="/track"><Package size={18} />تتبع طلبك</Link>
           </div>
+          {/* Phones only (docs/landing-mobile-audit-plan.md, batch 1): the code field
+              itself on the first screen, since tracking is the first thing a returning
+              postal customer does. Larger screens keep the link above and the band
+              after «how it works». */}
+          <div className="hero-track" data-area="hero"><TrackForm compact /></div>
           {/* Facts the product guarantees, not general reassurance (landing plan, phase 3). */}
           <ul className="hero-trust">
             <li><UserCheck size={16} />دون حساب أو كلمة مرور</li>
@@ -53,21 +60,22 @@ export default async function Home() {
           {settings.hero_image_data && <img className="custom-hero-image" src={settings.hero_image_data.url} alt={settings.hero_image_data.alt} width={settings.hero_image_data.width} height={settings.hero_image_data.height} fetchPriority="high" />}
           {!settings.hero_image_data && <HeroJourney icons={featured.slice(0, 3).map((x) => iconFor(x.icon_key))} />}
         </div>
+        {!settings.hero_image_data && <HeroStamp />}
       </section>
-      {/* After «how it works», whose last step introduces the request code. Tracking
-          also stays one tap away in the header, the hero and the phone tab bar. */}
+      {/* Larger screens: after «how it works», whose last step introduces the request
+          code. Phones have the field in the hero instead (and the tab bar's sheet). */}
       <section className="container tracking-strip" aria-labelledby="track-heading" style={{ order: place('how').order + 5 }}>
         <div className="tracking-label">
           <span className="tracking-icon"><Package size={24} /></span>
-          <div><h2 id="track-heading">لديك رقم طلب؟</h2><p>تابع حالته في أي وقت.</p></div>
+          <div><h2 id="track-heading">لديك رقم طلب؟</h2><p>تتبع حالته في أي وقت.</p></div>
         </div>
         <TrackForm />
       </section>
       {featured.length > 0 && (
         <section className="container services-section" data-area="featured" style={place('services')}>
           <div className="section-heading">
-            <div><span className="eyebrow">مساحات متعددة، عناية واحدة</span><h2>كيف نقدر نساعدك؟</h2></div>
-            <Link className="text-button" href="/services">جميع الخدمات <ArrowLeft size={18} /></Link>
+            <div><span className="eyebrow">بريد، ومعاملات، وخدمات متنوعة</span><h2>كيف نساعدك؟</h2></div>
+            <Link className="text-button" href="/services">كل الخدمات <ArrowLeft size={18} /></Link>
           </div>
           {/* Search right above the cards, as in the reference layout. A plain GET
               form: it works before hydration and lands on /services?q=. */}
@@ -84,14 +92,14 @@ export default async function Home() {
         <div className="container how-inner">
           <div>
             <span className="eyebrow">ببساطة، من البداية للنهاية</span>
-            <h2>ثلاث خطوات.<br />وتبدأ الحكاية.</h2>
-            <p>صممنا التجربة لتكون واضحة،<br />وتترك لك وقتًا لما يهمك.</p>
+            <h2>ثلاث خطوات، من الطلب إلى الإنجاز.</h2>
+            <p>طلب واحد، ورقم واحد تتابع به كل شيء.</p>
           </div>
           <div className="steps">
             {[
-              { n: '01', title: 'اختر ما تحتاجه', text: 'في صفحة كل خدمة تفاصيلها ومتطلباتها وطريقة تسعيرها.', icon: Layers3 },
-              { n: '02', title: 'أرسل طلبك', text: 'املأ النموذج واكتب رقمك في WhatsApp، فيظهر لك رقم طلب يبدأ بـ ARJ-.', icon: Send },
-              { n: '03', title: 'تابع حتى الإنجاز', text: 'تابع الحالة برقم الطلب، أو باسمك ورقم هاتفك إن نسيته.', icon: CheckCheck },
+              { n: '01', title: 'اختر الخدمة', text: 'في صفحة كل خدمة متطلباتها وطريقة تسعيرها.', icon: Layers3 },
+              { n: '02', title: 'أرسل طلبك', text: 'املأ النموذج برقم WhatsApp، فيظهر لك رقم طلب يبدأ بـ ARJ-.', icon: Send },
+              { n: '03', title: 'تتبع حتى الإنجاز', text: 'بالرقم، أو باسمك ورقم هاتفك إن نسيته.', icon: CheckCheck },
             ].map((s) => (
               <div className="step" key={s.n}>
                 <span className="step-number" aria-hidden="true">{s.n}</span><s.icon size={25} strokeWidth={1.5} /><h3>{s.title}</h3><p>{s.text}</p>
@@ -103,9 +111,9 @@ export default async function Home() {
             <h3>بعد إرسال طلبك</h3>
             <ul>
               <li><Bell size={18} /><span>يصل تنبيه إلى فريق عرجون، ويُراجَع طلبك في لوحة العمل.</span></li>
-              <li><MessageCircle size={18} /><span>إن احتاج الطلب تفاصيل، أو كان سعره يُحدد بعد المراجعة، يتواصل معك المسؤول عبر WhatsApp.</span></li>
-              <li><Package size={18} /><span>كل تغيير في الحالة يظهر في صفحة المتابعة، مع ملاحظات الفريق العامة.</span></li>
-              <li><ShieldCheck size={18} /><span>لا نطلب بريدك الإلكتروني ولا نراسلك به؛ التواصل عبر WhatsApp وصفحة المتابعة.</span></li>
+              <li><MessageCircle size={18} /><span>إن احتاج الطلب تفاصيل، أو كان سعره يُحدد بعد المراجعة، يراسلك المسؤول عبر WhatsApp.</span></li>
+              <li><Package size={18} /><span>كل تغيير في الحالة يظهر في صفحة التتبع، مع ملاحظات الفريق العامة.</span></li>
+              <li><ShieldCheck size={18} /><span>لا نطلب عنوان بريد إلكتروني ولا نراسلك به؛ التواصل عبر WhatsApp وصفحة التتبع.</span></li>
             </ul>
           </div>
         </div>
@@ -133,7 +141,7 @@ export default async function Home() {
           <p>اختر الخدمة المناسبة وأرسل طلبك في دقائق، أو اسألنا قبل أن تبدأ.</p>
         </div>
         <div className="closing-actions">
-          <Link className="button" href="/services">استعرض الخدمات <ArrowLeft size={19} /></Link>
+          <Link className="button" href="/services">ابدأ طلبك <ArrowLeft size={19} /></Link>
           {settings.whatsapp_url
             ? <a className="button secondary" href={settings.whatsapp_url} target="_blank" rel="noopener noreferrer"><MessageCircle size={18} />تحدث معنا عبر WhatsApp</a>
             : <Link className="button secondary" href="/contact"><MessageCircle size={18} />تواصل معنا</Link>}

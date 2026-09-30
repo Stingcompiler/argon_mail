@@ -14,7 +14,7 @@ export default async function ContactPage() {
       <div className="page-intro">
         <span className="eyebrow">نسمعك باهتمام</span>
         <h1>كل سؤال، بداية تواصل.</h1>
-        <p>أخبرنا كيف نقدر نساعدك.</p>
+        <p>أخبرنا كيف نساعدك.</p>
       </div>
       <div className="contact-layout">
         <QueryProvider><ContactForm /></QueryProvider>

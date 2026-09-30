@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { TrackingView } from '@/components/site/TrackingView';
 import { QueryProvider } from '@/contexts/QueryProvider';
 
-export const metadata: Metadata = { title: 'متابعة الطلب', robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: 'تتبع طلبك', robots: { index: false, follow: false } };
 
 export default function TrackPage() {
   return (

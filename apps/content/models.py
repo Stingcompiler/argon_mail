@@ -4,7 +4,7 @@ from django.db import models
 def default_navigation():
     return [
         {"label": "الرئيسية", "href": "/", "enabled": True},
-        {"label": "خدماتنا", "href": "/services", "enabled": True},
+        {"label": "الخدمات", "href": "/services", "enabled": True},
         {"label": "عن المنصة", "href": "/about", "enabled": True},
         {"label": "تواصل معنا", "href": "/contact", "enabled": True},
     ]
@@ -21,12 +21,10 @@ def default_home_sections():
 TAGLINE = "للخدمات الإلكترونية والرقمية"
 HERO_EYEBROW = "تواصلٌ أذكى… لمستقبل رقمي أفضل"
 SEO_TITLE = "بريد عرجون | للخدمات الإلكترونية والرقمية"
-SEO_DESCRIPTION = "خدمات إلكترونية ورقمية متنوعة بطلب واحد واضح، ومتابعة برقم الطلب."
-HERO_TITLE = "خدمات متنوعة،\nبطلب واحد واضح."
-HERO_TEXT = (
-    "اختر الخدمة المناسبة، أرسل تفاصيلك، واحتفظ برقم طلبك لمتابعة حالته.\n"
-    "يتواصل معك فريق عرجون عبر WhatsApp عند الحاجة."
-)
+SEO_DESCRIPTION = "خدمات بريدية وإلكترونية متنوعة بطلب واحد واضح، وتتبع برقم الطلب."
+# Postal first, then the rest (docs/landing-mobile-audit-plan.md, batch 1).
+HERO_TITLE = "بريدك ومعاملاتك،\nفي طلب واحد."
+HERO_TEXT = "أرسل طرودك ومستنداتك، أو اطلب خدمة تعليمية أو سفر أو معاملة، وتتبع كل طلب برقمه."
 
 
 class SiteSettings(models.Model):

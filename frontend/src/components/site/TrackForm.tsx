@@ -7,8 +7,9 @@ import { track } from '@/lib/analytics';
 /**
  * A plain GET form to /track?code=…, so it works before the page hydrates
  * (or without JavaScript); once hydrated it navigates client-side instead.
+ * `compact` is the phone hero and the tab-bar sheet: one row, no arrow.
  */
-export function TrackForm({ initial = '' }: { initial?: string }) {
+export function TrackForm({ initial = '', compact = false }: { initial?: string; compact?: boolean }) {
   const router = useRouter();
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -18,12 +19,12 @@ export function TrackForm({ initial = '' }: { initial?: string }) {
     router.push(`/track?code=${encodeURIComponent(value)}`);
   };
   return (
-    <form className="track-form" action="/track" onSubmit={submit} role="search">
+    <form className={'track-form' + (compact ? ' compact' : '')} action="/track" onSubmit={submit} role="search">
       <div>
         <Search size={19} />
         <input name="code" aria-label="رقم الطلب" dir="ltr" placeholder="ARJ-XXXXXXXX" defaultValue={initial} required maxLength={20} />
       </div>
-      <button className="button">تتبع الطلب <ArrowLeft size={17} /></button>
+      <button className="button">تتبع طلبك{!compact && <ArrowLeft size={17} />}</button>
     </form>
   );
 }
