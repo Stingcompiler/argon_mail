@@ -24,13 +24,31 @@ DEMO = [
 ]
 
 
+# The areas' own card texts (the large card): short and long description.
+AREAS = {
+    "خدمات بريدية": ("mail", "sage", "من مكانك إلى وجهتك",
+                     "إرسال الطرود والمستندات وتنسيق وصولها، مع متابعة كل طلب برقمه حتى يكتمل."),
+    "خدمات تعليمية": ("education", "sand", "مساحة لطموحك",
+                      "خدمات تساعدك في التقديم الدراسي وتجهيز الشهادات والمستندات التي تطلبها الجهات التعليمية."),
+    "خدمات السفر": ("travel", "blue", "لرحلة أكثر اطمئنانًا",
+                    "معرفة متطلبات السفر وتجهيز مستنداتها وتنسيق خطوات طلبك قبل أن تبدأ رحلتك."),
+    "خدمات عامة": ("document", "rose", "نهتم بالتفاصيل",
+                   "تجهيز المستندات ومراجعتها، وخدمات أخرى تحتاج من يتابع تفاصيلها معك."),
+}
+
+
 class Command(BaseCommand):
     help = "Create demo categories and services (development only)."
 
     @transaction.atomic
     def handle(self, *args, **opts):
         for i, (cat, name, icon, color, tag, desc, fields) in enumerate(DEMO):
+            icon_key, area_color, area_tag, area_desc = AREAS[cat]
             category, _ = Category.objects.get_or_create(name=cat, defaults={"sort_order": i})
+            if not category.tagline and not category.description:  # never overwrite the owner's text
+                category.icon_key, category.color = icon_key, area_color
+                category.tagline, category.description = area_tag, area_desc
+                category.save()
             service, created = Service.objects.get_or_create(
                 name=name,
                 defaults=dict(category=category, icon_key=icon, color=color, tagline=tag, description=desc,

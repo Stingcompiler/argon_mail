@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const slug = decodeURIComponent((await params).slug);
   const c = await getCategory(slug);
   if (!c) return { title: 'المجال غير موجود' };
-  const description = c.description || `خدمات ${c.name} من بريد عرجون: اختر الخدمة وأرسل طلبك وتابعه برقم الطلب.`;
+  const description = (c.description || c.tagline || `خدمات ${c.name} من بريد عرجون: اختر الخدمة وأرسل طلبك وتابعه برقم الطلب.`).slice(0, 170);
   return {
     title: c.name, description,
     alternates: { canonical: categoryHref(c.slug) },
@@ -44,8 +44,9 @@ export default async function CategoryPage({ params }: Props) {
           ? <img className="category-hero-image" src={category.image.url} alt={category.image.alt} width={category.image.width} height={category.image.height} />
           : <span className="category-hero-icon" aria-hidden="true"><Icon size={34} strokeWidth={1.5} /></span>}
         <div>
+          {category.tagline && <span className="eyebrow">{category.tagline}</span>}
           <h1>{category.name}</h1>
-          {category.description && <p>{category.description}</p>}
+          {category.description && <p className="preserve-lines">{category.description}</p>}
         </div>
       </header>
       <h2 className="tiles-heading">اختر الخدمة</h2>

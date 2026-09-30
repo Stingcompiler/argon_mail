@@ -526,3 +526,11 @@
 .category-editor label{display:grid;gap:6px;font-size:var(--fs-small);font-weight:600}
 .category-editor .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:var(--fs-small);font-weight:600}
 .category-editor .editor-actions{display:flex;gap:10px;flex-wrap:wrap}
+/* Area editor: fields beside a live preview of the large card. */
+.category-editor{grid-template-columns:minmax(0,1fr) 300px;align-items:start;column-gap:24px}
+.category-editor-fields{display:grid;gap:12px;min-width:0}
+.category-editor-fields textarea{resize:vertical}
+.category-editor-preview{position:sticky;top:12px;display:grid;gap:8px}
+.category-editor-preview .preview-label{font-size:var(--fs-label);font-weight:700;color:var(--muted)}
+.category-editor .editor-actions{grid-column:1/-1}
+@media (max-width:900px){.category-editor{grid-template-columns:1fr}.category-editor-preview{position:static;max-width:320px}}

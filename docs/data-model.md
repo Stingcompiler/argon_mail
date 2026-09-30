@@ -12,7 +12,7 @@
 
 | الكيان | الحقول المهمة | القواعد |
 | --- | --- | --- |
-| Category | name فريد، slug، description (سطر البطاقة)، icon_key، image (PublicAsset، PROTECT)، is_featured (يظهر في الرئيسية)، sort_order | لا يُحذف وفيه خدمات (PROTECT). هو «البطاقة الرئيسية»، وخدماته بلاطات بداخله. icon_key من ICON_KEYS (30 أيقونة مشتركة مع الخدمات) |
+| Category | name فريد، slug، tagline (الوصف المصغّر)، description (الوصف المطوّل، حتى 1000)، color (sage/sand/blue/rose)، icon_key، image (PublicAsset، PROTECT)، is_featured (يظهر في الرئيسية)، sort_order | لا يُحذف وفيه خدمات (PROTECT). هو «البطاقة الرئيسية»، وخدماته بلاطات بداخله. icon_key من ICON_KEYS (30 أيقونة مشتركة مع الخدمات) |
 | Service | category، name، slug فريد (عربي مسموح)، description، requirements، duration_text، price_type، price_amount (عشري)، price_currency، icon_key، color، status (draft/published/hidden)، is_featured، seo_title، seo_description، form_version | قيد: السعر مطلوب إن لم يكن «بعد المراجعة». تغيير الحقول يرفع form_version |
 | ServiceField | service، key (ثابت)، label، help_text، type، required، options (JSON)، max_length، sort_order | key فريد داخل الخدمة ويبقى ثابتًا عند التعديل |
 | ServiceSlugRedirect | old_slug فريد، service | يُنشأ تلقائيًا عند تغيير slug |

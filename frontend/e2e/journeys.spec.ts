@@ -205,3 +205,24 @@ test('home search lands on the matching service tiles', async ({ page }) => {
   await expect(page).toHaveURL(/\/services\?q=/);
   await expect(page.locator('.service-tiles').getByRole('link', { name: 'تجهيز ومراجعة المستندات' })).toBeVisible();
 });
+
+/** docs/brand-readjust-plan.md: the area card is the service card as it was,
+ * with a larger centred title; the service types inside are icon-and-name tiles. */
+test('the area card keeps the image area, both descriptions and a larger centred title', async ({ page }) => {
+  await page.goto('/services');
+  const card = page.locator('.category-grid .category-card').filter({ hasText: 'خدمات تعليمية' });
+  await expect(card.locator('.service-art')).toBeVisible();
+  await expect(card.locator('.service-art')).toContainText('مساحة لطموحك');
+  await expect(card.locator('.service-body p')).not.toBeEmpty();
+  await expect(card.getByRole('link', { name: 'استعرض الخدمات' })).toBeVisible();
+  const title = card.locator('h3');
+  const [align, size] = await title.evaluate((h) => [getComputedStyle(h).textAlign, parseFloat(getComputedStyle(h).fontSize)]);
+  expect(align).toBe('center');
+  expect(size).toBeGreaterThanOrEqual(20);
+  // A type inside the area is only an icon and a name.
+  await card.locator('h3 a').click();
+  const tile = page.locator('.service-tiles .service-tile').first();
+  await expect(tile.locator('.tile-icon')).toBeVisible();
+  await expect(tile.locator('p')).toHaveCount(0);
+});
+

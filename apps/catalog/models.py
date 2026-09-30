@@ -28,12 +28,16 @@ ICON_KEYS = [
 
 
 class Category(models.Model):
-    """A main service area (المجال): shown as a card with an image and a large
-    title; its services are the tiles inside it (docs/brand-redesign-plan.md)."""
+    """A main service area (المجال), shown as the large card: an image or tint
+    on top with the short description, then a large centred title and the long
+    description. Its services are the icon-and-name tiles inside it
+    (docs/brand-readjust-plan.md)."""
 
     name = models.CharField("الاسم", max_length=80, unique=True)
     slug = models.SlugField(max_length=100, unique=True, allow_unicode=True, blank=True)
-    description = models.CharField("سطر تعريفي", max_length=160, blank=True)
+    tagline = models.CharField("الوصف المصغّر", max_length=120, blank=True)
+    description = models.TextField("الوصف المطوّل", max_length=1000, blank=True)
+    color = models.CharField(max_length=10, default="sage")
     icon_key = models.CharField(max_length=20, default="other")
     image = models.ForeignKey("media_library.PublicAsset", null=True, blank=True, on_delete=models.PROTECT, related_name="categories")
     is_featured = models.BooleanField("يظهر في الرئيسية", default=True)

@@ -2,12 +2,13 @@
 import { ArrowDown, ArrowLeft, ArrowUp, Check, CircleHelp, Eye, EyeOff, FileText, Globe, Layers3, LockKeyhole, Pencil, Plus, Save, Search, SlidersHorizontal, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import { useUi } from '@/contexts/UiContext';
-import { useCategories, useCategoryActions, useDeleteService, usePreviewLink, useSaveService, useServices, useSetServiceStatus } from '@/hooks/admin';
+import { useAssets, useCategories, useCategoryActions, useDeleteService, usePreviewLink, useSaveService, useServices, useSetServiceStatus } from '@/hooks/admin';
 import { ApiError, fieldErrors } from '@/lib/api/client';
 import type { AdminService, AdminServiceInput, Category, FieldType, ServiceField } from '@/lib/api/types';
 import { iconFor } from '../icons';
 import { IconPicker } from './IconPicker';
 import { AssetPicker } from './MediaLibrary';
+import { CategoryCard } from '@/components/site/CategoryCard';
 import { LoadError, Loading, SectionTitle, Toggle, useDialogFocus } from './ui';
 import { SlidingGroup } from '@/lib/motion';
 
@@ -144,16 +145,23 @@ function CategoriesPanel() {
   );
 }
 
-/** The category card as the public site shows it: name, line, icon, image. */
+const TINTS = [['sage', 'سماوي'], ['sand', 'رملي'], ['blue', 'فيروزي'], ['rose', 'وردي']] as const;
+
+/** The area's large card: texts, colour, icon and image, with a live preview
+ * of the card exactly as the site shows it (docs/brand-readjust-plan.md). */
 function CategoryEditor({ category, onDone }: { category: Category; onDone: () => void }) {
   const { notify } = useUi();
   const { update } = useCategoryActions();
+  const assets = useAssets();
   const [d, setD] = useState({
-    name: category.name, description: category.description, icon_key: category.icon_key,
-    image: category.image, is_featured: category.is_featured,
+    name: category.name, tagline: category.tagline, description: category.description, color: category.color,
+    icon_key: category.icon_key, image: category.image, is_featured: category.is_featured,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const set = (patch: Partial<typeof d>) => setD({ ...d, ...patch });
+  const asset = assets.data?.find((a) => a.id === d.image);
+  const image = d.image === category.image ? category.image_data
+    : asset ? { url: asset.url, alt: asset.alt_text, width: asset.width, height: asset.height } : null;
   return (
     <form className="category-editor" onSubmit={(e) => {
       e.preventDefault();
@@ -162,13 +170,30 @@ function CategoryEditor({ category, onDone }: { category: Category; onDone: () =
         onError: (err) => { setErrors(fieldErrors(err)); notify(err.message); },
       });
     }}>
-      <label>اسم المجال<input value={d.name} onChange={(e) => set({ name: e.target.value })} required maxLength={80} /></label>
-      {errors.name && <small className="field-error">{errors.name}</small>}
-      <label>سطر تعريفي (اختياري)<input value={d.description} onChange={(e) => set({ description: e.target.value })} maxLength={160} placeholder="مثال: استخراج وتوثيق المستندات الرسمية" /></label>
-      <div className="toggle-row"><span>يظهر في الرئيسية</span><Toggle checked={d.is_featured} onChange={(is_featured) => set({ is_featured })} label="يظهر في الرئيسية" /></div>
-      <label>الأيقونة (تظهر حين لا توجد صورة)</label>
-      <IconPicker value={d.icon_key} onChange={(icon_key) => set({ icon_key })} />
-      <AssetPicker label="صورة البطاقة (اختيارية، أفقية 16:10)" value={d.image} onChange={(image) => set({ image })} />
+      <div className="category-editor-fields">
+        <label>اسم المجال<input value={d.name} onChange={(e) => set({ name: e.target.value })} required maxLength={80} /></label>
+        {errors.name && <small className="field-error">{errors.name}</small>}
+        <label>الوصف المصغّر (يظهر أعلى البطاقة)<input value={d.tagline} onChange={(e) => set({ tagline: e.target.value })} maxLength={120} placeholder="مثال: مساحة لطموحك" /></label>
+        <label>الوصف المطوّل (تحت العنوان، وكاملًا في صفحة المجال)
+          <textarea rows={4} value={d.description} onChange={(e) => set({ description: e.target.value })} maxLength={1000} placeholder="ما الخدمات التي يجمعها هذا المجال؟" />
+        </label>
+        <div className="toggle-row"><span>يظهر في الرئيسية</span><Toggle checked={d.is_featured} onChange={(is_featured) => set({ is_featured })} label="يظهر في الرئيسية" /></div>
+        <label>لون البطاقة</label>
+        <div className="color-picker">
+          {TINTS.map(([c, label]) => (
+            <button key={c} type="button" aria-label={label} title={label} aria-pressed={d.color === c} className={c + ' ' + (d.color === c ? 'selected' : '')} onClick={() => set({ color: c })}>{d.color === c && <Check size={18} />}</button>
+          ))}
+        </div>
+        <label>الأيقونة (تظهر حين لا توجد صورة)</label>
+        <IconPicker value={d.icon_key} onChange={(icon_key) => set({ icon_key })} />
+        <AssetPicker label="صورة خلفية أعلى البطاقة (اختيارية)" value={d.image} onChange={(image) => set({ image })} />
+      </div>
+      <div className="category-editor-preview">
+        <span className="preview-label">معاينة البطاقة</span>
+        <div inert>
+          <CategoryCard category={{ ...d, slug: category.slug, image, services_count: category.services_count ?? 0 }} />
+        </div>
+      </div>
       <div className="editor-actions">
         <button className="button" disabled={update.isPending}><Save size={16} />حفظ المجال</button>
         <button type="button" className="button secondary" onClick={onDone}>إلغاء</button>
@@ -308,7 +333,7 @@ function ServiceEditor({ draft, setDraft, onClose }: { draft: Draft; setDraft: (
             <IconPicker value={draft.icon_key} onChange={(icon_key) => change({ icon_key })} />
             <label>خلفية البطاقة</label>
             <div className="color-picker">
-              {([['sage', 'سماوي'], ['sand', 'رملي'], ['blue', 'فيروزي'], ['rose', 'وردي']] as const).map(([c, label]) => (
+              {TINTS.map(([c, label]) => (
                 <button key={c} aria-label={label} title={label} aria-pressed={draft.color === c} className={c + ' ' + (draft.color === c ? 'selected' : '')} onClick={() => change({ color: c })}>{draft.color === c && <Check size={18} />}</button>
               ))}
             </div>

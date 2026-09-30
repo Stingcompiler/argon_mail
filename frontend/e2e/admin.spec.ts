@@ -131,24 +131,26 @@ test.describe('admin dashboard', () => {
     await expect(page.getByLabel('المسؤول', { exact: true })).toHaveValue('none');
   });
 
-  /** Brand redesign, phase 3: a category is a main card the owner describes. */
-  test('categories: the card line, icon and home visibility are editable', async ({ page }) => {
+  /** An area is the large card the owner describes (docs/brand-readjust-plan.md). */
+  test('areas: the large card texts, icon and home visibility are editable', async ({ page }) => {
     await adminLogin(page, '/admin/services');
     await page.getByRole('button', { name: /المجالات/ }).click();
     await page.getByRole('button', { name: 'تحرير خدمات بريدية' }).click();
     const editor = page.locator('.category-editor');
-    const line = editor.getByLabel('سطر تعريفي (اختياري)');
+    const line = editor.getByLabel('الوصف المصغّر (يظهر أعلى البطاقة)');
     const original = await line.inputValue();
     await line.fill('طرود ومستندات إلى أي وجهة');
+    // The preview shows the card as the site will.
+    await expect(editor.locator('.category-editor-preview')).toContainText('طرود ومستندات إلى أي وجهة');
     await editor.getByRole('button', { name: 'بريد', exact: true }).click();
     await editor.getByRole('button', { name: 'حفظ المجال' }).click();
     await expect(editor).toHaveCount(0);
     const card = (await (await page.request.get('/api/v1/public/categories/')).json())
       .find((c: { name: string }) => c.name === 'خدمات بريدية');
-    expect(card).toMatchObject({ description: 'طرود ومستندات إلى أي وجهة', icon_key: 'mail' });
+    expect(card).toMatchObject({ tagline: 'طرود ومستندات إلى أي وجهة', icon_key: 'mail' });
     // Put it back for the other tests.
     await page.getByRole('button', { name: 'تحرير خدمات بريدية' }).click();
-    await editor.getByLabel('سطر تعريفي (اختياري)').fill(original);
+    await editor.getByLabel('الوصف المصغّر (يظهر أعلى البطاقة)').fill(original);
     await editor.getByRole('button', { name: 'طرود', exact: true }).click();
     await editor.getByRole('button', { name: 'حفظ المجال' }).click();
     await expect(editor).toHaveCount(0);

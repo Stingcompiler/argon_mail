@@ -147,8 +147,8 @@ test('home (phone): services row shows its position', async ({ page }) => {
   await row.evaluate((el) => el.scrollTo({ left: -el.scrollWidth, behavior: 'instant' }));
   await expect(dots.nth(cards - 1)).toHaveClass('on');
   // Keyboard users reach every card, and focus brings it into view.
-  // Each main card is itself one link.
-  const last = page.locator('.services-section .services-grid > a').last();
+  // The card's title link is its keyboard stop.
+  const last = page.locator('.services-section .services-grid > *').last().locator('h3 a');
   await last.focus();
   await expect(last).toBeInViewport();
   await expect(page.locator('.services-section').getByRole('link', { name: /جميع الخدمات/ })).toBeVisible();
