@@ -6,10 +6,10 @@ import { FaqList } from '@/components/site/FaqList';
 import { JsonLd } from '@/components/site/JsonLd';
 import { CarouselDots } from '@/components/site/CarouselDots';
 import { HeroJourney } from '@/components/site/HeroJourney';
-import { ServiceCard } from '@/components/site/ServiceCard';
+import { CategoryCard } from '@/components/site/CategoryCard';
 import { iconFor } from '@/components/icons';
 import { TrackForm } from '@/components/site/TrackForm';
-import { getServices, getSite } from '@/lib/server-api';
+import { getCategories, getSite } from '@/lib/server-api';
 
 export async function generateMetadata(): Promise<Metadata> {
   await connection();
@@ -19,8 +19,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Home() {
   await connection(); // rendered per request; data comes from the tagged cache
-  const [{ settings, faq }, services] = await Promise.all([getSite(), getServices()]);
-  const featured = services.filter((s) => s.is_featured);
+  const [{ settings, faq }, categories] = await Promise.all([getSite(), getCategories()]);
+  // The main cards: areas the owner marked «يظهر في الرئيسية».
+  const featured = categories.filter((c) => c.is_featured);
   const sections = settings.home_sections?.length ? settings.home_sections : [{ key: 'services', visible: true }, { key: 'how', visible: true }, { key: 'faq', visible: true }];
   // Owner-controlled order and visibility (the hero always comes first). Orders
   // step by 10 so the tracking band can sit right after «how it works» (5).
@@ -68,7 +69,7 @@ export default async function Home() {
             <div><span className="eyebrow">مساحات متعددة، عناية واحدة</span><h2>كيف نقدر نساعدك؟</h2></div>
             <Link className="text-button" href="/services">جميع الخدمات <ArrowLeft size={18} /></Link>
           </div>
-          <div className="services-grid">{featured.map((s) => <ServiceCard key={s.slug} service={s} />)}</div>
+          <div className="services-grid">{featured.map((c) => <CategoryCard key={c.slug} category={c} />)}</div>
           <CarouselDots count={featured.length} target=".services-section .services-grid" />
         </section>
       )}

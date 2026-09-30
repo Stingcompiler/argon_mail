@@ -18,11 +18,14 @@ async function recordEvents(page: Page) {
 }
 const events = (page: Page) => page.evaluate(() => JSON.parse(sessionStorage.getItem('e2e-events') || '[]') as Record<string, string>[]);
 
-test('home → service → request submitted, with events that carry no personal data', async ({ page }) => {
+test('home → area → service → request submitted, with events that carry no personal data', async ({ page }) => {
   await recordEvents(page);
   const name = `رحلة الرئيسية ${Date.now()}`;
   await page.goto('/');
-  await page.locator('.services-section').getByRole('link', { name: 'إرسال الطرود والمستندات' }).first().click();
+  // The main card (the area) leads to its services as tiles.
+  await page.locator('.services-section').getByRole('link', { name: /خدمات بريدية/ }).first().click();
+  await expect(page.getByRole('heading', { level: 1, name: 'خدمات بريدية' })).toBeVisible();
+  await page.locator('.service-tiles').getByRole('link', { name: 'إرسال الطرود والمستندات' }).click();
   await expect(page).toHaveURL(new RegExp(encodeURIComponent(SERVICE)));
   await page.getByLabel('الاسم الكامل').fill(name);
   await page.getByRole('combobox', { name: 'الدولة' }).first().selectOption('SA');
@@ -35,9 +38,10 @@ test('home → service → request submitted, with events that carry no personal
   const code = new URL(page.url()).searchParams.get('code')!;
 
   const got = await events(page);
-  expect(got.map((e) => e.name)).toEqual(['service_select', 'request_start', 'request_complete']);
-  expect(got[0]).toMatchObject({ service: SERVICE, area: 'featured' });
+  expect(got.map((e) => e.name)).toEqual(['category_select', 'service_select', 'request_start', 'request_complete']);
+  expect(got[0]).toMatchObject({ category: 'خدمات-بريدية', area: 'featured' });
   expect(got[1]).toMatchObject({ service: SERVICE });
+  expect(got[2]).toMatchObject({ service: SERVICE });
   const raw = JSON.stringify(got);
   for (const personal of [name, '501234567', code]) expect(raw).not.toContain(personal);
 });
@@ -115,4 +119,33 @@ test('reduced motion: nothing animates on the home page', async ({ browser }) =>
   expect(running).toBe(0);
   await noHorizontalScroll(page);
   await ctx.close();
+});
+
+/** Brand redesign, phase 4: areas are main cards; services are tiles inside them. */
+test('services page: area cards, and a search that shows matching tiles', async ({ page }) => {
+  await page.goto('/services');
+  const cards = page.locator('.category-grid .category-card');
+  expect(await cards.count()).toBeGreaterThan(0);
+  await expect(cards.first().locator('h3')).toBeVisible();
+  const search = page.getByRole('searchbox', { name: 'ابحث عن خدمة' });
+  await search.fill('الطرود');
+  await expect(page.locator('.service-tiles').getByRole('link', { name: 'إرسال الطرود والمستندات' })).toBeVisible();
+  await expect(cards).toHaveCount(0);
+  await search.fill('كلمة لا توجد');
+  await expect(page.getByRole('heading', { name: 'لم نجد خدمة بهذا الاسم' })).toBeVisible();
+  await search.fill('');
+  await expect(cards.first()).toBeVisible();
+  // A search from elsewhere arrives as ?q=
+  await page.goto('/services?q=' + encodeURIComponent('السفر'));
+  await expect(page.locator('.service-tiles').getByRole('link', { name: 'تنسيق متطلبات السفر' })).toBeVisible();
+});
+
+test('area page: its services as tiles, a tracking tile, and a way back', async ({ page }) => {
+  await page.goto('/services/category/' + encodeURIComponent('خدمات-بريدية'));
+  await expect(page.getByRole('heading', { level: 1, name: 'خدمات بريدية' })).toBeVisible();
+  const tiles = page.locator('.service-tiles');
+  await expect(tiles.getByRole('link', { name: 'إرسال الطرود والمستندات' })).toHaveAttribute('href', '/services/' + encodeURIComponent(SERVICE));
+  await expect(tiles.getByRole('link', { name: 'تتبع طلبك' })).toHaveAttribute('href', '/track');
+  await expect(page.getByRole('link', { name: 'كل المجالات' })).toHaveAttribute('href', '/services');
+  expect((await page.request.get('/services/category/' + encodeURIComponent('لا-يوجد'))).status()).toBe(404);
 });

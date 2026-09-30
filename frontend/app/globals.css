@@ -1121,3 +1121,39 @@ footer .brand-symbol{background:var(--white)}
 .hero h1{font-weight:800}
 .login-mark{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:var(--r-lg);background:var(--white)}
 .footer-message svg{color:var(--accent-500)}
+/* ── Main cards (المجالات) and service tiles (docs/brand-redesign-plan.md) ── */
+.category-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px}
+.category-card{display:flex;flex-direction:column;background:var(--white);border:1px solid var(--neutral-200);border-radius:var(--r-lg);overflow:hidden;color:inherit;box-shadow:0 6px 18px color-mix(in srgb,var(--brand-900) 6%,transparent);transition:transform .2s ease,box-shadow .2s ease}
+.category-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px color-mix(in srgb,var(--brand-900) 12%,transparent)}
+.category-card:focus-visible{outline:3px solid var(--brand-800);outline-offset:3px}
+.category-card-media{display:grid;place-items:center;aspect-ratio:16/10;background:linear-gradient(140deg,var(--neutral-100),var(--tint-sage-bg) 55%,var(--accent-100));overflow:hidden}
+.category-card-media img{width:100%;height:100%;object-fit:cover;display:block}
+.category-card-icon{display:grid;place-items:center;width:84px;height:84px;border-radius:50%;background:var(--white);color:var(--brand-800);box-shadow:0 8px 20px color-mix(in srgb,var(--brand-900) 10%,transparent)}
+.category-card-body{display:grid;gap:6px;justify-items:center;text-align:center;padding:18px 18px 22px}
+.category-card-body :is(h2,h3){font-size:var(--fs-h3);font-weight:800;line-height:1.35;color:var(--dark);margin:0;text-wrap:balance}
+.category-card-line{font-size:var(--fs-small);color:var(--muted);line-height:1.7}
+.category-card-count{font-size:var(--fs-label);font-weight:700;color:var(--brand-800);background:var(--neutral-100);border-radius:var(--r-pill);padding:3px 12px;margin-top:4px}
+@media (max-width:760px){.services-section .category-card{flex:0 0 min(80%,300px);scroll-snap-align:start}
+.category-grid{grid-template-columns:1fr;gap:14px}}
+
+.service-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+@media (max-width:760px){.service-tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}}
+@media (max-width:359px){.service-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.service-tile{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:10px;min-height:118px;padding:16px 8px 14px;background:var(--white);border:1px solid var(--neutral-200);border-radius:var(--r-lg);text-align:center;color:var(--dark);box-shadow:0 4px 12px color-mix(in srgb,var(--brand-900) 5%,transparent);transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.service-tile:hover{border-color:var(--brand-300);box-shadow:0 10px 22px color-mix(in srgb,var(--brand-900) 10%,transparent)}
+.service-tile:focus-visible{outline:3px solid var(--brand-800);outline-offset:3px}
+.tile-icon{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--neutral-100);color:var(--brand-800)}
+.tile-name{font-size:var(--fs-small);font-weight:700;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tile-track .tile-icon{background:var(--accent-100);color:var(--accent-700)}
+.tiles-heading{font-size:var(--fs-title);font-weight:700;color:var(--dark);margin:28px 0 14px}
+
+.category-page .back-link{margin-bottom:18px}
+.category-hero{display:flex;align-items:center;gap:18px;padding:22px;border-radius:var(--r-xl);background:linear-gradient(140deg,var(--neutral-100),var(--tint-sage-bg) 60%,var(--accent-100))}
+.category-hero h1{font-size:var(--fs-h1);font-weight:800;color:var(--dark);margin:0}
+.category-hero p{margin:6px 0 0}
+.category-hero-icon{flex-shrink:0;display:grid;place-items:center;width:72px;height:72px;border-radius:50%;background:var(--white);color:var(--brand-800)}
+.category-hero-image{flex-shrink:0;width:132px;aspect-ratio:16/10;object-fit:cover;border-radius:var(--r-md)}
+@media (max-width:560px){.category-hero{flex-direction:column;text-align:center;padding:20px 16px}.category-hero-image{width:100%}}
+.services-search{margin:4px 0 26px;max-width:640px}
+.services-search input{width:100%}
+.search-box:focus-within{outline:3px solid var(--brand-800);outline-offset:2px}

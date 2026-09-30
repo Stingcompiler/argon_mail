@@ -140,14 +140,15 @@ test('home (phone): services row shows its position', async ({ page }) => {
   await page.goto('/');
   const dots = page.locator('.carousel-dots span');
   const cards = await page.locator('.services-section .services-grid > *').count();
-  test.skip(cards < 2, 'needs two featured services');
+  test.skip(cards < 2, 'needs two featured areas');
   await expect(dots).toHaveCount(cards);
   await expect(dots.nth(0)).toHaveClass('on');
   const row = page.locator('.services-section .services-grid');
   await row.evaluate((el) => el.scrollTo({ left: -el.scrollWidth, behavior: 'instant' }));
   await expect(dots.nth(cards - 1)).toHaveClass('on');
   // Keyboard users reach every card, and focus brings it into view.
-  const last = page.locator('.services-section .services-grid > *').last().locator('a').first();
+  // Each main card is itself one link.
+  const last = page.locator('.services-section .services-grid > a').last();
   await last.focus();
   await expect(last).toBeInViewport();
   await expect(page.locator('.services-section').getByRole('link', { name: /جميع الخدمات/ })).toBeVisible();
@@ -185,13 +186,13 @@ test('phone: fixed bars step aside while typing, without stealing the submit tap
   await expect(bar).toBeVisible();
 });
 
-/** Design batch 1: on a common phone the first service shows above the tab
+/** Design batch 1: on a common phone the first main card shows above the tab
  * bar on the first screen, under the hero's two actions. */
-test('home (phone): the first service card starts on the first screen', async ({ page }) => {
+test('home (phone): the first main card starts on the first screen', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   const bar = await page.locator('.tab-bar').boundingBox();
-  const card = await page.locator('.services-section .service-card').first().boundingBox();
+  const card = await page.locator('.services-section .category-card').first().boundingBox();
   expect(bar!.y - card!.y, 'at least 150px of the first card above the tab bar').toBeGreaterThanOrEqual(150);
   const actions = page.locator('.hero-actions .button');
   const [a, b] = [await actions.nth(0).boundingBox(), await actions.nth(1).boundingBox()];
