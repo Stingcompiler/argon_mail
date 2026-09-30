@@ -4,6 +4,10 @@ import { expect, type Page } from '@playwright/test';
 /** WCAG 2.1 A/AA rules from axe-core, plus heading and landmark structure
  * (axe "best practice" rules Lighthouse also checks); any violation fails with a readable list. */
 export async function audit(page: Page) {
+  // Measure colours at rest: a fade or transition still running (a button appearing,
+  // a page fading in) would read as low contrast. Endless animations are ignored.
+  await page.waitForFunction(() => document.getAnimations().every((a) =>
+    a.playState !== 'running' || (a.effect?.getTiming().iterations ?? 1) === Infinity), undefined, { timeout: 5000 }).catch(() => {});
   const wcag = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
   const structure = await new AxeBuilder({ page }).withRules(['heading-order', 'page-has-heading-one', 'landmark-one-main']).analyze();
   const violations = [...wcag.violations, ...structure.violations];

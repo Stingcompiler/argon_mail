@@ -52,33 +52,6 @@ svg{flex-shrink:0;vertical-align:middle}
 .hero-trust span{display:flex;align-items:center;gap:6px}
 .hero-trust i{height:10px;width:1px;background:#d3d9ca}
 .hero-visual{height:400px;background:#eef0e5;border-radius:150px 150px 15px 15px;position:relative;overflow:hidden;isolation:isolate}
-.visual-top{position:absolute;top:27px;width:100%;text-align:center;font-size:10px;color:#849174}
-.orbit{position:absolute;border:1px solid #d9dfca;border-radius:50%;width:330px;height:330px;top:67px;left:50%;transform:translateX(-50%);z-index:-1}
-.orbit-two{width:260px;height:260px;top:100px}
-.visual-spark{position:absolute;left:54px;top:85px;color:#bd9346;transform:rotate(-12deg)}
-.mail-illustration{position:absolute;left:50%;top:83px;width:250px;height:248px;transform:translateX(-50%) rotate(-9deg)}
-.letter{position:absolute;background:#faf8ec;width:188px;height:176px;top:0;left:29px;border-radius:5px;box-shadow:0 5px 25px #3953320b;padding:20px;transform:rotate(6deg)}
-.letter-head{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--green);padding-bottom:15px;border-bottom:1px solid #e2e3d5}
-.letter-line{height:4px;background:#d5dacb;width:70%;margin-top:10px;border-radius:3px}
-.letter-line.long{width:94%;margin-top:15px}
-.letter-stamp{position:absolute;left:20px;bottom:24px;width:33px;height:33px;border:1px solid #b6c4a9;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#7d976c}
-.envelope{position:absolute;bottom:0;left:0;width:250px;height:158px;background:#456c50;border-radius:5px 5px 10px 10px;box-shadow:0 22px 22px #35573622;overflow:hidden}
-.envelope-flap{position:absolute;inset:0;background:#76906b;clip-path:polygon(0 0,50% 55%,100% 0)}
-.envelope-front{position:absolute;inset:0;background:#587b57;clip-path:polygon(0 0,50% 55%,100% 0,100% 100%,0 100%)}
-.envelope-front:after{content:'';position:absolute;inset:0;background:#61805b;clip-path:polygon(0 100%,50% 48%,100% 100%)}
-.seal{position:absolute;z-index:2;left:99px;top:63px;width:53px;height:53px;background:#d5b368;border-radius:50%;border:5px solid #dcbf7f;display:flex;align-items:center;justify-content:center;color:#836734;box-shadow:0 4px 6px #273e1b22}
-.floating-chip{background:#fffdf6;box-shadow:0 9px 30px #35402e0b;position:absolute;border:1px solid #ebece0;border-radius:9px;padding:12px;display:flex;align-items:center;gap:10px;z-index:3}
-.floating-chip b{font-size:10px;display:block;color:#3e533b}
-.floating-chip small{font-size:8px;display:block;color:#84907a;margin-top:2px}
-.chip-one{right:19px;bottom:79px;transform:rotate(3deg)}
-.chip-one>svg{color:#7a9462;margin-right:5px}
-.mini-icon{display:flex;align-items:center;justify-content:center;width:35px;height:35px;background:#e8eedf;border-radius:7px;color:#5a7950}
-.mini-icon.gold{background:#f5edda;color:#ad8844}
-.chip-two{left:21px;top:101px;transform:rotate(-5deg);padding:8px 11px}
-.chip-two b{font-size:9px}
-.visual-bottom{position:absolute;bottom:19px;left:22px;right:22px;display:flex;justify-content:space-between;font-size:8px;color:#829177;direction:ltr}
-.visual-bottom>span:first-child{letter-spacing:2px}
-.visual-bottom>span:last-child{display:flex;gap:5px;align-items:center;direction:rtl}
 .tracking-strip{display:flex;align-items:center;justify-content:space-between;gap:42px;padding:25px 30px;border:1px solid #e0e4d8;background:#f1f3e9;border-radius:9px}
 .tracking-label{display:flex;gap:16px;align-items:center;flex-shrink:0}
 .tracking-icon{color:#62774f;display:flex;align-items:center}
@@ -244,12 +217,7 @@ tbody tr:hover{background:#f7f9ef}
 .toast{position:fixed;bottom:25px;right:25px;max-width:480px;z-index:100;background:#173e32;color:#f6f6e9;border:1px solid #3b644e;box-shadow:0 8px 30px #0002;padding:16px 20px;border-radius:9px;display:flex;align-items:center;gap:12px;font-size:12px}
 .toast>button{margin-right:auto;color:#d0ddc7}
 @media(min-width:1500px){.hero{padding-top:80px;padding-bottom:80px}
-.hero-visual{height:450px}
-.mail-illustration{top:108px}
-.chip-two{top:125px}
-.chip-one{bottom:104px}
-.orbit{top:92px}
-.orbit-two{top:125px}}
+.hero-visual{height:450px}}
 @media(max-width:1100px){.container{width:calc(100% - 64px)}
 .header-inner nav{margin-left:0;gap:22px}
 .hero{gap:28px}
@@ -268,9 +236,7 @@ tbody tr:hover{background:#f7f9ef}
 .tracking-label h2{font-size:var(--fs-h3);font-weight:700}
 .how-inner{gap:30px}
 .steps{gap:20px}
-.detail-layout{gap:45px}
-.chip-one{right:9px}
-.chip-two{left:7px}}
+.detail-layout{gap:45px}}
 @media(max-width:800px){.container{width:calc(100% - 40px)}
 .preview-bar{padding:6px 20px;font-size:11px}
 .header-inner{height:85px;gap:18px}
@@ -288,17 +254,6 @@ tbody tr:hover{background:#f7f9ef}
 .hero-trust i{display:none}
 .hero-actions{flex-wrap:wrap;gap:10px;margin-top:19px}
 .hero-actions .button{font-size:var(--fs-body);min-height:43px;font-weight:600}
-.mail-illustration{transform:translateX(-50%) rotate(-9deg) scale(.86);top:60px}
-.chip-one{bottom:64px;padding:8px;gap:6px}
-.chip-one b{font-size:8px}
-.chip-one small{font-size:7px}
-.chip-one>svg{width:13px}
-.mini-icon{width:29px;height:29px}
-.chip-two{top:82px;left:8px;padding:6px}
-.chip-two b{font-size:7px}
-.visual-top{font-size:8px}
-.visual-spark{left:38px;top:60px}
-.visual-bottom{font-size:6px;left:13px;right:13px}
 .tracking-strip{flex-direction:column;align-items:stretch;gap:18px}
 .track-form{max-width:none}
 .tracking-label{gap:11px}
@@ -353,17 +308,6 @@ tbody tr:hover{background:#f7f9ef}
 .hero-trust{justify-content:center;font-size:var(--fs-label);margin-top:23px;gap:14px}
 .hero-trust span{gap:4px}
 .hero-visual{height:300px;border-radius:110px 110px 12px 12px;max-width:390px;width:100%;margin:auto}
-.mail-illustration{top:42px;transform:translateX(-50%) rotate(-9deg) scale(.85)}
-.visual-top{top:19px}
-.orbit{top:35px;width:285px;height:285px}
-.orbit-two{top:66px;width:220px;height:220px}
-.chip-one{bottom:57px;right:13px;padding:9px}
-.chip-one b{font-size:9px}
-.chip-one small{font-size:7px}
-.chip-two{top:62px;left:14px}
-.chip-two b{font-size:8px}
-.visual-spark{top:49px;left:51px}
-.visual-bottom{font-size:7px}
 .tracking-strip{padding:20px;gap:15px}
 .tracking-label h2{font-size:var(--fs-h3);font-weight:700}
 .tracking-label p{font-size:var(--fs-small)}
@@ -1072,3 +1016,28 @@ a.contact-line:hover{background:#f2f5ec}
 /* The tracking band now follows «how it works»: space it from its neighbours. */
 .tracking-strip{margin-block:36px}
 .hero-actions .button.secondary{gap:10px}
+/* ── Landing plan, phase 2: hero artwork = the request journey ─────────── */
+.journey{position:absolute;inset:52px 30px 30px;display:flex;flex-direction:column;justify-content:space-between;isolation:isolate}
+.journey::before{content:'';position:absolute;top:12%;bottom:12%;left:50%;border-left:2px dashed #c3d0b5;z-index:-1}
+.j-card{width:76%;background:#fffef9;border:1px solid #dfe5d4;border-radius:16px;padding:12px 14px;box-shadow:0 12px 26px #2438201a;display:flex;flex-direction:column;gap:8px}
+.j-pick,.j-track{align-self:flex-start}
+.j-send{align-self:flex-end}
+.j-card small{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#44523f}
+.j-card small b{width:20px;height:20px;border-radius:50%;background:var(--green);color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+.j-tiles{display:flex;gap:8px}
+.j-tiles span{width:44px;height:44px;border-radius:12px;background:#eef2e7;color:var(--green);display:flex;align-items:center;justify-content:center}
+.j-tiles span.on{background:var(--green);color:#fff;box-shadow:0 6px 14px #145a4633}
+.j-line{display:block;height:8px;border-radius:4px;background:#e6ebdf}
+.j-line.short{width:62%}
+.j-chip{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:#e1ebd6;color:#2d5840}
+.j-ticket{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.j-code{font-family:ui-monospace,Menlo,monospace;font-weight:700;color:var(--green);letter-spacing:.5px;font-size:15px}
+.j-ring{position:relative;width:36px;height:36px;color:var(--green);display:flex;align-items:center;justify-content:center}
+.j-ring .j-ring-track{position:absolute;inset:0;transform:rotate(-90deg)}
+.j-ring circle{fill:none;stroke:#e3eadb;stroke-width:4}
+.j-ring circle.fill{stroke:var(--green);stroke-linecap:round;stroke-dasharray:94.25;stroke-dashoffset:34}
+/* Phones: the default artwork gives way so the first service appears sooner
+   (an owner-uploaded hero image still shows). */
+@media (max-width:560px){.hero-visual:not(.has-image){display:none}}
+/* Shorter arch on tablets: tighter cards so the third one isn't clipped. */
+@media (max-width:1100px){.journey{inset:40px 18px 20px}.j-card{width:84%;padding:9px 11px;gap:6px}.j-tiles span{width:36px;height:36px;border-radius:10px}.j-line{height:6px}.j-code{font-size:14px}}
