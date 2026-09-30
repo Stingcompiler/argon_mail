@@ -90,6 +90,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const bootstrap = useCallback(() => {
     if (statusRef.current !== 'unknown') return;
+    // No sign-in marker: nobody has signed in on this browser, so skip the
+    // refresh round trip (and its 401). The marker is set and cleared with
+    // the HttpOnly refresh cookie by the server.
+    if (!document.cookie.split('; ').some((c) => c.startsWith('arjoon_signed_in='))) {
+      statusRef.current = 'anonymous';
+      setStatus('anonymous');
+      return;
+    }
     statusRef.current = 'loading';
     setStatus('loading');
     refresh();

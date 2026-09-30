@@ -1,13 +1,16 @@
 'use client';
 import { ArrowLeft, Check, CheckCheck, Copy } from 'lucide-react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useUi } from '@/contexts/UiContext';
 import { RememberCode } from './RememberCode';
 
 export function OrderSuccess() {
   const code = useSearchParams().get('code') || '';
+  const router = useRouter();
+  // Opened without an order number (typed or bookmarked): nothing to show here.
+  useEffect(() => { if (!code) router.replace('/track'); }, [code, router]);
   const { notify } = useUi();
   const [copied, setCopied] = useState(false);
   return (

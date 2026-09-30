@@ -31,6 +31,16 @@ class AuthFlowTests(APITestCase):
         self.assertEqual(cookie["samesite"], "Strict")
         self.assertEqual(cookie["path"], "/api/v1/auth/")
 
+    def test_sign_in_marker_follows_the_session(self):
+        """A readable, non-secret marker lets the frontend skip refresh for visitors."""
+        r = self.login()
+        marker = r.cookies["arjoon_signed_in"]
+        self.assertEqual(marker.value, "1")
+        self.assertFalse(marker["httponly"])
+        self.assertEqual(marker["path"], "/")
+        r = self.client.post("/api/v1/auth/logout/", HTTP_ORIGIN=ORIGIN)
+        self.assertEqual(r.cookies["arjoon_signed_in"]["max-age"], 0)
+
     def test_login_rejects_untrusted_origin(self):
         r = self.client.post("/api/v1/auth/login/", {"email": "admin@example.com", "password": PASSWORD},
                              format="json", HTTP_ORIGIN="https://evil.example")

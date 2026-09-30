@@ -59,3 +59,11 @@ test.describe('readable on phones', () => {
     });
   }
 });
+
+test('unknown pages keep the site navigation', async ({ page }) => {
+  const r = await page.goto('/this-page-does-not-exist');
+  expect(r?.status()).toBe(404);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('لم نجد هذه الصفحة.');
+  await expect(page.getByRole('navigation', { name: 'التنقل السريع' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'القائمة', exact: true })).toBeVisible();
+});

@@ -38,6 +38,9 @@ def check_trusted_origin(request):
         raise PermissionDenied("مصدر الطلب غير موثوق.")
 
 
+SIGNED_IN_COOKIE = "arjoon_signed_in"
+
+
 def set_refresh_cookie(response, refresh: RefreshToken):
     cfg = settings.REFRESH_COOKIE
     response.set_cookie(
@@ -49,11 +52,19 @@ def set_refresh_cookie(response, refresh: RefreshToken):
         httponly=cfg["httponly"],
         samesite=cfg["samesite"],
     )
+    # Not a credential: only tells the frontend a session may exist, so pages
+    # skip the refresh call (and its 401) for visitors who never signed in.
+    response.set_cookie(
+        SIGNED_IN_COOKIE, "1",
+        max_age=int(settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()),
+        path="/", secure=cfg["secure"], httponly=False, samesite="Lax",
+    )
 
 
 def clear_refresh_cookie(response):
     cfg = settings.REFRESH_COOKIE
     response.delete_cookie(cfg["name"], path=cfg["path"], samesite=cfg["samesite"])
+    response.delete_cookie(SIGNED_IN_COOKIE, path="/", samesite="Lax")
 
 
 def session_payload(user, refresh: RefreshToken):

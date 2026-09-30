@@ -44,7 +44,7 @@ export type Tracking = { code: string; service_name: string; status: StatusBrief
 export type Answer = { key: string; label: string; type: FieldType; value: string | string[] };
 export type OrderListItem = {
   id: number; code: string; customer_name: string; customer_phone: string; service_name: string;
-  status: StatusBrief; assignee: UserBrief | null; payment_status: PaymentStatus; created_at: string; updated_at: string;
+  status: StatusBrief; assignee: UserBrief | null; payment_status?: PaymentStatus; created_at: string; updated_at: string;
 };
 export type OrderNote = { id: number; visibility: 'public' | 'internal'; body: string; author: UserBrief; created_at: string };
 export type OrderEventKind = 'created' | 'status_changed' | 'assigned' | 'note_added' | 'attachment_added' | 'quote_created' | 'quote_decided' | 'payment_status' | 'payment_recorded';
@@ -66,7 +66,8 @@ export type Payment = {
 export type OrderDetail = OrderListItem & {
   answers: Answer[]; details: string; service_snapshot: { name: string; category: string; price_label: string; slug: string };
   form_version: number; public_updated_at: string; notes: OrderNote[]; events: OrderEvent[]; whatsapp_url: string;
-  attachments: Attachment[]; quotes: Quote[]; payments: Payment[]; payment_status_label: string;
+  // Omitted by the server for executors (prices and payments are admin/operator only).
+  attachments: Attachment[]; quotes?: Quote[]; payments?: Payment[]; payment_status_label?: string;
 };
 export type StorageStatus = { used: number; quota: number; percent: number; disk_free: number; warning: boolean };
 export type OrderFilters = { q?: string; status?: string; service?: string; assignee?: string; created_after?: string; created_before?: string; page?: number };

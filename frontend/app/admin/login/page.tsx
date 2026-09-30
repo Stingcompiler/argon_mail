@@ -5,12 +5,16 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { LoginForm } from '@/components/admin/LoginForm';
 import { useAuth } from '@/contexts/AuthContext';
+import { safeNext } from '@/lib/safe-next';
 
 export default function LoginPage() {
   const { status, bootstrap } = useAuth(); // 'offline' just shows the form; login reports its own errors
   const router = useRouter();
   useEffect(() => { bootstrap(); }, [bootstrap]);
-  useEffect(() => { if (status === 'authenticated') router.replace('/admin'); }, [status, router]);
+  // Signed in (already, or just now through the form): back to the page that
+  // sent you here (dashboard paths only; see safeNext). One redirect only; a
+  // second one from the form left a navigation request hanging.
+  useEffect(() => { if (status === 'authenticated') router.replace(safeNext(window.location.search)); }, [status, router]);
   return (
     <main className="login-page">
       <div className="login-story">
@@ -22,7 +26,7 @@ export default function LoginPage() {
       </div>
       <div className="login-form-area">
         <Link className="back-link" href="/"><ArrowRight size={16} />العودة إلى الموقع</Link>
-        <LoginForm onDone={() => router.replace('/admin')} />
+        <LoginForm />
       </div>
     </main>
   );
