@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
 import { connection } from 'next/server';
+import { Suspense } from 'react';
+import { QueryProvider } from '@/contexts/QueryProvider';
 import { CategoryCard } from '@/components/site/CategoryCard';
+import { OrderDialog } from '@/components/site/OrderDialog';
 import { ServicesBrowser } from '@/components/site/ServicesBrowser';
-import { getCategories, getServices } from '@/lib/server-api';
+import { getCategories, getServices, getSite } from '@/lib/server-api';
 
 export const metadata: Metadata = {
   title: 'خدماتنا',
@@ -15,7 +18,7 @@ type Props = { searchParams: Promise<{ q?: string }> };
 /** The main service areas as cards; searching shows matching services as tiles. */
 export default async function ServicesPage({ searchParams }: Props) {
   await connection();
-  const [categories, services, { q }] = await Promise.all([getCategories(), getServices(), searchParams]);
+  const [categories, services, { settings }, { q }] = await Promise.all([getCategories(), getServices(), getSite(), searchParams]);
   return (
     <section className="container page-section services-page">
       <div className="page-intro">
@@ -33,6 +36,7 @@ export default async function ServicesPage({ searchParams }: Props) {
       ) : (
         <div className="empty-state"><h2>لا توجد خدمات منشورة حاليًا</h2><p>عد قريبًا، أو تواصل معنا لمعرفة المزيد.</p></div>
       )}
+      <QueryProvider><Suspense><OrderDialog services={services} limits={{ maxFileMb: settings.max_file_mb, maxFiles: settings.max_files_per_order, maxTotalMb: settings.max_order_upload_mb ?? 20 }} /></Suspense></QueryProvider>
     </section>
   );
 }

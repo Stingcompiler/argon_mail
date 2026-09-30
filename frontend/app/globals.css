@@ -1157,3 +1157,26 @@ footer .brand-symbol{background:var(--white)}
 .services-search{margin:4px 0 26px;max-width:640px}
 .services-search input{width:100%}
 .search-box:focus-within{outline:3px solid var(--brand-800);outline-offset:2px}
+/* ── Order dialog: a tile opens its request form (docs/brand-redesign-plan.md) ──
+   Full height from the bottom on phones, a centred panel on larger screens;
+   the page behind does not scroll. */
+html:has(.order-dialog[open]){overflow:hidden}
+.order-dialog{padding:0;border:0;background:var(--cream);color:var(--ink);width:min(720px,calc(100vw - 32px));max-width:none;max-height:min(92dvh,960px);border-radius:var(--r-xl);box-shadow:0 30px 80px color-mix(in srgb,var(--brand-950) 30%,transparent)}
+.order-dialog::backdrop{background:color-mix(in srgb,var(--brand-950) 50%,transparent);backdrop-filter:blur(3px)}
+.order-dialog-body{display:grid;gap:14px;padding:0 22px 24px}
+.order-dialog-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:12px;padding:16px 0 12px;background:var(--cream);border-bottom:1px solid var(--line)}
+.order-dialog-head>div{flex:1;min-width:0}
+.order-dialog-head h2{font-size:var(--fs-title);font-weight:800;color:var(--dark);margin:0;line-height:1.4}
+.order-dialog-head p{font-size:var(--fs-label);margin:2px 0 0}
+.order-dialog-head .tile-icon{width:46px;height:46px;flex-shrink:0}
+.order-dialog-details{border:1px solid var(--line);border-radius:var(--r-md);background:var(--white);padding:12px 14px}
+.order-dialog-details summary{cursor:pointer;font-weight:700;font-size:var(--fs-small);color:var(--brand-800)}
+.order-dialog-details[open] summary{margin-bottom:8px}
+.order-dialog-details h3{font-size:var(--fs-small);font-weight:700;margin:10px 0 4px}
+.order-dialog-details p{font-size:var(--fs-small)}
+.order-dialog .request-form{box-shadow:none;margin:0}
+@media (max-width:760px){.order-dialog{width:100vw;max-height:none;height:100dvh;margin:0;inset:0;border-radius:0}
+.order-dialog-body{padding:0 16px calc(24px + env(safe-area-inset-bottom))}}
+@media (prefers-reduced-motion:no-preference){.order-dialog[open]{animation:dialog-in .22s ease-out}}
+@keyframes dialog-in{from{opacity:0;transform:translateY(16px)}}
+.order-dialog .request-form{padding:20px}@media (max-width:760px){.order-dialog .request-form{padding:16px 14px}}

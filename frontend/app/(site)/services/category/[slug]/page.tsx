@@ -2,10 +2,13 @@ import { ArrowRight, PackageSearch } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 import { connection } from 'next/server';
+import { QueryProvider } from '@/contexts/QueryProvider';
 import { categoryHref } from '@/components/site/CategoryCard';
+import { OrderDialog } from '@/components/site/OrderDialog';
 import { ServiceTile } from '@/components/site/ServiceTile';
-import { ogBase, getCategory, getServices } from '@/lib/server-api';
+import { ogBase, getCategory, getServices, getSite } from '@/lib/server-api';
 import { iconFor } from '@/components/icons';
 
 type Props = { params: Promise<{ slug: string }> };
@@ -23,11 +26,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-/** A main service area: its services as tiles (icon and name). */
+/** A main service area: its services as tiles (icon and name); a tile opens
+ * the request form in a dialog. */
 export default async function CategoryPage({ params }: Props) {
   await connection();
   const slug = decodeURIComponent((await params).slug);
-  const [category, services] = await Promise.all([getCategory(slug), getServices()]);
+  const [category, services, { settings }] = await Promise.all([getCategory(slug), getServices(), getSite()]);
   if (!category) notFound();
   const inside = services.filter((s) => s.category.slug === category.slug);
   const Icon = iconFor(category.icon_key);
@@ -52,6 +56,7 @@ export default async function CategoryPage({ params }: Props) {
           <span className="tile-name">تتبع طلبك</span>
         </Link>
       </div>
+      <QueryProvider><Suspense><OrderDialog services={inside} limits={{ maxFileMb: settings.max_file_mb, maxFiles: settings.max_files_per_order, maxTotalMb: settings.max_order_upload_mb ?? 20 }} /></Suspense></QueryProvider>
     </section>
   );
 }

@@ -1,8 +1,18 @@
 'use client';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
-import type { Tracking, TrackingSummary } from '@/lib/api/types';
+import type { PublicServiceDetail, Tracking, TrackingSummary } from '@/lib/api/types';
 import { qk } from '@/lib/query-keys';
+
+/** One service with its request form, for the order dialog on area pages. */
+export function usePublicService(slug: string | null) {
+  return useQuery({
+    queryKey: qk.public.service(slug || ''),
+    queryFn: ({ signal }) => api<PublicServiceDetail>(`/public/services/${encodeURIComponent(slug!)}/`, { auth: false, signal }),
+    enabled: !!slug,
+    staleTime: 60_000,
+  });
+}
 
 export function useTracking(code: string) {
   return useQuery({
