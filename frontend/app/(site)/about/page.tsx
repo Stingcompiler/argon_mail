@@ -20,7 +20,7 @@ export default async function AboutPage() {
           { icon: Layers3, title: 'خدمات تتجدد', text: 'تُضاف المجالات والخدمات بحسب ما يقدمه فريق عرجون، لتجد الخيارات المنشورة في مكان واحد.' },
           { icon: MessageCircle, title: 'تواصل إنساني', text: 'أرسل طلبك واترك رقم WhatsApp، ليتواصل معك المسؤول عند الحاجة.' },
           { icon: ShieldCheck, title: 'خطوات واضحة', text: 'رقم طلب تحتفظ به، وحالة تعرفها، وملاحظات تتابع من خلالها تقدم العمل.' },
-        ].map((a) => <div className="about-card" key={a.title}><a.icon size={30} /><h2>{a.title}</h2><p>{a.text}</p></div>)}
+        ].map((a) => <div className="about-card" key={a.title}><a.icon size={30} strokeWidth={1.5} /><h2>{a.title}</h2><p>{a.text}</p></div>)}
       </div>
     </section>
   );

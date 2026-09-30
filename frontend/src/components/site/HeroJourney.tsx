@@ -12,7 +12,7 @@ export function HeroJourney({ icons }: { icons: LucideIcon[] }) {
     <div className="journey" aria-hidden="true">
       <div className="j-card j-pick">
         <small><b>1</b> اختر الخدمة</small>
-        <div className="j-tiles">{tiles.map((Icon, i) => <span key={i} className={i === 0 ? 'on' : ''}><Icon size={22} strokeWidth={1.6} /></span>)}</div>
+        <div className="j-tiles">{tiles.map((Icon, i) => <span key={i} className={i === 0 ? 'on' : ''}><Icon size={22} strokeWidth={1.5} /></span>)}</div>
       </div>
       <div className="j-card j-send">
         <small><b>2</b> أرسل التفاصيل</small>

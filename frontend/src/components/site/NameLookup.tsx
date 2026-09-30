@@ -50,7 +50,7 @@ export function NameLookup() {
 
       {notFound && (
         <div className="empty-state" role="alert">
-          <Search size={35} />
+          <Search size={35} strokeWidth={1.5} />
           <h2>لم نعثر على طلبات</h2>
           <p>تأكد من كتابة الاسم الكامل ورقم الهاتف كما في الطلب، أو استخدم رقم الطلب.</p>
         </div>

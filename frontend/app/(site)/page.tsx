@@ -1,4 +1,4 @@
-import { ArrowUpLeft, Bell, CheckCheck, Clock3, Layers3, MessageCircle, Package, Send, ShieldCheck, UserCheck } from 'lucide-react';
+import { ArrowLeft, Bell, CheckCheck, Clock3, Layers3, MessageCircle, Package, Send, ShieldCheck, UserCheck } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { connection } from 'next/server';
@@ -37,7 +37,7 @@ export default async function Home() {
           <p className="preserve-lines">{settings.hero_text}</p>
           <div className="hero-actions" data-area="hero">
             {/* New visitors start by choosing a service; existing customers track. */}
-            <Link className="button" href="/services">استعرض الخدمات <ArrowUpLeft size={19} /></Link>
+            <Link className="button" href="/services">استعرض الخدمات <ArrowLeft size={19} /></Link>
             <Link className="button secondary" href="/track"><Package size={18} />تابع طلبك</Link>
           </div>
           {/* Facts the product guarantees, not general reassurance (landing plan, phase 3). */}
@@ -66,7 +66,7 @@ export default async function Home() {
         <section className="container services-section" data-area="featured" style={place('services')}>
           <div className="section-heading">
             <div><span className="eyebrow">مساحات متعددة، عناية واحدة</span><h2>كيف نقدر نساعدك؟</h2></div>
-            <Link className="text-button" href="/services">جميع الخدمات <ArrowUpLeft size={18} /></Link>
+            <Link className="text-button" href="/services">جميع الخدمات <ArrowLeft size={18} /></Link>
           </div>
           <div className="services-grid">{featured.map((s) => <ServiceCard key={s.slug} service={s} />)}</div>
           <CarouselDots count={featured.length} target=".services-section .services-grid" />
@@ -86,7 +86,7 @@ export default async function Home() {
               { n: '03', title: 'تابع حتى الإنجاز', text: 'تابع الحالة برقم الطلب، أو باسمك ورقم هاتفك إن نسيته.', icon: CheckCheck },
             ].map((s) => (
               <div className="step" key={s.n}>
-                <span className="step-number" aria-hidden="true">{s.n}</span><s.icon size={25} strokeWidth={1.4} /><h3>{s.title}</h3><p>{s.text}</p>
+                <span className="step-number" aria-hidden="true">{s.n}</span><s.icon size={25} strokeWidth={1.5} /><h3>{s.title}</h3><p>{s.text}</p>
               </div>
             ))}
           </div>
@@ -108,7 +108,7 @@ export default async function Home() {
             <span className="eyebrow">قبل أن تبدأ</span>
             <h2>أسئلة في بالك؟</h2>
             <p>إجابات قصيرة، لصورة أوضح.</p>
-            <Link className="text-button" href="/contact">تواصل معنا <ArrowUpLeft size={17} /></Link>
+            <Link className="text-button" href="/contact">تواصل معنا <ArrowLeft size={17} /></Link>
           </div>
           <FaqList items={faq} />
           <JsonLd data={{
@@ -125,7 +125,7 @@ export default async function Home() {
           <p>اختر الخدمة المناسبة وأرسل طلبك في دقائق، أو اسألنا قبل أن تبدأ.</p>
         </div>
         <div className="closing-actions">
-          <Link className="button" href="/services">استعرض الخدمات <ArrowUpLeft size={19} /></Link>
+          <Link className="button" href="/services">استعرض الخدمات <ArrowLeft size={19} /></Link>
           {settings.whatsapp_url
             ? <a className="button secondary" href={settings.whatsapp_url} target="_blank" rel="noopener noreferrer"><MessageCircle size={18} />تحدث معنا عبر WhatsApp</a>
             : <Link className="button secondary" href="/contact"><MessageCircle size={18} />تواصل معنا</Link>}

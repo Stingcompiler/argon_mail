@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowUpLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import type { PublicService } from '@/lib/api/types';
 import { iconFor } from '../icons';
@@ -10,11 +10,11 @@ export function ServiceCard({ service: s, cta = 'اكتشف الخدمة' }: { s
     <article className="service-card">
       <Link className={`service-art ${s.color}`} href={href} tabIndex={-1} aria-hidden="true">
         <div className="art-ring" />
-        <Icon size={46} strokeWidth={1.25} />
+        <Icon size={46} strokeWidth={1.5} />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {s.image && <img className="service-custom-image" src={s.image.url} alt={s.image.alt} width={s.image.width} height={s.image.height} loading="lazy" decoding="async" />}
         <span>{s.tagline}</span>
-        <ArrowUpLeft className="art-arrow" size={18} />
+        <ArrowLeft className="art-arrow" size={18} />
       </Link>
       <div className="service-body">
         <small>{s.category.name}</small>

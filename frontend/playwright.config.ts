@@ -20,7 +20,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   projects: [
-    { name: 'mobile', testMatch: /(customer|a11y-public|admin-nav|site-nav|journeys)\.spec\.ts/, use: { ...devices['Pixel 7'] } },
+    { name: 'mobile', testMatch: /(customer|a11y-public|admin-nav|site-nav|journeys|design-system)\.spec\.ts/, use: { ...devices['Pixel 7'] } },
     { name: 'desktop', testMatch: /(admin|a11y-admin|admin-nav)\.spec\.ts/, use: { ...devices['Desktop Chrome'] } },
   ],
 });
