@@ -1,4 +1,4 @@
-import { ArrowLeft, Bell, CheckCheck, Clock3, Layers3, MessageCircle, Package, Search, Send, ShieldCheck, UserCheck } from 'lucide-react';
+import { ArrowLeft, Bell, Clock3, MessageCircle, Package, Search, ShieldCheck, UserCheck } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { connection } from 'next/server';
@@ -70,7 +70,6 @@ export default async function Home() {
           code. Phones have the field in the hero instead (and the tab bar's sheet). */}
       <section className="container tracking-strip" aria-labelledby="track-heading" style={{ order: place('how').order + 5 }}>
         <div className="tracking-label">
-          <span className="tracking-icon"><Package size={24} /></span>
           <div><h2 id="track-heading">لديك رقم طلب؟</h2><p>تتبع حالته في أي وقت.</p></div>
         </div>
         <TrackForm />
@@ -101,12 +100,12 @@ export default async function Home() {
           </div>
           <div className="steps">
             {[
-              { n: '01', title: 'اختر الخدمة', text: 'في صفحة كل خدمة متطلباتها وطريقة تسعيرها.', icon: Layers3 },
-              { n: '02', title: 'أرسل طلبك', text: 'املأ النموذج برقم WhatsApp، فيظهر لك رقم طلب يبدأ بـ ARJ-.', icon: Send },
-              { n: '03', title: 'تتبع حتى الإنجاز', text: 'بالرقم، أو باسمك ورقم هاتفك إن نسيته.', icon: CheckCheck },
+              { n: '01', title: 'اختر الخدمة', text: 'في صفحة كل خدمة متطلباتها وطريقة تسعيرها.' },
+              { n: '02', title: 'أرسل طلبك', text: 'املأ النموذج برقم WhatsApp، فيظهر لك رقم طلب يبدأ بـ ARJ-.' },
+              { n: '03', title: 'تتبع حتى الإنجاز', text: 'بالرقم، أو باسمك ورقم هاتفك إن نسيته.' },
             ].map((s) => (
               <div className="step" key={s.n}>
-                <span className="step-number" aria-hidden="true">{s.n}</span><s.icon size={25} strokeWidth={1.5} /><h3>{s.title}</h3><p>{s.text}</p>
+                <span className="step-number" aria-hidden="true">{s.n}</span><h3>{s.title}</h3><p>{s.text}</p>
               </div>
             ))}
           </div>

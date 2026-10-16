@@ -15,7 +15,8 @@ import { SlidingGroup } from '@/lib/motion';
 const STAGES = ['الاستلام', 'المراجعة', 'التنفيذ', 'الجاهزية', 'الإنجاز'];
 const STAGE_OF: Partial<Record<StatusMeaning, number>> = { new: 1, in_review: 2, waiting_customer: 2, in_progress: 3, ready: 4, completed: 5 };
 
-/** Ring that fills to the current stage (SVG stroke, animated in CSS). */
+/** Ring that fills to the current stage (SVG stroke, animated in CSS). It shows
+ * progress only (3 of 5); the status itself is said once, by the badge beside it. */
 function ProgressRing({ stage }: { stage: number }) {
   const r = 34, c = 2 * Math.PI * r;
   const done = stage === STAGES.length;
@@ -26,7 +27,6 @@ function ProgressRing({ stage }: { stage: number }) {
         <circle cx="42" cy="42" r={r} className="ring-fill" style={{ ['--c' as string]: c, ['--off' as string]: c * (1 - stage / STAGES.length) }} />
       </svg>
       <span aria-hidden="true">{done ? <Check size={20} /> : <><b>{stage}</b>/{STAGES.length}</>}</span>
-      <small aria-hidden="true">{STAGES[stage - 1]}</small>
     </div>
   );
 }
