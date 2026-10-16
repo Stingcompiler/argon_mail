@@ -876,19 +876,12 @@ footer .brand-symbol{background:var(--white)}
 .service-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
 @media (max-width:760px){.service-tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}}
 @media (max-width:359px){.service-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.service-tile{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:10px;min-height:118px;padding:16px 8px 14px;background:var(--white);border:1px solid var(--neutral-200);border-radius:var(--r-lg);text-align:center;color:var(--dark);box-shadow:0 4px 12px color-mix(in srgb,var(--brand-900) 5%,transparent);transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
-.service-tile:hover{border-color:var(--brand-300);box-shadow:0 10px 22px color-mix(in srgb,var(--brand-900) 10%,transparent)}
 .service-tile:focus-visible{outline:3px solid var(--brand-800);outline-offset:3px}
-.tile-icon{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--neutral-100);color:var(--brand-800)}
-.tile-name{font-size:var(--fs-small);font-weight:700;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.tile-track .tile-icon{background:var(--accent-100);color:var(--accent-700)}
 .tiles-heading{font-size:var(--fs-title);font-weight:700;color:var(--dark);margin:28px 0 14px}
 
 .category-page .back-link{margin-bottom:18px}
-.category-hero{display:flex;align-items:center;gap:18px;padding:22px;border-radius:var(--r-xl);background:linear-gradient(140deg,var(--neutral-100),var(--tint-sage-bg) 60%,var(--accent-100))}
 .category-hero h1{font-size:var(--fs-h1);font-weight:800;color:var(--dark);margin:0}
 .category-hero p{margin:6px 0 0}
-.category-hero-icon{flex-shrink:0;display:grid;place-items:center;width:72px;height:72px;border-radius:50%;background:var(--white);color:var(--brand-800)}
 .category-hero-image{flex-shrink:0;width:132px;aspect-ratio:16/10;object-fit:cover;border-radius:var(--r-md)}
 @media (max-width:560px){.category-hero{flex-direction:column;text-align:center;padding:20px 16px}.category-hero-image{width:100%}}
 .services-search{margin:4px 0 26px;max-width:640px}
@@ -905,18 +898,14 @@ html:has(.order-dialog[open]){overflow:hidden}
 .order-dialog-head>div{flex:1;min-width:0}
 .order-dialog-head h2{font-size:var(--fs-title);font-weight:800;color:var(--dark);margin:0;line-height:1.4}
 .order-dialog-head p{font-size:var(--fs-label);margin:2px 0 0}
-.order-dialog-head .tile-icon{width:46px;height:46px;flex-shrink:0}
-.order-dialog-details{border:1px solid var(--line);border-radius:var(--r-md);background:var(--white);padding:12px 14px}
 .order-dialog-details summary{cursor:pointer;font-weight:700;font-size:var(--fs-small);color:var(--brand-800)}
 .order-dialog-details[open] summary{margin-bottom:8px}
 .order-dialog-details h3{font-size:var(--fs-small);font-weight:700;margin:10px 0 4px}
 .order-dialog-details p{font-size:var(--fs-small)}
-.order-dialog .request-form{box-shadow:none;margin:0}
 @media (max-width:760px){.order-dialog{width:100vw;max-height:none;height:100dvh;margin:0;inset:0;border-radius:0}
 .order-dialog-body{padding:0 16px calc(24px + env(safe-area-inset-bottom))}}
 @media (prefers-reduced-motion:no-preference){.order-dialog[open]{animation:dialog-in .22s ease-out}}
 @keyframes dialog-in{from{opacity:0;transform:translateY(16px)}}
-.order-dialog .request-form{padding:20px}@media (max-width:760px){.order-dialog .request-form{padding:16px 14px}}
 /* ── Home composition (docs/brand-redesign-plan.md, phase 6) ─────────────────
    The hero as a light sky banner with a faint wing curve (static, CSS only),
    the search right above the main cards, and the brand centred in the phone
@@ -1032,3 +1021,24 @@ html:has(.order-dialog[open]){overflow:hidden}
 .footer-main>div:not(:first-child):not(.footer-message) :is(a,button){min-height:40px;padding:0 14px}
 .footer-note{margin-top:0}
 .footer-bottom{flex-direction:row;flex-wrap:wrap;gap:4px 14px;padding-top:12px;padding-bottom:16px}}
+
+/* ── «الأسطح المصبوغة» (docs/ui-profile.md): a service type tile carries its
+   area's tint over its whole surface, the icon sits on it directly (no circle),
+   and the name is shown in full. The tracking tile stays white to stand apart. */
+.service-tile{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:10px;min-height:118px;padding:16px 8px 14px;border:1px solid transparent;border-radius:var(--r-lg);text-align:center;color:var(--dark);background:var(--tint-sage-bg);transition:border-color .15s ease,background-color .15s ease}
+.service-tile.tint-sand{background:var(--tint-sand-bg)}.service-tile.tint-blue{background:var(--tint-blue-bg)}.service-tile.tint-rose{background:var(--tint-rose-bg)}
+.service-tile .tile-glyph{color:var(--tint-sage-fg)}.service-tile.tint-sand .tile-glyph{color:var(--tint-sand-fg)}.service-tile.tint-blue .tile-glyph{color:var(--tint-blue-fg)}.service-tile.tint-rose .tile-glyph{color:var(--tint-rose-fg)}
+.service-tile:hover{border-color:currentColor}
+.tile-name{font-size:var(--fs-small);font-weight:700;line-height:1.5;overflow-wrap:anywhere}
+.service-tile.tile-track{background:var(--white);border-color:var(--neutral-200)}
+.service-tile.tile-track .tile-glyph{color:var(--brand-800)}
+.category-hero{display:flex;align-items:center;gap:18px;padding:22px;border-radius:var(--r-xl);background:var(--tint-sage-bg)}
+.category-hero.tint-sand{background:var(--tint-sand-bg)}.category-hero.tint-blue{background:var(--tint-blue-bg)}.category-hero.tint-rose{background:var(--tint-rose-bg)}
+.category-hero .eyebrow{color:var(--tint-sage-fg)}.category-hero.tint-sand .eyebrow{color:var(--tint-sand-fg)}.category-hero.tint-blue .eyebrow{color:var(--tint-blue-fg)}.category-hero.tint-rose .eyebrow{color:var(--tint-rose-fg)}
+/* Order dialog: the form sits on the dialog's own surface (no card in a card),
+   the details are a flat folded section, and closing is a light icon button. */
+.order-dialog .request-form{border:0;background:none;padding:0;margin:0;box-shadow:none}
+.order-dialog-details{border-block:1px solid var(--line);padding:12px 0}
+.order-dialog-head .icon-button{border:0;background:none;min-width:44px;min-height:44px}
+.order-dialog-head .icon-button:hover{background:var(--neutral-100)}
+#order-dialog-title:focus{outline:none}

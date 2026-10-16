@@ -9,7 +9,7 @@ import { ServiceTile } from './ServiceTile';
  * cards show (crawlers see them, and each area page lists its services);
  * a query shows the matching services as tiles.
  */
-export function ServicesBrowser({ services, initialQuery = '', children }: { services: PublicService[]; initialQuery?: string; children: React.ReactNode }) {
+export function ServicesBrowser({ services, tints = {}, initialQuery = '', children }: { services: PublicService[]; tints?: Record<string, string>; initialQuery?: string; children: React.ReactNode }) {
   const [query, setQuery] = useState(initialQuery);
   const q = query.trim();
   const found = q ? services.filter((s) => (s.name + ' ' + s.description + ' ' + s.category.name).includes(q)) : [];
@@ -24,7 +24,7 @@ export function ServicesBrowser({ services, initialQuery = '', children }: { ser
           {found.length ? (
             <>
               <h2 className="tiles-heading">{found.length === 1 ? 'خدمة واحدة' : `${found.length} خدمات`} تطابق «{q}»</h2>
-              <div className="service-tiles">{found.map((s) => <ServiceTile key={s.slug} service={s} />)}</div>
+              <div className="service-tiles">{found.map((s) => <ServiceTile key={s.slug} service={s} tint={tints[s.category.slug]} />)}</div>
             </>
           ) : (
             <div className="empty-state">

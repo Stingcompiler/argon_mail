@@ -5,7 +5,6 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
 import { usePublicService } from '@/hooks/public';
 import type { PublicService } from '@/lib/api/types';
-import { iconFor } from '../icons';
 import { OrderForm } from './OrderForm';
 import { serviceHref } from './ServiceTile';
 
@@ -62,7 +61,11 @@ export function OrderDialog({ services, limits }: { services: PublicService[]; l
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
-    if (summary && !d.open) d.showModal();
+    if (summary && !d.open) {
+      d.showModal();
+      // Start at the service name, not on the close button.
+      d.querySelector<HTMLElement>('#order-dialog-title')?.focus();
+    }
     if (!summary && d.open) {
       d.close();
       trigger.current?.focus();
@@ -76,7 +79,6 @@ export function OrderDialog({ services, limits }: { services: PublicService[]; l
     else router.replace(urlWith(null), { scroll: false });
   }, [router, urlWith]);
 
-  const Icon = iconFor(summary?.icon_key || '');
   return (
     <dialog ref={ref} className="order-dialog" aria-labelledby="order-dialog-title"
       onCancel={(e) => { e.preventDefault(); close(); }}
@@ -84,9 +86,8 @@ export function OrderDialog({ services, limits }: { services: PublicService[]; l
       {summary && (
         <div className="order-dialog-body">
           <header className="order-dialog-head">
-            <span className="tile-icon" aria-hidden="true"><Icon size={24} strokeWidth={1.5} /></span>
             <div>
-              <h2 id="order-dialog-title">{summary.name}</h2>
+              <h2 id="order-dialog-title" tabIndex={-1}>{summary.name}</h2>
               <p>{summary.price_label}{summary.duration_text ? ` · ${summary.duration_text}` : ''}</p>
             </div>
             <button type="button" className="icon-button" aria-label="إغلاق نموذج الطلب" onClick={close}><X size={20} /></button>

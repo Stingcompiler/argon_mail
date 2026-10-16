@@ -223,7 +223,25 @@ test('the area card keeps the image area, both descriptions and a larger centred
   // A type inside the area is only an icon and a name.
   await card.locator('h3 a').click();
   const tile = page.locator('.service-tiles .service-tile').first();
-  await expect(tile.locator('.tile-icon')).toBeVisible();
+  await expect(tile.locator('.tile-glyph')).toBeVisible();
   await expect(tile.locator('p')).toHaveCount(0);
 });
 
+
+/** docs/ui-profile.md («الأسطح المصبوغة»): a type tile carries its area's tint,
+ * its icon sits on the tint without a circle, and its name is never cut. */
+test('type tiles: area tint, no icon circle, full names', async ({ page }) => {
+  await page.goto('/services/category/' + encodeURIComponent('خدمات-تعليمية'));
+  const tile = page.locator('.service-tiles .service-tile:not(.tile-track)').first();
+  const [tileBg, heroBg] = await Promise.all([
+    tile.evaluate((t) => getComputedStyle(t).backgroundColor),
+    page.locator('.category-hero').evaluate((h) => getComputedStyle(h).backgroundColor),
+  ]);
+  expect(tileBg).toBe(heroBg); // the tile and its area header share the area's tint
+  const glyph = tile.locator('.tile-glyph');
+  expect(await glyph.evaluate((g) => getComputedStyle(g.parentElement!).backgroundColor)).toBe(tileBg); // no circle behind the icon
+  const name = tile.locator('.tile-name');
+  // Nothing clamps or hides the name (Arabic glyphs may rise past the line box; that is not a cut).
+  expect(await name.evaluate((n) => { const c = getComputedStyle(n); return [c.webkitLineClamp, c.overflow, c.textOverflow].join(' '); })).toBe('none visible clip');
+  await expect(page.locator('.category-hero svg')).toHaveCount(0);
+});
