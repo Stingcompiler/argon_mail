@@ -75,18 +75,18 @@ export function OrdersPanel({ compact = false }: { compact?: boolean }) {
       {orders.isLoading ? <Loading /> : orders.isError ? <LoadError error={orders.error} retry={() => orders.refetch()} /> : (
         <>
           <div className="table-scroll" aria-busy={orders.isFetching}>
-            <table className="responsive-table">
+            <table className="responsive-table orders-table">
               <thead><tr><th>رقم الطلب</th><th>العميل</th><th>الخدمة</th><th>الحالة</th><th>المسؤول</th><th>التاريخ</th><th><span className="sr-only">إجراءات</span></th></tr></thead>
               <tbody>
                 {data!.results.map((o) => (
                   <tr key={o.id} onClick={() => setSelected(o.id)}>
-                    <td data-primary="true" className="order-id" dir="ltr">{o.code}</td>
-                    <td data-label="العميل"><span className="avatar">{o.customer_name[0]}</span>{o.customer_name}</td>
-                    <td data-label="الخدمة">{o.service_name}</td>
-                    <td data-label="الحالة"><StatusBadge meaning={o.status.meaning} label={o.status.label} /></td>
-                    <td data-label="المسؤول" className="muted">{o.assignee?.full_name || '—'}</td>
-                    <td data-label="التاريخ" className="muted">{formatDate(o.created_at)}</td>
-                    <td data-actions="true"><button className="icon-button" aria-label={'عرض ' + o.code} onClick={(e) => { e.stopPropagation(); setSelected(o.id); }}><ArrowUpLeft size={17} /></button></td>
+                    <td data-primary="true" data-col="code" className="order-id" dir="ltr">{o.code}</td>
+                    <td data-label="العميل" data-col="customer"><span className="avatar">{o.customer_name[0]}</span>{o.customer_name}</td>
+                    <td data-label="الخدمة" data-col="service">{o.service_name}</td>
+                    <td data-label="الحالة" data-col="status"><StatusBadge meaning={o.status.meaning} label={o.status.label} /></td>
+                    <td data-label="المسؤول" data-col="assignee" className="muted">{o.assignee?.full_name || '—'}</td>
+                    <td data-label="التاريخ" data-col="date" className="muted">{formatDate(o.created_at)}</td>
+                    <td data-actions="true" data-col="open"><button className="icon-button" aria-label={'عرض ' + o.code} onClick={(e) => { e.stopPropagation(); setSelected(o.id); }}><ArrowUpLeft size={17} /></button></td>
                   </tr>
                 ))}
               </tbody>

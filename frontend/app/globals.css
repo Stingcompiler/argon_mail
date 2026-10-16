@@ -415,7 +415,7 @@ a:focus-visible{outline:3px solid var(--brand-800);outline-offset:4px}
 .field-error{display:block;color:var(--danger-600);font-size:var(--fs-small);margin-top:4px}
 .notice.error{background:var(--danger-50);border-color:var(--danger-100);color:var(--danger-700)}
 [aria-invalid=true]{border-color:var(--danger-500)!important}
-.spin{animation:spin 1s linear infinite}
+.spin{animation:spin 1s linear infinite} /* ui-allow: مؤشر تحميل لعملية جارية */
 @keyframes spin{to{transform:rotate(360deg)}}
 .choice-group{border:0;padding:0;margin:0 0 18px}
 .choice-group legend{font-weight:600;font-size:var(--fs-small);margin-bottom:6px}
