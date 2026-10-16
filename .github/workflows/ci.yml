@@ -61,6 +61,7 @@ jobs:
       - run: npm ci --include=dev
       - run: npx tsc --noEmit
       - run: npm run check:colours
+      - run: npm run lint:ui
       - run: npm run build
       - name: Dependency audit (critical fails; known Next 15 PostCSS advisory is a warning)
         run: |
