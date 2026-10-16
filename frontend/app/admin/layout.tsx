@@ -1,3 +1,4 @@
+import './workspace.css';
 import './admin.css';
 import type { Metadata } from 'next';
 import { AdminProviders } from '@/contexts/Providers';
