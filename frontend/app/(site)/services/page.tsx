@@ -18,6 +18,7 @@ type Props = { searchParams: Promise<{ q?: string }> };
 /** The main service areas as cards; searching shows matching services as tiles. */
 export default async function ServicesPage({ searchParams }: Props) {
   await connection();
+  // Search results are tiles too, each in its own area's tint (tints by area slug).
   const [categories, services, { settings }, { q }] = await Promise.all([getCategories(), getServices(), getSite(), searchParams]);
   return (
     <section className="container page-section services-page">
@@ -27,7 +28,7 @@ export default async function ServicesPage({ searchParams }: Props) {
         <p>اختر المجال، ثم الخدمة التي تحتاجها.</p>
       </div>
       {services.length ? (
-        <ServicesBrowser services={services} initialQuery={typeof q === 'string' ? q.slice(0, 80) : ''}>
+        <ServicesBrowser services={services} tints={Object.fromEntries(categories.map((c) => [c.slug, c.color]))} initialQuery={typeof q === 'string' ? q.slice(0, 80) : ''}>
           <h2 className="sr-only">المجالات</h2>
           <div className="category-grid">
             {categories.map((c) => <CategoryCard key={c.slug} category={c} />)}
