@@ -1,5 +1,5 @@
 'use client';
-import { ArrowUpLeft, CheckCheck, Clock3, Inbox, MessageCircle, ShieldCheck, Sparkles, UserPlus } from 'lucide-react';
+import { ArrowUpLeft, CheckCheck, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { PageHeading } from '@/components/admin/AdminShell';
 import { OrdersPanel } from '@/components/admin/OrdersPanel';
@@ -15,23 +15,24 @@ export default function Overview() {
   const m = summary.data?.by_meaning || {};
   const inProgress = (m.in_review || 0) + (m.in_progress || 0) + (m.waiting_customer || 0) + (m.ready || 0);
   return (
-    <>
+    <div className="overview-page">
       <PageHeading title="نظرة عامة" text="ملخص العمل وأحدث الطلبات." />
       {alerts.data && <AlertsBanner failed={alerts.data.failed} skipped={alerts.data.skipped} />}
-      <div className="stats-grid">
-        {[
-          { name: 'إجمالي الطلبات', value: summary.data?.total, icon: Inbox },
-          { name: 'طلبات جديدة', value: m.new || 0, icon: Sparkles },
-          { name: 'قيد العمل', value: inProgress, icon: Clock3 },
-          { name: 'طلبات مكتملة', value: m.completed || 0, icon: CheckCheck },
-        ].map((s) => (
-          <div className="stat" key={s.name}>
-            <div><span>{s.name}</span><s.icon size={19} /></div>
-            <strong><CountUp value={summary.isLoading ? null : s.value ?? 0} /></strong>
-            <small>{summary.isError ? 'تعذّر التحميل' : 'بيانات حية'}</small>
-          </div>
-        ))}
-      </div>
+      {/* One flat summary strip, not a card per number (docs/ui-cards-review.md). */}
+      <section className="summary-strip-wrap" aria-labelledby="summary-title">
+        <h2 id="summary-title" className="sr-only">ملخص الطلبات</h2>
+        <dl className="summary-strip">
+          {[
+            ['إجمالي الطلبات', summary.data?.total],
+            ['جديدة', m.new || 0],
+            ['قيد العمل', inProgress],
+            ['مكتملة', m.completed || 0],
+          ].map(([name, value]) => (
+            <div key={name as string}><dt>{name}</dt><dd><CountUp pad={1} value={summary.isLoading ? null : (value as number | undefined) ?? 0} /></dd></div>
+          ))}
+        </dl>
+        <p className="summary-note">{summary.isError ? 'تعذّر تحميل الأرقام.' : 'أرقام حية تتحدث تلقائيًا.'}</p>
+      </section>
       <div className="overview-grid">
         <NeedsAttention unassigned={summary.data?.unassigned_new} />
         <WeekChart days={summary.data?.last_7_days} />
@@ -41,7 +42,7 @@ export default function Overview() {
         <ShieldCheck size={21} />
         <div><b>معلومات العميل تبقى في مساحة الإدارة</b><p>صفحة المتابعة تعرض حالة الطلب وملاحظاتك العامة فقط.</p></div>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -49,8 +50,8 @@ export default function Overview() {
 function NeedsAttention({ unassigned }: { unassigned?: number }) {
   const newMessages = useInquiries({ status: 'new' }).data?.count;
   const rows = [
-    { href: '/admin/orders?assignee=none', icon: UserPlus, label: 'طلبات غير مسندة', hint: 'اختر مسؤولًا لكل طلب', count: unassigned },
-    { href: '/admin/messages?status=new', icon: MessageCircle, label: 'رسائل جديدة', hint: 'لم يُرد عليها بعد', count: newMessages },
+    { href: '/admin/orders?assignee=none', label: 'طلبات غير مسندة', hint: 'اختر مسؤولًا لكل طلب', count: unassigned },
+    { href: '/admin/messages?status=new', label: 'رسائل جديدة', hint: 'لم يُرد عليها بعد', count: newMessages },
   ];
   const clear = rows.every((r) => r.count === 0);
   return (
@@ -61,7 +62,6 @@ function NeedsAttention({ unassigned }: { unassigned?: number }) {
           {rows.map((r) => (
             <li key={r.href}>
               <Link href={r.href}>
-                <span className="attention-icon"><r.icon size={18} /></span>
                 <span><b>{r.label}</b><small>{r.hint}</small></span>
                 <strong className={r.count ? 'has-items' : ''}>{r.count ?? '…'}</strong>
                 <ArrowUpLeft size={16} />
