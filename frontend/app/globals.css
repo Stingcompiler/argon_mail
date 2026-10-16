@@ -58,7 +58,6 @@ svg{flex-shrink:0;vertical-align:middle}
 .hero-visual{height:400px;background:var(--neutral-100);border-radius:150px 150px 15px 15px;position:relative;overflow:hidden;isolation:isolate}
 .tracking-strip{display:flex;align-items:center;justify-content:space-between;gap:42px;padding:25px 30px;border:1px solid var(--neutral-300);background:var(--neutral-100);border-radius:var(--r-lg)}
 .tracking-label{display:flex;gap:16px;align-items:center;flex-shrink:0}
-.tracking-icon{color:var(--brand-600);display:flex;align-items:center}
 .tracking-label h2{font-size:var(--fs-h3);font-weight:700;color:var(--dark)}
 .tracking-label p{font-size:var(--fs-small)}
 .track-form{display:flex;gap:9px;flex:1;max-width:620px}
@@ -155,7 +154,7 @@ textarea{resize:vertical}
 .checkbox-row input{accent-color:var(--green);margin-top:5px}
 .wide{width:100%}
 .centered-page{text-align:center;padding:70px 0 100px;display:flex;align-items:center;flex-direction:column;min-height:75vh}
-.success-icon{height:80px;width:80px;border-radius:50%;background:var(--success-50);display:flex;align-items:center;justify-content:center;color:var(--green);margin-bottom:25px}
+.success-icon{height:64px;width:64px;display:flex;align-items:center;justify-content:center;color:var(--success-600);margin-bottom:18px}
 .centered-page h1{font-size:var(--fs-h1);color:var(--dark);font-weight:700}
 .centered-page>p{font-size:var(--fs-body);margin-top:10px}
 .ticket{padding:23px 50px;border:1px dashed var(--neutral-500);background:var(--neutral-100);border-radius:var(--r-lg);margin:30px 0;display:flex;flex-direction:column;align-items:center}
@@ -298,7 +297,6 @@ tbody tr:hover{background:var(--neutral-25)}
 .tracking-strip{padding:20px;gap:15px}
 .tracking-label h2{font-size:var(--fs-h3);font-weight:700}
 .tracking-label p{font-size:var(--fs-small)}
-.tracking-icon svg{width:24px}
 .track-form{gap:7px}
 .track-form .button{font-size:var(--fs-small);padding:10px 12px;gap:6px;min-height:44px;font-weight:600}
 .track-form input{font-size:var(--fs-input)}
@@ -594,7 +592,7 @@ a:focus-visible{outline:3px solid var(--brand-800);outline-offset:4px}
 .nav-sheet nav a{display:flex;align-items:center;gap:14px;min-height:56px;padding:6px 10px;border-radius:var(--r-md);font-size:var(--fs-body);font-weight:600;color:var(--ink)}
 .nav-sheet nav a .chev{margin-right:auto;color:var(--neutral-600)}
 .nav-sheet nav a.active{background:var(--neutral-150);color:var(--green)}
-.nav-sheet-icon{width:40px;height:40px;border-radius:var(--r-md);background:var(--neutral-100);color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-sheet-icon{width:28px;height:40px;color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .nav-sheet nav a.active .nav-sheet-icon{background:var(--green);color:var(--white)}
 .nav-sheet-actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px}
 .nav-sheet-actions:has(> :nth-child(2)){grid-template-columns:1fr 1fr}
@@ -740,7 +738,6 @@ footer{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
 a.contact-line:hover{background:var(--neutral-50)}
 .contact-line b{display:block;font-size:var(--fs-small)}
 .contact-line small{display:block;font-size:var(--fs-label);color:var(--muted)}
-.contact-icon{width:40px;height:40px;border-radius:var(--r-md);background:var(--neutral-100);color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .contact-card .subtle-copy{margin-top:10px}
 @media (max-width:900px){.contact-layout{grid-template-columns:1fr}}
 /* Large screens (P4): use more of the width, a larger hero illustration. */
@@ -950,8 +947,7 @@ html:has(.order-dialog[open]){overflow:hidden}
 .services-section .section-heading{margin-bottom:8px}
 .home-search{margin-bottom:10px}
 /* The three facts as chips in one row; it scrolls sideways when the row is tight. */
-.hero-trust{flex-wrap:nowrap;justify-content:flex-start;justify-content:safe center;gap:8px;margin:10px -16px 0;padding:0 16px 2px;overflow-x:auto;scrollbar-width:none}
-.hero-trust::-webkit-scrollbar{display:none}
+.hero-trust{flex-wrap:wrap;justify-content:center;gap:8px;margin:10px 0 0;padding:0}
 .hero-trust li{flex:0 0 auto;min-height:36px;padding:0 12px;border:1px solid var(--neutral-300);border-radius:var(--r-pill);background:color-mix(in srgb,var(--white) 72%,transparent);white-space:nowrap}
 .hero-trust li a{min-height:36px;display:inline-flex;align-items:center}}
 /* The tab bar's «تتبع طلبك» opens the code field in a sheet instead of leaving the page. */
@@ -1042,3 +1038,13 @@ html:has(.order-dialog[open]){overflow:hidden}
 .order-dialog-head .icon-button{border:0;background:none;min-width:44px;min-height:44px}
 .order-dialog-head .icon-button:hover{background:var(--neutral-100)}
 #order-dialog-title:focus{outline:none}
+
+/* Contact rows: the label says the channel, no icon square beside it. */
+.contact-line{padding:10px 4px}
+/* Trust facts on phones: one row of plain text, never a clipped chip row. The
+   price fact gives way below 560px; every service page states its price. */
+@media (max-width:560px){.hero-trust{flex-wrap:wrap;gap:0 16px}
+.hero-trust li{min-height:40px;padding:0;border:0;background:none;font-size:var(--fs-label);white-space:nowrap}
+.hero-trust li a{min-height:40px}
+.hero-trust li:nth-child(3){display:none}}
+@media (max-width:359px){.hero-trust{gap:0 10px}}

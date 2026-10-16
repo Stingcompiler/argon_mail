@@ -1,4 +1,4 @@
-import { Mail, MapPin, MessageCircle, Package } from 'lucide-react';
+import {  } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ContactForm } from '@/components/site/ContactForm';
@@ -22,22 +22,18 @@ export default async function ContactPage() {
         <aside className="contact-card" aria-labelledby="contact-other">
           <h2 id="contact-other">طرق أخرى للتواصل</h2>
           {settings.whatsapp_url && (
-            <a className="contact-line" href={settings.whatsapp_url} target="_blank" rel="noopener noreferrer">
-              <span className="contact-icon"><MessageCircle size={19} /></span><span><b>WhatsApp</b><small>محادثة مباشرة مع الفريق</small></span>
+            <a className="contact-line" href={settings.whatsapp_url} target="_blank" rel="noopener noreferrer"><span><b>WhatsApp</b><small>محادثة مباشرة مع الفريق</small></span>
             </a>
           )}
           {settings.email && (
-            <a className="contact-line" href={`mailto:${settings.email}`}>
-              <span className="contact-icon"><Mail size={19} /></span><span><b>البريد الإلكتروني</b><small dir="ltr">{settings.email}</small></span>
+            <a className="contact-line" href={`mailto:${settings.email}`}><span><b>البريد الإلكتروني</b><small dir="ltr">{settings.email}</small></span>
             </a>
           )}
           {settings.address && (
-            <div className="contact-line">
-              <span className="contact-icon"><MapPin size={19} /></span><span><b>العنوان</b><small>{settings.address}</small></span>
+            <div className="contact-line"><span><b>العنوان</b><small>{settings.address}</small></span>
             </div>
           )}
-          <Link className="contact-line" href="/track">
-            <span className="contact-icon"><Package size={19} /></span><span><b>لديك طلب؟</b><small>تابع حالته برقم الطلب أو باسمك</small></span>
+          <Link className="contact-line" href="/track"><span><b>لديك طلب؟</b><small>تابع حالته برقم الطلب أو باسمك</small></span>
           </Link>
           <p className="subtle-copy">نرد على رسالتك عبر WhatsApp على الرقم الذي تكتبه في النموذج.</p>
         </aside>
