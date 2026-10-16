@@ -17,3 +17,6 @@ frontend/node_modules/
 backups/
 frontend/playwright-report/
 frontend/test-results/
+
+# UI review screenshots (frontend/scripts/shots.mjs)
+/shots/
