@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { BRAND, RtlLine, brandMarkDataUri, cairo } from '@/lib/og/render';
+import { BRAND, RtlLine, brandMarkDataUri, plex } from '@/lib/og/render';
 
 // Default share image for every page (WhatsApp, Facebook, X). Rendered once
 // at build time; text is static because Django is not running during builds.
@@ -9,10 +9,10 @@ export const contentType = 'image/png';
 export const dynamic = 'force-static';
 
 export default async function OpengraphImage() {
-  const [bold, regular, mark] = await Promise.all([cairo(700), cairo(400), brandMarkDataUri()]);
+  const [bold, regular, mark] = await Promise.all([plex(700), plex(400), brandMarkDataUri()]);
   return new ImageResponse(
     (
-      <div style={{ width: '100%', height: '100%', display: 'flex', background: BRAND.surface, fontFamily: 'Cairo' }}>
+      <div style={{ width: '100%', height: '100%', display: 'flex', background: BRAND.surface, fontFamily: 'IBM Plex Sans Arabic' }}>
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', gap: 18, flex: 1, padding: '0 80px', background: BRAND.navy }}>
           <RtlLine text="بريد عرجون" size={104} color="#FFFFFF" />
           <RtlLine text="للخدمات الإلكترونية والرقمية" size={44} color={BRAND.sky} weight={400} />

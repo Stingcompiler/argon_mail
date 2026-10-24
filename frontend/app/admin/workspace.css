@@ -39,7 +39,7 @@
 .icon-picker button.selected{border-color:var(--brand-500);background:var(--neutral-150);color:var(--brand-600)}
 .color-picker button.selected{border-color:var(--brand-500)}
 .message-item.selected{background:var(--neutral-100);border-right:3px solid var(--brand-500);padding-right:17px} /* ui-allow: مؤشر العنصر النشط في قائمة الرسائل */
-.message-reader-top .eyebrow{font-family:monospace;margin:0;font-size:var(--fs-small)}
+.message-reader-top .eyebrow{font-family:var(--font-mono);font-variant-numeric:tabular-nums;margin:0;font-size:var(--fs-small)}
 .reply-guide>.button{margin-right:auto;font-size:var(--fs-small);min-height:35px;padding:7px 10px;gap:8px}
 .autosave{display:flex;gap:6px;align-items:center;font-size:var(--fs-label);color:var(--neutral-700);margin-top:10px}
 .content-layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(220px,1fr);gap:25px;align-items:flex-start}
@@ -166,7 +166,7 @@
 .move-buttons .icon-button{padding:6px}
 .muted-section{opacity:.55}
 .navigation-editor{display:flex;align-items:center;gap:13px;padding:16px 0;border-bottom:1px solid var(--neutral-200)}
-.navigation-editor>span{font-size:var(--fs-small);font-family:monospace;color:var(--neutral-700)}
+.navigation-editor>span{font-size:var(--fs-small);font-family:var(--font-mono);font-variant-numeric:tabular-nums;color:var(--neutral-700)}
 .navigation-editor label{font-size:var(--fs-label);flex:1;margin:0;min-width:0}
 .navigation-editor label input{font-size:var(--fs-small)}
 .navigation-editor>.icon-button{color:var(--brand-400);margin-top:18px}

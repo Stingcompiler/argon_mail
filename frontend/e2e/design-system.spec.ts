@@ -39,3 +39,15 @@ test('public pages use the radius scale, icon strokes and arrows of the design s
     expect(found.diagonal, `${url}: internal links use the left arrow`).toBe(0);
   }
 });
+
+/** docs/design/DESIGN.md (D-0007, option A): one family, IBM Plex Sans Arabic +
+ * IBM Plex Sans, and at most 200 KB of fonts for the first view. */
+test('fonts: only the decided family is declared, and the first view stays under 200 KB', async ({ page }) => {
+  let bytes = 0;
+  page.on('response', async (r) => { if (/\.woff2?(\?|$)/.test(r.url())) bytes += (await r.body()).length; });
+  await page.goto('/');
+  await page.waitForLoadState('networkidle');
+  const families = await page.evaluate(() => [...new Set([...document.fonts].map((f) => f.family.replace(/['"]/g, '')))]);
+  for (const f of families) expect(f, 'a font family outside the decision').toMatch(/^IBMPlexSans(Arabic)?( Fallback)?$/);
+  expect(bytes, 'font bytes on the first view').toBeLessThanOrEqual(200 * 1024);
+});
