@@ -44,10 +44,22 @@ E2E_LOGIN=… E2E_PASSWORD=… npm run shots -- <label>   # then look at shots/<
 The text check catches known shapes only. It does not replace looking at the
 screenshots at 390, 768, 1280 and 1920 px.
 
+## Type (D-0007, docs/design/DESIGN.md)
+
+- One family: IBM Plex Sans Arabic + IBM Plex Sans, 400/500/600/700. Name fonts
+  only through `--font-ui`, `--font-mono`, `--font-display`. Use the `--fs-*`
+  scale.
+- Nothing under 12 px outside `.badge`; small text keeps line-height ≥ 1.6. No
+  `fontSize`/`fontFamily`/`fontWeight` inline in components.
+- Every number shown goes in `.num` (or `[data-num]` on a numeric column, which
+  aligns to the end). Use `<Num>` for a whole number and `<Nums text>` for a
+  sentence with numbers (dates, prices). Text people typed carries `data-free`.
+  `e2e/numbers.spec.ts` fails on a bare digit.
+
 ## Other rules
 
 - Arabic RTL: use logical properties (`margin-inline-start`, `text-align: start`).
-  Mirror only directional icons. Use Latin digits (0–9).
+  Mirror only directional icons. Use Western digits (0–9).
 - Respect `prefers-reduced-motion`. No decorative motion that runs on its own.
 - Tap targets are 44 px on phones; inputs stay at 16 px.
 - Do not add a UI library; build on the shared components listed in the profile.
