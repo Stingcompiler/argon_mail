@@ -8,6 +8,7 @@ import type { Inquiry, InquiryStatus } from '@/lib/api/types';
 import { formatDateTime } from '@/lib/format';
 import { LoadError, Loading } from './ui';
 import { SlidingGroup } from '@/lib/motion';
+import { Num, Nums } from '@/components/Num';
 
 const STATUSES: { v: InquiryStatus | ''; l: string }[] = [{ v: '', l: 'الكل' }, { v: 'new', l: 'جديدة' }, { v: 'in_progress', l: 'قيد المتابعة' }, { v: 'done', l: 'تمت المعالجة' }];
 
@@ -36,7 +37,7 @@ export function MessagesManager() {
         <SlidingGroup active={status} className="segmented" role="group" aria-label="تصفية الرسائل">
           {STATUSES.map((s) => <button key={s.v} className={status === s.v ? 'selected' : ''} aria-pressed={status === s.v} onClick={() => setStatus(s.v)}>{s.l}</button>)}
         </SlidingGroup>
-        <span className="muted small-text">{list.data ? `${list.data.count} رسائل` : ''}</span>
+        <span className="muted small-text">{list.data ? <><Num>{list.data.count}</Num> رسائل</> : ''}</span>
       </div>
       <div className="inbox-layout">
         <aside className="inbox-list">
@@ -45,16 +46,16 @@ export function MessagesManager() {
           {list.isLoading ? <Loading /> : list.isError ? <LoadError error={list.error} retry={() => list.refetch()} /> : <>
             {items.map((m) => (
               <button className={'message-item ' + (activeId === m.id ? 'selected' : '')} key={m.id} onClick={() => setActiveId(m.id)}>
-                <div><span className="avatar">{m.name[0]}</span><b>{m.name}</b>{m.status === 'new' && <i />}</div>
-                <h3>{m.subject}</h3><p>{m.body}</p>
-                <small>{formatDateTime(m.created_at)}<span>{STATUSES.find((s) => s.v === m.status)?.l}</span></small>
+                <div data-free><span className="avatar">{m.name[0]}</span><b>{m.name}</b>{m.status === 'new' && <i />}</div>
+                <h3 data-free>{m.subject}</h3><p data-free>{m.body}</p>
+                <small><Nums text={formatDateTime(m.created_at)} /><span>{STATUSES.find((s) => s.v === m.status)?.l}</span></small>
               </button>
             ))}
             {!items.length && <div className="compact-empty"><Inbox size={30} /><p>لا توجد رسائل مطابقة.</p></div>}
             {pages > 1 && (
               <div className="pagination">
                 <button className="button secondary" disabled={page <= 1} onClick={() => setPage(page - 1)}>الأحدث</button>
-                <span className="subtle-copy">صفحة {page} من {pages}</span>
+                <span className="subtle-copy">صفحة <Num>{page}</Num> من <Num>{pages}</Num></span>
                 <button className="button secondary" disabled={page >= pages} onClick={() => setPage(page + 1)}>الأقدم</button>
               </div>
             )}
@@ -91,12 +92,12 @@ function Reader({ message: m }: { message: Inquiry }) {
           </select>
         </div>
       </div>
-      <h2>{m.subject}</h2>
-      <div className="sender-details"><span className="avatar">{m.name[0]}</span><div><b>{m.name}</b><small>{formatDateTime(m.created_at)}</small></div></div>
+      <h2 data-free>{m.subject}</h2>
+      <div className="sender-details"><span className="avatar" data-free>{m.name[0]}</span><div><b data-free>{m.name}</b><small><Nums text={formatDateTime(m.created_at)} /></small></div></div>
       <p className="message-body preserve-lines">{m.body}</p>
       <div className="reply-guide">
         <MessageCircle size={24} />
-        <div><b>أكمل التواصل عبر WhatsApp</b><p dir="ltr">{m.phone}</p></div>
+        <div><b>أكمل التواصل عبر WhatsApp</b><p dir="ltr" className="num">{m.phone}</p></div>
         <a className="button secondary" href={m.whatsapp_url} target="_blank" rel="noopener noreferrer">تواصل <ArrowUpLeft size={15} /></a>
       </div>
       <label>ملاحظة داخلية<textarea placeholder="سجّل ما يلزم لمتابعة الرسالة..." rows={3} maxLength={4000} value={note} onChange={(e) => setNote(e.target.value)} /></label>

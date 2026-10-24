@@ -7,6 +7,7 @@ import { fieldErrors } from '@/lib/api/client';
 import type { Asset } from '@/lib/api/types';
 import { formatSize } from '@/lib/files';
 import { LoadError, Loading, useDialogFocus } from './ui';
+import { Num, Nums } from '@/components/Num';
 
 const ACCEPT = 'image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp';
 const MAX_MB = 5;
@@ -25,7 +26,7 @@ export function MediaLibrary() {
   return (
     <>
       <div className="workspace-toolbar">
-        <span className="muted small-text">{assets.data!.length} صور</span>
+        <span className="muted small-text"><Num>{assets.data!.length}</Num> صور</span>
         <label className="button upload-button">
           <UploadCloud size={17} />إضافة صورة
           <input type="file" accept={ACCEPT} onChange={(e) => {
@@ -57,8 +58,8 @@ export function MediaLibrary() {
             </div>
             <section>
               <h3>{a.alt_text}</h3>
-              <small>{a.width}×{a.height} · {formatSize(a.size)}</small>
-              <b>{a.usage.length ? `مستخدمة (${a.usage.length})` : 'غير مستخدمة'}</b>
+              <small><Num>{`${a.width}×${a.height}`}</Num> · <Nums text={formatSize(a.size)} /></small>
+              <b>{a.usage.length ? <>مستخدمة (<Num>{a.usage.length}</Num>)</> : 'غير مستخدمة'}</b>
             </section>
           </button>
         ))}
@@ -66,7 +67,7 @@ export function MediaLibrary() {
           <div className="empty-state"><ImageIcon size={34} /><h2>لا توجد صور</h2><p>أضف صورة لتستخدمها في الخدمات أو كشعار.</p></div>
         )}
       </div>
-      <div className="design-tip"><ShieldCheck size={18} /><span>تُصغَّر الصور الكبيرة إلى 2000 بكسل وتُزال منها البيانات الوصفية (مثل موقع التصوير) قبل النشر. مرفقات العملاء خاصة ولا تظهر هنا.</span></div>
+      <div className="design-tip"><ShieldCheck size={18} /><span>تُصغَّر الصور الكبيرة إلى <Num>2000</Num> بكسل وتُزال منها البيانات الوصفية (مثل موقع التصوير) قبل النشر. مرفقات العملاء خاصة ولا تظهر هنا.</span></div>
       {pending && <UploadDialog file={pending} onClose={() => setPending(null)} />}
       {selected && <AssetDialog asset={selected} setAsset={setSelected} onClose={() => setSelected(null)} />}
     </>
@@ -94,7 +95,7 @@ function UploadDialog({ file, onClose }: { file: File; onClose: () => void }) {
         <div className="media-modal-body">
           <div className="panel-heading"><div><span className="eyebrow">صورة جديدة</span><h2>كل صورة، بمعناها.</h2></div>
             <button type="button" className="icon-button" aria-label="إلغاء" onClick={onClose}><X /></button></div>
-          <p className="subtle-copy" dir="auto">{file.name} · {formatSize(file.size)}</p>
+          <p className="subtle-copy" dir="auto"><span data-free>{file.name}</span> · <Nums text={formatSize(file.size)} /></p>
           <label>النص البديل <em>*</em>
             <textarea rows={3} required maxLength={200} value={alt} onChange={(e) => setAlt(e.target.value)} placeholder="صف ما يظهر في الصورة باختصار" />
             <small>يقرؤه من لا يرى الصورة وتفهمه محركات البحث.</small>
@@ -124,7 +125,7 @@ function AssetDialog({ asset, setAsset, onClose }: { asset: Asset; setAsset: (a:
           <div className="panel-heading"><div><span className="eyebrow">تفاصيل الوسيط</span><h2>كل صورة، بمعناها.</h2></div>
             <button className="icon-button" aria-label="إغلاق تفاصيل الصورة" onClick={onClose}><X /></button></div>
           <label>النص البديل<textarea rows={3} maxLength={200} value={asset.alt_text} onChange={(e) => setAsset({ ...asset, alt_text: e.target.value })} /></label>
-          <p className="subtle-copy">{asset.width}×{asset.height} · {formatSize(asset.size)} · <span dir="auto">{asset.original_name}</span></p>
+          <p className="subtle-copy"><Num>{`${asset.width}×${asset.height}`}</Num> · <Nums text={formatSize(asset.size)} /> · <span dir="auto" data-free>{asset.original_name}</span></p>
           <p className="subtle-copy">{asset.usage.length ? `مستخدمة في: ${asset.usage.join('، ')}` : 'غير مستخدمة حاليًا.'}</p>
           <div className="save-row">
             <div className="inline-actions">

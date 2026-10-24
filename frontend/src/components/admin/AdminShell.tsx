@@ -10,6 +10,7 @@ import { formatSize } from '@/lib/files';
 import type { Role } from '@/lib/api/types';
 import { LoginForm } from './LoginForm';
 import { roleLabel, useDialogFocus } from './ui';
+import { Nums } from '@/components/Num';
 
 type NavGroup = 'daily' | 'catalog' | 'site' | 'admin';
 
@@ -106,14 +107,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <div className="sidebar-bottom">
           {storage.data && (
             <div className="storage">
-              <span>التخزين <b>{formatSize(storage.data.used)} / {formatSize(storage.data.quota)}</b></span>
+              <span>التخزين <b><Nums text={`${formatSize(storage.data.used)} / ${formatSize(storage.data.quota)}`} /></b></span>
               <div style={{ ['--used' as string]: `${Math.min(100, storage.data.percent)}%` }} role="progressbar" aria-valuenow={storage.data.percent} aria-valuemin={0} aria-valuemax={100} aria-label="استهلاك التخزين" />
               {storage.data.warning && <small className="storage-warn">اقتربت المساحة من الامتلاء. راجع سياسة الاحتفاظ.</small>}
             </div>
           )}
           <div className="admin-user">
             <span aria-hidden="true">{user.full_name[0]}</span>
-            <div><b>{user.full_name}</b><small>{roleLabel[user.role]}</small></div>
+            <div><b data-free>{user.full_name}</b><small>{roleLabel[user.role]}</small></div>
           </div>
           <div className="sidebar-actions">
             <Link href="/" target="_blank"><ExternalLink size={16} />عرض الموقع</Link>
@@ -133,7 +134,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 <Bell size={18} />{!!alerts.data?.failed && <i className="dot" />}
               </Link>
             )}
-            <span className="admin-top-name"><Clock3 size={15} />{roleLabel[user.role]} · {user.full_name}</span>
+            <span className="admin-top-name"><Clock3 size={15} />{roleLabel[user.role]} · <span data-free>{user.full_name}</span></span>
           </span>
         </header>
         <div className="admin-content">

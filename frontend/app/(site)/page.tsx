@@ -105,7 +105,7 @@ export default async function Home() {
               { n: '03', title: 'تتبع حتى الإنجاز', text: 'بالرقم، أو باسمك ورقم هاتفك إن نسيته.' },
             ].map((s) => (
               <div className="step" key={s.n}>
-                <span className="step-number" aria-hidden="true">{s.n}</span><h3>{s.title}</h3><p>{s.text}</p>
+                <span className="step-number num" aria-hidden="true">{s.n}</span><h3>{s.title}</h3><p>{s.text}</p>
               </div>
             ))}
           </div>

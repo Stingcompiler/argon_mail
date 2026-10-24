@@ -8,6 +8,7 @@ import { formatDate, formatDateTime } from '@/lib/format';
 import { AttachmentList, OrderMoney } from './OrderMoney';
 import { LoadError, Loading, StatusBadge, useDialogFocus } from './ui';
 import { SlidingGroup } from '@/lib/motion';
+import { Num, Nums } from '@/components/Num';
 
 const MAX_MB = 20; // the server enforces the owner's lower limit
 
@@ -52,8 +53,8 @@ export function OrderDrawer({ id, onClose }: { id: number; onClose: () => void }
       <section className="service-drawer order-drawer" role="dialog" aria-modal="true" aria-label="تفاصيل الطلب">
         <header>
           <div>
-            <span className="eyebrow">طلب خدمة{o && ` · ${formatDate(o.created_at)}`}</span>
-            <h2 className="order-id" dir="ltr">{o?.code || '...'}</h2>
+            <span className="eyebrow">طلب خدمة{o && <> · <Nums text={formatDate(o.created_at)} /></>}</span>
+            <h2 className="order-id num" dir="ltr">{o?.code || '...'}</h2>
           </div>
           <button className="icon-button" aria-label="إغلاق تفاصيل الطلب" onClick={onClose}><X /></button>
         </header>
@@ -84,7 +85,7 @@ export function OrderDrawer({ id, onClose }: { id: number; onClose: () => void }
                   <div className="answer-row" key={a.key}><span>{a.label}</span><b>{Array.isArray(a.value) ? a.value.join('، ') || '—' : a.value || '—'}</b></div>
                 ))}
                 {o.details && <div className="answer-row"><span>تفاصيل إضافية</span><b className="preserve-lines">{o.details}</b></div>}
-                <div className="answer-row"><span>نسخة النموذج</span><b>{o.form_version} · {o.service_snapshot.price_label}</b></div>
+                <div className="answer-row"><span>نسخة النموذج</span><b><Num>{o.form_version}</Num> · <Nums text={o.service_snapshot.price_label} /></b></div>
               </div>
               <AttachmentList order={o} items={o.attachments.filter((f) => f.kind !== 'payment_proof')} canUpload maxMb={MAX_MB} />
               <div className="form-row">
@@ -125,7 +126,7 @@ export function OrderDrawer({ id, onClose }: { id: number; onClose: () => void }
               <div className="note-list">
                 {[...o.notes].reverse().map((n) => (
                   <article key={n.id} className={n.visibility}>
-                    <small>{n.visibility === 'internal' ? 'داخلية' : 'للعميل'} · {n.author.full_name} · {formatDateTime(n.created_at)}</small>
+                    <small>{n.visibility === 'internal' ? 'داخلية' : 'للعميل'} · <span data-free>{n.author.full_name}</span> · <Nums text={formatDateTime(n.created_at)} /></small>
                     <p className="preserve-lines">{n.body}</p>
                   </article>
                 ))}
@@ -139,8 +140,8 @@ export function OrderDrawer({ id, onClose }: { id: number; onClose: () => void }
                   <div key={ev.id}>
                     <span>{ev.kind === 'created' ? <Inbox size={13} /> : <Check size={13} />}</span>
                     <section>
-                      <b>{eventText(ev.kind, ev.data)}</b>
-                      <small>{formatDateTime(ev.created_at)} · {ev.actor?.full_name || 'العميل'}{ev.is_public ? ' · ظاهر للعميل' : ''}</small>
+                      <b><Nums text={eventText(ev.kind, ev.data)} /></b>
+                      <small><Nums text={formatDateTime(ev.created_at)} /> · <span data-free>{ev.actor?.full_name || 'العميل'}</span>{ev.is_public ? ' · ظاهر للعميل' : ''}</small>
                     </section>
                   </div>
                 ))}

@@ -8,6 +8,7 @@ import type { NotificationStatus } from '@/lib/api/types';
 import { formatDateTime } from '@/lib/format';
 import { LoadError, Loading } from './ui';
 import { SlidingGroup } from '@/lib/motion';
+import { Num, Nums } from '@/components/Num';
 
 const FILTERS: { v: NotificationStatus | ''; l: string }[] = [
   { v: '', l: 'الكل' }, { v: 'failed', l: 'فشل' }, { v: 'pending', l: 'بانتظار الإرسال' }, { v: 'sent', l: 'أُرسل' }, { v: 'skipped', l: 'لم يُرسل' },
@@ -48,10 +49,10 @@ export function NotificationsManager() {
                         </small>
                       </td>
                       <td data-label="الحالة"><span className={'badge ' + tone(n.status)}><i />{n.status_label}</span>
-                        {n.status === 'pending' && n.attempts > 0 && <small className="muted" style={{ display: 'block' }}><Clock3 size={11} /> التالية {formatDateTime(n.next_attempt_at)}</small>}</td>
+                        {n.status === 'pending' && n.attempts > 0 && <small className="muted" style={{ display: 'block' }}><Clock3 size={11} /> التالية <Nums text={formatDateTime(n.next_attempt_at)} /></small>}</td>
                       <td data-label="المحاولات">{n.attempts}</td>
                       <td data-label="آخر خطأ" className="muted" title={n.last_error} style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.last_error || '—'}</td>
-                      <td data-label="التاريخ" className="muted">{formatDateTime(n.sent_at || n.created_at)}</td>
+                      <td data-label="التاريخ" className="muted"><Nums text={formatDateTime(n.sent_at || n.created_at)} /></td>
                       <td data-actions="true">
                         {n.status !== 'sent' && n.status !== 'sending' && (
                           <button className="button secondary" disabled={resend.isPending} onClick={() => resend.mutate(n.id, {
@@ -70,7 +71,7 @@ export function NotificationsManager() {
             {pages > 1 && (
               <div className="pagination">
                 <button className="button secondary" disabled={page <= 1} onClick={() => setPage(page - 1)}>السابق</button>
-                <span className="subtle-copy">صفحة {page} من {pages}</span>
+                <span className="subtle-copy">صفحة <Num>{page}</Num> من <Num>{pages}</Num></span>
                 <button className="button secondary" disabled={page >= pages} onClick={() => setPage(page + 1)}>التالي</button>
               </div>
             )}
@@ -87,7 +88,7 @@ export function AlertsBanner({ failed, skipped }: { failed: number; skipped: num
     <div className="admin-note warn" role="status">
       <AlertTriangle size={21} />
       <div>
-        <b>{failed ? `${failed} تنبيه بريد فشل إرساله` : `${skipped} تنبيه لم يُرسل لعدم ضبط بريد مستلم`}</b>
+        <b>{failed ? <><Num>{failed}</Num> تنبيه بريد فشل إرساله</> : <><Num>{skipped}</Num> تنبيه لم يُرسل لعدم ضبط بريد مستلم</>}</b>
         <p>الطلبات محفوظة. <Link href={failed ? '/admin/notifications' : '/admin/settings#alerts'}>{failed ? 'راجع التنبيهات وأعد الإرسال' : 'اضبط بريد التنبيهات'}</Link>.</p>
       </div>
     </div>

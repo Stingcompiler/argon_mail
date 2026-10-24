@@ -7,6 +7,7 @@ import { AlertsBanner } from '@/components/admin/NotificationsManager';
 import { useAuth } from '@/contexts/AuthContext';
 import { useInquiries, useNotificationSummary, useOrderSummary } from '@/hooks/admin';
 import { CountUp } from '@/lib/motion';
+import { Num } from '@/components/Num';
 
 export default function Overview() {
   const summary = useOrderSummary();
@@ -63,7 +64,7 @@ function NeedsAttention({ unassigned }: { unassigned?: number }) {
             <li key={r.href}>
               <Link href={r.href}>
                 <span><b>{r.label}</b><small>{r.hint}</small></span>
-                <strong className={r.count ? 'has-items' : ''}>{r.count ?? '…'}</strong>
+                <strong className={'num' + (r.count ? ' has-items' : '')}>{r.count ?? '…'}</strong>
                 <ArrowUpLeft size={16} />
               </Link>
             </li>
@@ -83,11 +84,11 @@ function WeekChart({ days }: { days?: { date: string; count: number }[] }) {
   const label = days ? `طلبات آخر 7 أيام: ${days.map((d) => `${DAY.format(new Date(d.date + "T12:00"))} ${d.count}`).join('، ')}` : 'جارٍ التحميل';
   return (
     <section className="week-chart" aria-labelledby="week-title">
-      <div className="week-head"><h2 id="week-title">آخر 7 أيام</h2><b>{days ? total : '…'} طلب</b></div>
+      <div className="week-head"><h2 id="week-title">آخر <Num>7</Num> أيام</h2><b>{days ? <Num>{total}</Num> : '…'} طلب</b></div>
       <div className="week-bars" role="img" aria-label={label}>
         {(days || Array.from({ length: 7 }, (_, i) => ({ date: String(i), count: 0 }))).map((d, i) => (
           <div key={d.date} className={i === 6 ? 'today' : ''}>
-            <span className="bar" style={{ ['--h' as string]: `${Math.round((d.count / max) * 100)}%` }} aria-hidden="true"><i>{d.count || ''}</i></span>
+            <span className="bar" style={{ ['--h' as string]: `${Math.round((d.count / max) * 100)}%` }} aria-hidden="true"><i className="num">{d.count || ''}</i></span>
             <small aria-hidden="true">{days ? DAY.format(new Date(d.date + "T12:00")) : ''}</small>
           </div>
         ))}

@@ -1051,3 +1051,9 @@ html:has(.order-dialog[open]){overflow:hidden}
 .hero-trust li a{min-height:40px}
 .hero-trust li:nth-child(3){display:none}}
 @media (max-width:359px){.hero-trust{gap:0 10px}}
+
+/* ── Numerals (docs/design/DESIGN.md): amounts, dates, times, ids, phones,
+   codes, counters, step numbers. Western digits; numeric columns align to the
+   end. Text typed by people (names, messages) carries data-free instead. */
+.num,[data-num]{font-family:var(--font-mono,var(--font-ui));font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+td[data-num],th[data-num]{text-align:end}

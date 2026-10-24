@@ -10,6 +10,7 @@ import { NameLookup } from './NameLookup';
 import { RememberCode } from './RememberCode';
 import { TrackForm } from './TrackForm';
 import { SlidingGroup } from '@/lib/motion';
+import { Nums } from '@/components/Num';
 
 /** Where each status meaning sits on the customer's journey (cancelled and failed have no place). */
 const STAGES = ['الاستلام', 'المراجعة', 'التنفيذ', 'الجاهزية', 'الإنجاز'];
@@ -26,7 +27,7 @@ function ProgressRing({ stage }: { stage: number }) {
         <circle cx="42" cy="42" r={r} className="ring-track" />
         <circle cx="42" cy="42" r={r} className="ring-fill" style={{ ['--c' as string]: c, ['--off' as string]: c * (1 - stage / STAGES.length) }} />
       </svg>
-      <span aria-hidden="true">{done ? <Check size={20} /> : <><b>{stage}</b>/{STAGES.length}</>}</span>
+      <span className="num" aria-hidden="true">{done ? <Check size={20} /> : <><b>{stage}</b>/{STAGES.length}</>}</span>
     </div>
   );
 }
@@ -68,14 +69,14 @@ export function TrackingView() {
             <div>
               <small>طلب خدمة</small>
               <h2>{t.service_name}</h2>
-              <span className="order-id" dir="ltr">{t.code}</span>
+              <span className="order-id num" dir="ltr">{t.code}</span>
             </div>
             <div className="result-status">
               {STAGE_OF[t.status.meaning] && <ProgressRing stage={STAGE_OF[t.status.meaning]!} />}
               <span className={`badge ${statusTone(t.status.meaning)}`}><i />{t.status.label}</span>
             </div>
           </div>
-          <p className="subtle-copy">آخر تحديث: {formatDateTime(t.updated_at)}</p>
+          <p className="subtle-copy">آخر تحديث: <Nums text={formatDateTime(t.updated_at)} /></p>
           <div className="timeline">
             {t.timeline.map((item, i) => {
               const last = i === t.timeline.length - 1;
@@ -85,7 +86,7 @@ export function TrackingView() {
                     {item.kind === 'note' ? <MessageSquareText size={14} /> : last ? <Clock3 size={14} /> : <Check size={14} />}
                   </span>
                   <b>{item.title}</b>
-                  <small>{item.kind === 'created' ? formatDate(item.at) : formatDateTime(item.at)}</small>
+                  <small><Nums text={item.kind === 'created' ? formatDate(item.at) : formatDateTime(item.at)} /></small>
                   {item.text && <p>{item.text}</p>}
                   {item.kind === 'created' && <p>سُجّل طلبك وأصبح جاهزًا للمراجعة.</p>}
                 </div>

@@ -11,6 +11,7 @@ import { PreviewBanner } from '@/components/site/PreviewBanner';
 import { OrderCta } from '@/components/site/OrderCta';
 import { QueryProvider } from '@/contexts/QueryProvider';
 import { getService, getServiceRedirect, getSite, ogBase, siteUrl } from '@/lib/server-api';
+import { Nums } from '@/components/Num';
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ preview?: string }> };
 
@@ -60,8 +61,8 @@ export default async function ServicePage({ params, searchParams }: Props) {
           <h1>{s.name}</h1>
           <p className="preserve-lines">{s.description}</p>
           <div className="detail-meta">
-            <span><Clock3 size={18} />{s.duration_text || 'المدة تُحدد بعد مراجعة الطلب'}</span>
-            <span><FileText size={18} />{s.price_label}</span>
+            <span><Clock3 size={18} /><Nums text={s.duration_text || 'المدة تُحدد بعد مراجعة الطلب'} /></span>
+            <span><FileText size={18} /><Nums text={s.price_label} /></span>
             <span><MessageCircle size={18} />التواصل عبر WhatsApp</span>
           </div>
           {s.requirements && (

@@ -7,6 +7,7 @@ import { fieldErrors } from '@/lib/api/client';
 import type { Attachment, Currency, OrderDetail, Payment, PaymentStatus } from '@/lib/api/types';
 import { FILE_ACCEPT, checkFile, formatSize } from '@/lib/files';
 import { formatDateTime } from '@/lib/format';
+import { Num, Nums } from '@/components/Num';
 
 const PAYMENT_STATUSES: { v: PaymentStatus; l: string }[] = [
   { v: 'not_required', l: 'غير مطلوب' }, { v: 'awaiting', l: 'بانتظار الدفع' }, { v: 'verifying', l: 'قيد التحقق' },
@@ -89,10 +90,10 @@ export function OrderMoney({ order, canEdit, maxMb }: { order: OrderDetail; canE
         <div className="note-list">
           {[...quotes].reverse().map((q) => (
             <article key={q.id} className={q.status === 'superseded' ? 'muted-card' : ''}>
-              <small>الإصدار {q.version} · {q.created_by.full_name} · {formatDateTime(q.created_at)}</small>
-              <b>{money(q.amount, q.currency)}</b> <span className="subtle-copy">— {QUOTE_STATUS[q.status]}</span>
+              <small>الإصدار <Num>{q.version}</Num> · <span data-free>{q.created_by.full_name}</span> · <Nums text={formatDateTime(q.created_at)} /></small>
+              <b className="num">{money(q.amount, q.currency)}</b> <span className="subtle-copy">— {QUOTE_STATUS[q.status]}</span>
               {q.note && <p>{q.note}</p>}
-              {q.decided_at && <small>قرار: {q.decided_by?.full_name} · {formatDateTime(q.decided_at)}{q.decision_note && ` · ${q.decision_note}`}</small>}
+              {q.decided_at && <small>قرار: <span data-free>{q.decided_by?.full_name}</span> · <Nums text={formatDateTime(q.decided_at)} />{q.decision_note && <> · <span data-free>{q.decision_note}</span></>}</small>}
             </article>
           ))}
         </div>
@@ -121,8 +122,8 @@ export function OrderMoney({ order, canEdit, maxMb }: { order: OrderDetail; canE
         <div className="note-list">
           {payments.map((p) => (
             <article key={p.id}>
-              <small>{p.recorded_by.full_name} · {formatDateTime(p.created_at)}</small>
-              <b>{money(p.amount, p.currency)}</b> <span className="subtle-copy">— {p.method_label}{p.reference && ` · ${p.reference}`}</span>
+              <small><span data-free>{p.recorded_by.full_name}</span> · <Nums text={formatDateTime(p.created_at)} /></small>
+              <b className="num">{money(p.amount, p.currency)}</b> <span className="subtle-copy">— {p.method_label}{p.reference && ` · ${p.reference}`}</span>
               {p.note && <p>{p.note}</p>}
             </article>
           ))}
