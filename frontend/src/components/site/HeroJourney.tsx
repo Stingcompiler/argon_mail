@@ -22,7 +22,7 @@ export function HeroJourney({ icons }: { icons: LucideIcon[] }) {
       <div className="j-card j-track">
         <small><b>3</b> تتبع طلبك</small>
         <div className="j-ticket">
-          <span className="j-code" dir="ltr">ARJ-7Q2K9M</span>
+          <span className="j-code num" dir="ltr">ARJ-7Q2K9M</span>
           <span className="j-ring"><svg className="j-ring-track" viewBox="0 0 36 36" width="36" height="36"><circle cx="18" cy="18" r="15" /><circle cx="18" cy="18" r="15" className="fill" /></svg><Check size={14} /></span>
         </div>
       </div>

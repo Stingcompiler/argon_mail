@@ -80,7 +80,7 @@ export function AppearanceManager() {
         <div className="category-list">
           {sections.map((s, i) => (
             <div key={s.key}>
-              <span className="category-index">{String(i + 1).padStart(2, '0')}</span>
+              <span className="category-index num">{String(i + 1).padStart(2, '0')}</span>
               <div><b>{SECTION_LABEL[s.key]}</b><small>{s.visible ? 'ظاهر' : 'مخفي'}</small></div>
               <div className="inline-actions">
                 <button className="icon-button" aria-label="تحريك للأعلى" disabled={!canEdit || i === 0} onClick={() => setSections(move(sections, i, -1))}><ArrowUp size={14} /></button>

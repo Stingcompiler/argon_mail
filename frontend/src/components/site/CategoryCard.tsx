@@ -2,6 +2,7 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import type { PublicCategory } from '@/lib/api/types';
 import { iconFor } from '../icons';
+import { Nums } from '@/components/Num';
 
 export const categoryHref = (slug: string) => `/services/category/${encodeURIComponent(slug)}`;
 
@@ -46,7 +47,7 @@ export function CategoryCard({ category: c, headingLevel = 3 }: { category: Publ
         <ArrowLeft className="art-arrow" size={18} />
       </Link>
       <div className="service-body">
-        <small>{countLabel(c.services_count)}</small>
+        <small><Nums text={countLabel(c.services_count)} /></small>
         <Heading><Link href={href}>{c.name}</Link></Heading>
         {c.description && <p>{c.description}</p>}
         <Link className="text-button" href={href}>استعرض الخدمات <ArrowLeft size={17} /></Link>

@@ -64,5 +64,5 @@ export function CountUp({ value, pad = 2 }: { value: number | null | undefined; 
   }, [value]);
   if (value == null) return <>…</>;
   // Screen readers get the final number, not every step.
-  return <span className="count-up"><span className="sr-only">{value}</span><span aria-hidden="true">{String(shown ?? 0).padStart(pad, '0')}</span></span>;
+  return <span className="count-up num"><span className="sr-only">{value}</span><span aria-hidden="true">{String(shown ?? 0).padStart(pad, '0')}</span></span>;
 }

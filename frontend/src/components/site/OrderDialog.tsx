@@ -7,6 +7,7 @@ import { usePublicService } from '@/hooks/public';
 import type { PublicService } from '@/lib/api/types';
 import { OrderForm } from './OrderForm';
 import { serviceHref } from './ServiceTile';
+import { Nums } from '@/components/Num';
 
 type Limits = { maxFileMb: number; maxFiles: number; maxTotalMb: number };
 
@@ -88,7 +89,7 @@ export function OrderDialog({ services, limits }: { services: PublicService[]; l
           <header className="order-dialog-head">
             <div>
               <h2 id="order-dialog-title" tabIndex={-1}>{summary.name}</h2>
-              <p>{summary.price_label}{summary.duration_text ? ` · ${summary.duration_text}` : ''}</p>
+              <p><Nums text={summary.price_label} />{summary.duration_text ? <> · <Nums text={summary.duration_text} /></> : null}</p>
             </div>
             <button type="button" className="icon-button" aria-label="إغلاق نموذج الطلب" onClick={close}><X size={20} /></button>
           </header>

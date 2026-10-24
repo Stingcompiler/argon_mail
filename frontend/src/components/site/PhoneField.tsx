@@ -29,7 +29,7 @@ export function PhoneField({ name, label, error, required = true }: { name: stri
             {list.others.map((c) => <option key={c.iso} value={c.iso}>{c.name} (+{c.dial})</option>)}
           </optgroup>
         </select>
-        <span className="dial" dir="ltr" aria-hidden="true">+{dialCode(iso)}</span>
+        <span className="dial num" dir="ltr" aria-hidden="true">+{dialCode(iso)}</span>
         <input
           id={id}
           type="tel"

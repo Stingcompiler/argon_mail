@@ -21,7 +21,7 @@ export function OrderSuccess() {
       <p>احتفظ برقم المتابعة لتعرف حالة طلبك في أي وقت ومن أي جهاز. من يحمل الرقم يستطيع رؤية الحالة فقط.</p>
       <div className="ticket">
         <span>رقم المتابعة الخاص بك</span>
-        <strong dir="ltr">{code || '—'}</strong>
+        <strong className="num" dir="ltr">{code || '—'}</strong>
         <button className="text-button" onClick={async () => {
           try { await navigator.clipboard.writeText(code); setCopied(true); } catch { notify('يمكنك تحديد الرقم ونسخه يدويًا'); }
         }}>

@@ -8,6 +8,7 @@ import type { OrderFilters } from '@/lib/api/types';
 import { formatDate } from '@/lib/format';
 import { OrderDrawer } from './OrderDrawer';
 import { LoadError, Loading, StatusBadge } from './ui';
+import { Num, Nums } from '@/components/Num';
 
 function useDebounced<T>(value: T, ms = 350) {
   const [v, setV] = useState(value);
@@ -41,7 +42,7 @@ export function OrdersPanel({ compact = false }: { compact?: boolean }) {
   return (
     <section className="table-panel">
       <div className="panel-heading">
-        <div><h2>{compact ? 'أحدث الطلبات' : 'إدارة الطلبات'}</h2><p>{data ? `${data.count} طلب` : 'كل المعلومات التي تحتاجها للخطوة التالية.'}</p></div>
+        <div><h2>{compact ? 'أحدث الطلبات' : 'إدارة الطلبات'}</h2><p>{data ? <><Num>{data.count}</Num> طلب</> : 'كل المعلومات التي تحتاجها للخطوة التالية.'}</p></div>
         <div className="table-search"><Search size={17} /><input aria-label="بحث في الطلبات" placeholder="رقم الطلب أو الاسم أو الهاتف..." value={q} onChange={(e) => setQ(e.target.value)} /></div>
         {!compact && (
           <div className="filters-toggle">
@@ -80,12 +81,12 @@ export function OrdersPanel({ compact = false }: { compact?: boolean }) {
               <tbody>
                 {data!.results.map((o) => (
                   <tr key={o.id} onClick={() => setSelected(o.id)}>
-                    <td data-primary="true" data-col="code" className="order-id" dir="ltr">{o.code}</td>
-                    <td data-label="العميل" data-col="customer"><span className="avatar">{o.customer_name[0]}</span>{o.customer_name}</td>
+                    <td data-primary="true" data-col="code" className="order-id num" dir="ltr">{o.code}</td>
+                    <td data-label="العميل" data-col="customer" data-free><span className="avatar">{o.customer_name[0]}</span>{o.customer_name}</td>
                     <td data-label="الخدمة" data-col="service">{o.service_name}</td>
                     <td data-label="الحالة" data-col="status"><StatusBadge meaning={o.status.meaning} label={o.status.label} /></td>
                     <td data-label="المسؤول" data-col="assignee" className="muted">{o.assignee?.full_name || '—'}</td>
-                    <td data-label="التاريخ" data-col="date" className="muted">{formatDate(o.created_at)}</td>
+                    <td data-label="التاريخ" data-col="date" className="muted"><Nums text={formatDate(o.created_at)} /></td>
                     <td data-actions="true" data-col="open"><button className="icon-button" aria-label={'عرض ' + o.code} onClick={(e) => { e.stopPropagation(); setSelected(o.id); }}><ArrowUpLeft size={17} /></button></td>
                   </tr>
                 ))}
@@ -102,7 +103,7 @@ export function OrdersPanel({ compact = false }: { compact?: boolean }) {
           {!compact && pages > 1 && (
             <div className="pagination">
               <button className="button secondary" disabled={(filters.page || 1) <= 1} onClick={() => set({ page: (filters.page || 1) - 1 })}>السابق</button>
-              <span className="subtle-copy">صفحة {filters.page || 1} من {pages}</span>
+              <span className="subtle-copy">صفحة <Num>{filters.page || 1}</Num> من <Num>{pages}</Num></span>
               <button className="button secondary" disabled={(filters.page || 1) >= pages} onClick={() => set({ page: (filters.page || 1) + 1 })}>التالي</button>
             </div>
           )}

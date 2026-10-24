@@ -11,6 +11,7 @@ import { AssetPicker } from './MediaLibrary';
 import { CategoryCard } from '@/components/site/CategoryCard';
 import { LoadError, Loading, SectionTitle, Toggle, useDialogFocus } from './ui';
 import { SlidingGroup } from '@/lib/motion';
+import { Num, Nums } from '@/components/Num';
 
 const FIELD_TYPES: { v: FieldType; l: string }[] = [
   { v: 'text', l: 'نص قصير' }, { v: 'textarea', l: 'نص طويل' }, { v: 'number', l: 'رقم' }, { v: 'date', l: 'تاريخ' },
@@ -50,8 +51,8 @@ export function ServicesManager() {
     <>
       <div className="workspace-toolbar">
         <SlidingGroup active={tab} className="segmented" role="group" aria-label="عرض">
-          <button className={tab === 'services' ? 'selected' : ''} aria-pressed={tab === 'services'} onClick={() => setTab('services')}>الخدمات <b>{services.data?.length ?? '…'}</b></button>
-          <button className={tab === 'categories' ? 'selected' : ''} aria-pressed={tab === 'categories'} onClick={() => setTab('categories')}>المجالات <b>{categories.data?.length ?? '…'}</b></button>
+          <button className={tab === 'services' ? 'selected' : ''} aria-pressed={tab === 'services'} onClick={() => setTab('services')}>الخدمات <b className="num">{services.data?.length ?? '…'}</b></button>
+          <button className={tab === 'categories' ? 'selected' : ''} aria-pressed={tab === 'categories'} onClick={() => setTab('categories')}>المجالات <b className="num">{categories.data?.length ?? '…'}</b></button>
         </SlidingGroup>
         <button className="button" onClick={openNew}><Plus size={17} />إضافة خدمة</button>
       </div>
@@ -60,7 +61,7 @@ export function ServicesManager() {
           <div className="workspace-search">
             <Search size={18} />
             <input aria-label="البحث في الخدمات" placeholder="ابحث بالاسم أو المجال..." value={search} onChange={(e) => setSearch(e.target.value)} />
-            <span>{list.length} خدمات</span>
+            <span><Num>{list.length}</Num> خدمات</span>
           </div>
           <h2 className="sr-only">قائمة الخدمات</h2>
           <div className="management-grid">
@@ -79,7 +80,7 @@ export function ServicesManager() {
                   <div className="managed-body">
                     <h3>{s.name}</h3>
                     <p>{s.description}</p>
-                    <div className="managed-meta"><span><FileText size={13} />{s.fields.length + 2} حقول</span><span>{s.price_label}</span></div>
+                    <div className="managed-meta"><span><FileText size={13} /><Num>{s.fields.length + 2}</Num> حقول</span><span><Nums text={s.price_label} /></span></div>
                     <div className="managed-actions">
                       <button onClick={() => setEditor(toDraft(s))}><Pencil size={14} />تحرير الخدمة</button>
                       {published && <a title="عرض في الموقع" aria-label={'عرض ' + s.name} href={`/services/${encodeURIComponent(s.slug)}`} target="_blank"><Eye size={16} /></a>}
@@ -128,8 +129,8 @@ function CategoriesPanel() {
       <div className="category-list">
         {categories.data!.map((c, i) => (
           <div key={c.id} className={editing === c.id ? 'editing' : undefined}>
-            <span className="category-index">{String(i + 1).padStart(2, '0')}</span>
-            <div><b>{c.name}</b><small>{c.services_count} خدمات{c.is_featured ? ' · في الرئيسية' : ''}</small></div>
+            <span className="category-index num">{String(i + 1).padStart(2, '0')}</span>
+            <div><b>{c.name}</b><small><Num>{c.services_count ?? 0}</Num> خدمات{c.is_featured ? ' · في الرئيسية' : ''}</small></div>
             <button className="icon-button" aria-label={'تحرير ' + c.name} aria-expanded={editing === c.id}
               onClick={() => setEditing(editing === c.id ? null : c.id)}><Pencil size={16} /></button>
             <button className="icon-button danger" aria-label={'حذف ' + c.name} disabled={!!c.services_count || remove.isPending}

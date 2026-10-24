@@ -7,6 +7,7 @@ import { useSaveTeamMember, useTeam } from '@/hooks/admin';
 import { fieldErrors } from '@/lib/api/client';
 import type { Role } from '@/lib/api/types';
 import { LoadError, Loading, Toggle, roleLabel, useDialogFocus } from './ui';
+import { Num } from '@/components/Num';
 
 export function TeamManager() {
   const { user } = useAuth();
@@ -22,7 +23,7 @@ export function TeamManager() {
         <button className="button" onClick={() => setAdding(true)}><UserPlus size={17} />إضافة عضو</button>
       </div>
       <section className="table-panel">
-        <div className="panel-heading"><div><h2>أعضاء الفريق</h2><p>الصلاحيات مطبقة على الخادم.</p></div><span className="date-chip">{team.data?.length ?? '…'} أعضاء</span></div>
+        <div className="panel-heading"><div><h2>أعضاء الفريق</h2><p>الصلاحيات مطبقة على الخادم.</p></div><span className="date-chip"><Num>{team.data?.length ?? '…'}</Num> أعضاء</span></div>
         {team.isLoading ? <Loading /> : team.isError ? <LoadError error={team.error} retry={() => team.refetch()} /> : (
           <div className="table-scroll">
             <table className="responsive-table">
@@ -30,8 +31,8 @@ export function TeamManager() {
               <tbody>
                 {team.data!.map((m) => (
                   <tr key={m.id}>
-                    <td data-primary="true"><span className="avatar">{m.full_name[0]}</span>{m.full_name}</td>
-                    <td data-label="البريد" dir="ltr">{m.email}</td>
+                    <td data-primary="true" data-free><span className="avatar">{m.full_name[0]}</span>{m.full_name}</td>
+                    <td data-label="البريد" dir="ltr" data-free>{m.email}</td>
                     <td data-label="اسم المستخدم" dir="ltr">
                       <input className="table-select" aria-label={'اسم مستخدم ' + m.full_name} defaultValue={m.username || ''} placeholder="—" maxLength={30}
                         onBlur={(e) => { const v = e.target.value.trim().toLowerCase(); if (v !== (m.username || '')) save.mutate({ id: m.id, username: v || null }, { onSuccess: () => notify('تم تحديث اسم المستخدم.'), onError: (er) => { notify(fieldErrors(er).username || er.message); e.target.value = m.username || ''; } }); }} />

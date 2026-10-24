@@ -2,6 +2,7 @@ import { Send } from 'lucide-react';
 import Link from 'next/link';
 import type { PageLink, SiteSettings } from '@/lib/api/types';
 import { Brand } from './Brand';
+import { Num } from '@/components/Num';
 
 export function SiteFooter({ settings, pages }: { settings: SiteSettings; pages: PageLink[] }) {
   return (
@@ -31,7 +32,7 @@ export function SiteFooter({ settings, pages }: { settings: SiteSettings; pages:
         </div>
       </div>
       <div className="container footer-bottom">
-        <span>© {new Date().getFullYear()} {settings.name}</span>
+        <span>© <Num>{new Date().getFullYear()}</Num> {settings.name}</span>
         {settings.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}
       </div>
     </footer>

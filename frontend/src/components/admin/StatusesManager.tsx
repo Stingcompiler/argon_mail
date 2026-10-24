@@ -75,7 +75,7 @@ export function StatusesManager() {
                       {s.is_initial && <small className="muted">الحالة الأولى لكل طلب جديد</small>}
                     </td>
                     <td data-label="المعنى الداخلي"><StatusBadge meaning={s.meaning} label={MEANINGS.find((m) => m.v === s.meaning)?.l || s.meaning} /></td>
-                    <td data-label="الطلبات">{s.orders_count}</td>
+                    <td data-label="الطلبات" data-num>{s.orders_count}</td>
                     <td data-label="مفعّلة"><Toggle checked={s.is_active} disabled={!canEdit || s.is_initial} label={`تفعيل ${s.label}`}
                       onChange={(v) => update.mutate({ id: s.id, is_active: v }, { onSuccess: () => notify(v ? 'فُعّلت الحالة.' : 'عُطّلت الحالة؛ تبقى في الطلبات السابقة.'), onError: fail })} /></td>
                     <td data-actions="true">

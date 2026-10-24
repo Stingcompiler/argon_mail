@@ -7,6 +7,7 @@ import { fieldErrors } from '@/lib/api/client';
 import type { AdminPage } from '@/lib/api/types';
 import { formatDateTime } from '@/lib/format';
 import { LoadError, Loading, SectionTitle, Toggle, useDialogFocus } from './ui';
+import { Nums } from '@/components/Num';
 
 const publicUrl = (p: { slug: string }) => (p.slug === 'privacy' || p.slug === 'terms' ? `/${p.slug}` : `/p/${encodeURIComponent(p.slug)}`);
 const blank: Partial<AdminPage> = { title: '', slug: '', body: '', status: 'draft', show_in_footer: true, seo_title: '', seo_description: '' };
@@ -33,7 +34,7 @@ export function PagesManager() {
                   <td data-label="الرابط" dir="ltr" className="muted">{publicUrl(p)}</td>
                   <td data-label="الحالة">{p.status === 'published' ? 'منشورة' : 'مسودة'}</td>
                   <td data-label="التذييل">{p.show_in_footer ? 'نعم' : '—'}</td>
-                  <td data-label="آخر تعديل" className="muted">{formatDateTime(p.updated_at)}</td>
+                  <td data-label="آخر تعديل" className="muted"><Nums text={formatDateTime(p.updated_at)} /></td>
                   <td data-actions="true"><button className="icon-button" aria-label={'تحرير ' + p.title} onClick={(e) => { e.stopPropagation(); setEditing({ ...p }); }}><FileText size={16} /></button></td>
                 </tr>
               ))}

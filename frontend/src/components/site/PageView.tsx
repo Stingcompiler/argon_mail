@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { PublicPage } from '@/lib/api/types';
 import { formatDate } from '@/lib/format';
 import { PreviewBanner } from './PreviewBanner';
+import { Nums } from '@/components/Num';
 
 /**
  * Renders a page body written as plain text: blank lines separate
@@ -31,7 +32,7 @@ export function PageView({ page, preview = false }: { page: PublicPage; preview?
           return <p key={i} className="preserve-lines">{b}</p>;
         })}
       </article>
-      <p className="subtle-copy">آخر تحديث: {formatDate(page.updated_at)}</p>
+      <p className="subtle-copy">آخر تحديث: <Nums text={formatDate(page.updated_at)} /></p>
       <Link className="text-button" href="/contact">تواصل معنا <ArrowLeft size={17} /></Link>
     </section>
   );

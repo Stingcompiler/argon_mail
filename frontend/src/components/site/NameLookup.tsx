@@ -10,6 +10,7 @@ import { formatDate, statusTone } from '@/lib/format';
 import { FieldError, describedBy, errorId, useFocusInvalid } from '@/lib/forms';
 import { PhoneField } from './PhoneField';
 import { RememberCode } from './RememberCode';
+import { Nums } from '@/components/Num';
 
 /** Track by full name + the WhatsApp number used in the order. */
 export function NameLookup() {
@@ -68,7 +69,7 @@ export function NameLookup() {
               <li key={o.code}>
                 <div>
                   <b>{o.service_name}</b>
-                  <small>رقم الطلب <bdi dir="ltr" className="order-id">{o.code}</bdi> · {formatDate(o.created_at)}</small>
+                  <small>رقم الطلب <bdi dir="ltr" className="order-id num">{o.code}</bdi> · <Nums text={formatDate(o.created_at)} /></small>
                 </div>
                 <span className={`badge ${statusTone(o.status.meaning)}`}><i />{o.status.label}</span>
                 <Link className="text-button" href={`/track?code=${encodeURIComponent(o.code)}`}>التفاصيل <ArrowLeft size={15} /></Link>
