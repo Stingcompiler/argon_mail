@@ -31,14 +31,33 @@ const RULES = [
   { name: 'نص بتدرج (background-clip:text)', css: true, re: /background-clip:\s*text/ },
   { name: 'حركة مستمرة', css: true, re: /animation[^;{}]*\binfinite\b|animation-iteration-count:\s*infinite/ },
   { name: 'كرت إحصائية لكل رقم', tsx: true, re: /className=["'{`][^"'}`]*\bstats?-(?:grid|cards?)\b/ },
+  // Type floor (docs/design/DESIGN.md, IBM Plex): nothing under 12px outside
+  // badges, and small text keeps a line height of at least 1.6.
+  { name: 'حجم خط دون 12px', css: true,
+    test: (line) => rules(line).some(({ sel, body }) => !/badge/.test(sel)
+      && [...body.matchAll(/font(?:-size)?:\s*(\d*\.?\d+)(px|rem)/g)].some(([, v, u]) => (u === 'rem' ? +v * 16 : +v) < 12)) },
+  { name: 'نص صغير بسطر أقل من 1.6', css: true,
+    test: (line) => rules(line).some(({ body }) => {
+      const size = body.match(/font-size:\s*(\d*\.?\d+)px/); const lh = body.match(/line-height:\s*(\d*\.?\d+)(?![\dp])/);
+      return size && +size[1] <= 13 && lh && +lh[1] < 1.6;
+    }) },
+  // A family is named only by the three tokens (D-0007): no literal family.
+  { name: 'عائلة خط خارج المتغيرات', css: true,
+    test: (line) => rules(line).some(({ sel, body }) => !/^\s*:root\s*$/.test(sel)
+      && [...body.matchAll(/font(?:-family)?:([^;]*)/g)].some(([, v]) => /[a-z]/i.test(v.replace(/var\(--font-(?:ui|mono|display)[^)]*\)|inherit|\d+(?:px|rem)|\b[1-9]00\b|normal|italic/g, '')))) },
+  // Font values belong in the tokens, not inline in components.
+  { name: 'قيمة خط داخل مكوّن', tsx: true, re: /\b(?:fontSize|fontFamily|fontWeight)\s*:/, skip: /opengraph-image|og\/render|apple-icon|favicon/ },
 ];
+
+// Each «selector{body}» on a line (the CSS here is one or a few rules per line).
+const rules = (line) => [...line.matchAll(/([^{}]*)\{([^{}]*)\}/g)].map(([, sel, body]) => ({ sel, body }));
 
 const hits = [];
 const scan = (file, kind) => {
   fs.readFileSync(path.join(ROOT, file), 'utf8').split('\n').forEach((line, i) => {
     if (line.includes('ui-allow:')) return;
     for (const r of RULES) {
-      if ((kind === 'css' && !r.css) || (kind === 'tsx' && !r.tsx)) continue;
+      if ((kind === 'css' && !r.css) || (kind === 'tsx' && !r.tsx) || (r.skip && r.skip.test(file))) continue;
       if (r.re ? r.re.test(line) : r.test(line)) hits.push(`${file}:${i + 1}: ${r.name}\n    ${line.trim().slice(0, 160)}`);
     }
   });
