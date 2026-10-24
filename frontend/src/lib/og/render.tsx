@@ -5,14 +5,15 @@ import { join } from 'node:path';
  * Shared drawing helpers for build-time images (Open Graph, icons).
  * next/og (satori) shapes Arabic letters but does not reorder words for
  * right-to-left text, so each word is its own box in a row-reverse flex row.
- * Cairo is used here because satori cannot read Noto Sans Arabic's GSUB tables.
+ * IBM Plex Sans Arabic, the site's own family (docs/design/DESIGN.md), from the
+ * @fontsource .woff files that satori can read.
  */
 // Identity «بريد عرجون للخدمات الإلكترونية والرقمية» (docs/brand-redesign-plan.md).
 export const BRAND = { navy: '#05285B', royal: '#0771C1', cyan: '#15A7D7', sky: '#DEEDFB', surface: '#F5F9FD' };
 
-export async function cairo(weight: 400 | 700) {
-  const file = join(process.cwd(), `node_modules/@fontsource/cairo/files/cairo-arabic-${weight}-normal.woff`);
-  return { name: 'Cairo', data: await readFile(file), weight, style: 'normal' as const };
+export async function plex(weight: 400 | 700) {
+  const file = join(process.cwd(), `node_modules/@fontsource/ibm-plex-sans-arabic/files/ibm-plex-sans-arabic-arabic-${weight}-normal.woff`);
+  return { name: 'IBM Plex Sans Arabic', data: await readFile(file), weight, style: 'normal' as const };
 }
 
 export async function brandMarkDataUri() {
