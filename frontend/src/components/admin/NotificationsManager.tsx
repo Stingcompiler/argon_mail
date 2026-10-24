@@ -88,7 +88,7 @@ export function AlertsBanner({ failed, skipped }: { failed: number; skipped: num
     <div className="admin-note warn" role="status">
       <AlertTriangle size={21} />
       <div>
-        <b>{failed ? `${failed} تنبيه بريد فشل إرساله` : `${skipped} تنبيه لم يُرسل لعدم ضبط بريد مستلم`}</b>
+        <b>{failed ? <><Num>{failed}</Num> تنبيه بريد فشل إرساله</> : <><Num>{skipped}</Num> تنبيه لم يُرسل لعدم ضبط بريد مستلم</>}</b>
         <p>الطلبات محفوظة. <Link href={failed ? '/admin/notifications' : '/admin/settings#alerts'}>{failed ? 'راجع التنبيهات وأعد الإرسال' : 'اضبط بريد التنبيهات'}</Link>.</p>
       </div>
     </div>
